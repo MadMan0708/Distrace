@@ -14,6 +14,15 @@ class DistraceAgent {
         instrumentation = inst;
         inst.addTransformer(new CustomTransformer());
     }
+
+    public static void main(String[] args){
+        if(args.length!=1){
+            System.out.println("Wrong number of arguments! PID of process to which attach the agent must be specified");
+            System.exit(0);
+        }
+
+        DistraceAgent.initialize(args[0]);
+    }
     /**
      * JVM hook to dynamically load javaagent at runtime.
      *
@@ -33,9 +42,9 @@ class DistraceAgent {
     /**
      * Programmatic hook to dynamically load javaagent at runtime.
      */
-    public static void initialize() {
+    public static void initialize(String pid) {
         if (instrumentation == null) {
-            DistraceAgent.loadAgent();
+            DistraceAgent.loadAgent(pid);
         }
     }
 
@@ -51,10 +60,10 @@ class DistraceAgent {
 
     private static final String jarFilePath = "/Users/kuba/IdeaProjects/Agent/out/artifacts/Agent_jar/Agent.jar";
 
-    public static void loadAgent() {
+    public static void loadAgent(String pid) {
 
         try {
-            VirtualMachine vm = VirtualMachine.attach(getPID());
+            VirtualMachine vm = VirtualMachine.attach(pid);
             vm.loadAgent(jarFilePath, "");
             vm.detach();
         } catch (Exception e) {

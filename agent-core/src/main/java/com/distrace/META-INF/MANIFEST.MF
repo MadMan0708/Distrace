@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Premain-Class: com.distrace.DistraceAgent
+Main-Class: com.distrace.DistraceAgent
+Agent-Class: com.distrace.DistraceAgent
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true
