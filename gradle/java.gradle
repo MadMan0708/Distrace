@@ -1,0 +1,49 @@
+// Gradle file for java-based project
+
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
+}
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava {
+    options.debug = true
+}
+
+task testJar(type: Jar, dependsOn: testClasses) {
+    appendix = 'test'
+    from sourceSets.test.output
+}
+
+// Create a configuration containing only test artifacts
+configurations {
+    testArchives
+}
+
+artifacts {
+    testArchives testJar
+}
+
+// Disable java 8 doclint
+if (JavaVersion.current().isJava8Compatible()) {
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}

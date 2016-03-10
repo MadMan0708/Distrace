@@ -1,0 +1,10 @@
+//
+// Distrace build file
+// This is a multi-module build file.
+//
+apply from: 'gradle/java.gradle'
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.11'
+}
