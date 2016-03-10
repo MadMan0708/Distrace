@@ -4,6 +4,40 @@
 //
 apply from: 'gradle/java.gradle'
 
+// The build script settings to fetch plugins and put them on classpath
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
+    }
+}
+
+//
+// For all projects (this and all subprojects) specify common properties and tasks
+//
+configure(allprojects) { project ->
+    apply plugin: 'idea'
+}
+
+
+//
+// Common configuration for all subprojects
+//
+configure(subprojects) { project ->
+    // All project inherits the same versioning number
+    version = rootProject.version
+
+    repositories {
+        mavenCentral()
+    }
+
+    // All subprojects are java projects so apply the plugin directly
+    apply from: "$rootDir/gradle/java.gradle"
+}
+
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.11'
