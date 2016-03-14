@@ -15,7 +15,7 @@ public class InfiniteLoop {
         while(true){
             // randomly sleeps between 500ms and 1200s
             long randomSleepDuration = (long) (500 + Math.random() * 700);
-            System.out.printf("Sleeping for %d ms ..\n", randomSleepDuration);
+            System.out.println("Sleeping for "+randomSleepDuration+" ms");
             Thread.sleep(randomSleepDuration);
         }
     }

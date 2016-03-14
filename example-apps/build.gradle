@@ -1,0 +1,29 @@
+description = "Example applications used for testing the instrumentation library"
+
+dependencies {
+    testCompile "junit:junit:4.12"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.5'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.5'
+    compile group: 'javassist', name: 'javassist', version: '3.12.1.GA'
+    compile files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+
+}
+
+// Add a new configuration containing only jars needed for test run
+configurations {
+    testAssembly {
+        description = 'Contains only jars needed to run tests on top of Spark.'
+        transitive = false
+    }
+}
+
+// Setup test environment
+test {
+    // Run with assertions ON
+    enableAssertions = true
+
+    // For a new JVM for each test class
+    forkEvery = 1
+}
+
+test.dependsOn testJar

@@ -61,7 +61,7 @@ class DistraceAgent {
 
         try {
             VirtualMachine vm = VirtualMachine.attach(pid);
-            String pathToJarContainingThisClass = null;//Get path to this jar
+            String pathToJarContainingThisClass = DistraceAgent.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
             vm.loadAgent(pathToJarContainingThisClass, "");
             vm.detach();
         } catch (Exception e) {
