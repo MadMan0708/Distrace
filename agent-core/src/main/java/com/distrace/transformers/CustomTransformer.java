@@ -17,12 +17,11 @@ public class CustomTransformer implements ClassFileTransformer {
 
         byte[] byteCode = classfileBuffer;
         System.out.println(className);
-        if (className.equals("cz/cuni/mff/hava/Main")) {
-            System.out.println("here");
+        if (className.equals("com.distrace.examples.InfiniteLoop")) {
+            System.out.println("Inside !!!!!!!!!!!!!!!!");
             try {
                 ClassPool cp = ClassPool.getDefault();
-                CtClass cc = cp.get("cz.cuni.mff.hava.Main");
-
+                CtClass cc = cp.get("com.distrace.examples.InfiniteLoop");
                 CtMethod m = cc.getDeclaredMethod("randomSleep");
                 m.addLocalVariable("elapsedTime", CtClass.longType);
                 m.insertBefore("elapsedTime = System.currentTimeMillis();");
