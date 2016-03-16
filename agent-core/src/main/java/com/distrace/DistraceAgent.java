@@ -5,6 +5,8 @@ import com.distrace.utils.Log;
 import com.sun.tools.attach.VirtualMachine;
 
 import java.lang.instrument.Instrumentation;
+import java.util.Enumeration;
+import java.util.Properties;
 
 class DistraceAgent {
 
@@ -36,11 +38,13 @@ class DistraceAgent {
     }
 
     public static void main(String[] args){
-        if(args.length!=1){
-            Log.info("Wrong number of arguments! PID of process to which attach the agent");
+        if(args.length!=2){
+            Log.info("Wrong number of arguments! " +
+                    "1) PID of process to which attach the agent" +
+                    "2) Path to the Agent JAR");
             System.exit(0);
         }
-        DistraceAgent.initialize(args[0]);
+        DistraceAgent.initialize(args[0], args[1]);
     }
 
 
@@ -51,18 +55,16 @@ class DistraceAgent {
     /**
      * Programmatic hook to dynamically load javaagent at runtime.
      */
-    public static void initialize(String pid) {
+    public static void initialize(String pid, String pathToAgentJar) {
         if (instrumentation == null) {
-            DistraceAgent.loadAgent(pid);
+            DistraceAgent.loadAgent(pid, pathToAgentJar);
         }
     }
 
-    public static void loadAgent(String pid) {
-
+    public static void loadAgent(String pid, String pathToAgentJar) {
         try {
             VirtualMachine vm = VirtualMachine.attach(pid);
-            String pathToJarContainingThisClass = DistraceAgent.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            vm.loadAgent(pathToJarContainingThisClass, "");
+            vm.loadAgent(pathToAgentJar, "");
             vm.detach();
         } catch (Exception e) {
             throw new RuntimeException(e);

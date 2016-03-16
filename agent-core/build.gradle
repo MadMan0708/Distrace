@@ -1,5 +1,4 @@
 import org.gradle.internal.jvm.Jvm
-
 description = "Distrace instrumentation library"
 
 dependencies {
@@ -36,6 +35,15 @@ jar {
         'Main-Class': 'com.distrace.DistraceAgent',
         'Agent-Class': 'com.distrace.DistraceAgent',
         'Can-Redefine-Classes': 'true',
-        'Can-Retransform-Classes': 'true'
+        'Can-Retransform-Classes': 'true',
+        'Boot-Class-Path':'javassist-3.12.1.GA.jar'
     }
 }
+
+task copyNecessaryLibs(type: Copy) {
+    into "$buildDir/libs"
+    from configurations.compile.filter { it.toString().endsWith("javassist-3.12.1.GA.jar")}
+}
+
+build.dependsOn(copyNecessaryLibs)
+

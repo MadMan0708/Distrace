@@ -17,8 +17,7 @@ public class CustomTransformer implements ClassFileTransformer {
 
         byte[] byteCode = classfileBuffer;
         System.out.println(className);
-        if (className.equals("com.distrace.examples.InfiniteLoop")) {
-            System.out.println("Inside !!!!!!!!!!!!!!!!");
+        if (className.equals("com/distrace/examples/InfiniteLoop")) {
             try {
                 ClassPool cp = ClassPool.getDefault();
                 CtClass cc = cp.get("com.distrace.examples.InfiniteLoop");
