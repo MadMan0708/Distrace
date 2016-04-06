@@ -10,5 +10,5 @@ tools_jar="$JAVA_HOME/lib/tools.jar"
 for pid in $pids
 do
  echo "Attaching agent to process $pid"
- java -cp "$tools_jar:$AGENT_JAR_FILE" "com.distrace.DistraceAgent" $pid "$AGENT_JAR_FILE" &
+ java -cp "$AGENT_JAR_FILE" "com.distrace.DistraceAgent" $pid "$AGENT_JAR_FILE"
 done

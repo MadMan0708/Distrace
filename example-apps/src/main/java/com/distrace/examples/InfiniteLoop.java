@@ -4,7 +4,9 @@ package com.distrace.examples;
  *
  */
 public class InfiniteLoop {
+
     public static void main(String[] args){
+        new Thread().run();
         while(true) {
             try {
                 randomSleep();

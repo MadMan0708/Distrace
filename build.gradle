@@ -12,6 +12,7 @@ buildscript {
     }
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
     }
 }
 
@@ -28,7 +29,7 @@ configure(allprojects) { project ->
 //
 configure(subprojects) { project ->
     // All project inherits the same versioning number
-    version = rootProject.version
+    ext.version = rootProject.version
 
     repositories {
         mavenCentral()

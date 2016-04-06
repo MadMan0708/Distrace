@@ -1,12 +1,16 @@
 package com.distrace;
 
-import com.distrace.transformers.CustomTransformer;
+import com.distrace.transformers.CustomImpl;
 import com.distrace.utils.Log;
 import com.sun.tools.attach.VirtualMachine;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.implementation.SuperMethodCall;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.instrument.Instrumentation;
-import java.util.Enumeration;
-import java.util.Properties;
 
 class DistraceAgent {
 
@@ -50,7 +54,16 @@ class DistraceAgent {
 
     public static void registerTransformers(Instrumentation inst){
         instrumentation = inst;
-        instrumentation.addTransformer(new CustomTransformer());
+        new AgentBuilder.Default()
+                .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
+                .type(ElementMatchers.named("java.lang.Thread"))
+                .transform(new AgentBuilder.Transformer() {
+                    public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
+                        return builder.method(ElementMatchers.nameEndsWith("run"))
+                                .intercept(MethodDelegation.to(new CustomImpl()).andThen(SuperMethodCall.INSTANCE));
+                    }
+                }).installOn(instrumentation);
+
     }
     /**
      * Programmatic hook to dynamically load javaagent at runtime.
@@ -66,6 +79,7 @@ class DistraceAgent {
             VirtualMachine vm = VirtualMachine.attach(pid);
             vm.loadAgent(pathToAgentJar, "");
             vm.detach();
+            System.out.println("Attached to target JVM and loaded Java Agent successfully");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
