@@ -6,4 +6,4 @@ EXAMPLES_JAR="distrace-example-apps-$VERSION.jar"
 EXAMPLES_JAR_FILE="$TOPDIR/example-apps/build/libs/$EXAMPLES_JAR"
 
 AGENT="lib-distrace-agent-core.dylib"
-AGENT_FILE="$TOPDIR/agent-core/build/$AGENT"
+AGENT_FILE="$TOPDIR/core-agent/build/$AGENT"

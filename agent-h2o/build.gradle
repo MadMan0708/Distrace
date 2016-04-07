@@ -1,4 +1,4 @@
-description = "Example applications used for testing the instrumentation library"
+description = "Agent build on top the agent-core designed to monitor H2O"
 
 // Setup test environment
 test {

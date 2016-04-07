@@ -9,13 +9,27 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+        classpath "gradle.plugin.fr.echoes.gradle.plugins:cpp-project-plugin:1.2.9"
     }
 }
 
+ext {
+    javaProjects = [
+            project(':distrace-core-instrumenter'),
+            project(':distrace-agent-h2o'),
+            project(':distrace-example-apps')
+    ]
+    cppProjects = [
+            project(':distrace-core-agent')
+    ]
+}
 //
 // For all projects (this and all subprojects) specify common properties and tasks
 //
@@ -35,8 +49,15 @@ configure(subprojects) { project ->
         mavenCentral()
     }
 
-    // All subprojects are java projects so apply the plugin directly
-    apply from: "$rootDir/gradle/java.gradle"
+    if(project in javaProjects){
+        apply from: "$rootDir/gradle/java.gradle"
+    }
+
+    if(project in cppProjects){
+        // CMake plugin
+        apply plugin: "fr.echoes.gradle.cpp"
+    }
+
 }
 
 

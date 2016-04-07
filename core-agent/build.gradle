@@ -1,0 +1,18 @@
+task launchCMake(type: Exec, group: "init") {
+
+    workingDir = buildDir
+    executable = "cmake"
+    args  ".."
+}
+
+compileCpp.dependsOn launchCMake
+
+cpp {
+    applicationType = "clibrary"
+    exec.with {
+        execPath = 'echo'
+        compileCppExecPath = "make"
+        compileCppBaseArgs = "compile"
+        compileCppExecWorkingDir = "build"
+    }
+}

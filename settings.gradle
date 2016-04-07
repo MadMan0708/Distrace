@@ -1,6 +1,7 @@
 rootProject.name = 'distrace'
 
-include 'agent-core'
+include 'core-agent'
+include 'core-instrumenter'
 include 'agent-h2o'
 include 'example-apps'
 
