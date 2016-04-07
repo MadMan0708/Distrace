@@ -35,14 +35,7 @@ artifacts {
 }
 
 task compileC(type: Exec){
-    def JAVA_HOME = System.getenv("JAVA_HOME")
-    def compiler = "g++"
-    def compilerIncludes = ["-I$JAVA_HOME/include", "-I$JAVA_HOME/include/darwin"]
-    def sources = ['src/main/c/agent.cpp']
-    def outputFile = "build/distrace-agent-core-${version}.so"
-    def compilerOptions = ["-dynamiclib", '-o', outputFile]
-    def command = [compiler]+compilerOptions+compilerIncludes+sources
-    commandLine command
+    // execute makec here
 }
 test.dependsOn testJar
 

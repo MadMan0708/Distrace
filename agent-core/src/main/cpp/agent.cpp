@@ -1,45 +1,42 @@
+/*
+ * Main code of Agent library. This code is written in C++11
+ */
 #include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
-#include <iostream>
 #include "jvmti.h"
 #include "jni.h"
 
 typedef struct {
-	/* JVMTI Environment */
-	jvmtiEnv *jvmti;
-	JNIEnv * jni;
-	jboolean vm_is_started;
-	jboolean vmDead;
-
-	/* Data access Lock */
-	jrawMonitorID lock;
-	JavaVM* jvm;
+    /* JVMTI Environment */
+    jvmtiEnv* jvmti = 0;
+    JNIEnv* jni = 0;
+    jboolean vm_is_started = (jboolean) false;
+    jboolean vmDead = (jboolean) false;
+    JavaVM* jvm = 0;
+    /* Data access Lock */
+    //jrawMonitorID lock;
 } GlobalAgentData;
 
 static GlobalAgentData *gdata;
 
-static void check_jvmti_error(jvmtiEnv *jvmti, jvmtiError errnum,
-		const char *str) {
-	if (errnum != JVMTI_ERROR_NONE) {
-		char *errnum_str;
+static void check_jvmti_error(jvmtiEnv *jvmti, jvmtiError errnum, const char *str) {
+    if (errnum != JVMTI_ERROR_NONE) {
+        char *errnum_str;
 
-		errnum_str = NULL;
-		(void) jvmti->GetErrorName(errnum, &errnum_str);
+        errnum_str = NULL;
+        (void) jvmti->GetErrorName(errnum, &errnum_str);
 
-		printf("ERROR: JVMTI: %d(%s): %s\n", errnum,
-				(errnum_str == NULL ? "Unknown" : errnum_str),
-				(str == NULL ? "" : str));
-	}
+        printf("ERROR: JVMTI: %d(%s): %s\n", errnum,
+               (errnum_str == NULL ? "Unknown" : errnum_str),
+               (str == NULL ? "" : str));
+    }
 }
 
-static void JNICALL
-cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv* env,
-                jclass class_being_redefined, jobject loader,
-                const char* name, jobject protection_domain,
-                jint class_data_len, const unsigned char* class_data,
-                jint* new_class_data_len, unsigned char** new_class_data) {
+static void JNICALL cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv* env,
+        jclass class_being_redefined, jobject loader,
+const char* name, jobject protection_domain,
+jint class_data_len, const unsigned char* class_data,
+        jint* new_class_data_len, unsigned char** new_class_data) {
 /*    enterCriticalSection(jvmti); {
 	if ( !gdata->vmDead ) {
 	    const char \* classname;
@@ -102,18 +99,18 @@ cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv* env,
  */
 static void JNICALL callbackVMInit(jvmtiEnv * jvmti, JNIEnv * env, jthread thread)
 {
-	jvmtiError err;
+jvmtiError err;
 
-	//err = jvmti->RunAgentThread(alloc_thread(env), &gcWorker, NULL,
-	//		JVMTI_THREAD_MAX_PRIORITY);
-	//check_jvmti_error(jvmti, err, "Unable to run agent cleanup thread");
+//err = jvmti->RunAgentThread(alloc_thread(env), &gcWorker, NULL,
+//		JVMTI_THREAD_MAX_PRIORITY);
+//check_jvmti_error(jvmti, err, "Unable to run agent cleanup thread");
 }
 
 /*
  * Callback we receive when the JVM terminates - no more functions can be called after this
  */
 static void JNICALL callbackVMDeath(jvmtiEnv *jvmti_env, JNIEnv* jni_env) {
-	gdata->vmDead = JNI_TRUE;
+gdata->vmDead = JNI_TRUE;
 }
 
 
@@ -166,69 +163,70 @@ static void JNICALL cbVMStart(jvmtiEnv *jvmti, JNIEnv *env) {
  * notifications.
  */
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) {
-	static GlobalAgentData data;
-	jvmtiError error;
-	jint res;
-	jvmtiEventCallbacks callbacks;
-	jvmtiEnv *jvmti = NULL;
-	jvmtiCapabilities capa;
+    static GlobalAgentData data;
+    jvmtiError error;
+    jint result;
+    jvmtiEnv *jvmti = NULL;
+    jvmtiEventCallbacks callbacks;
+    jvmtiCapabilities capabilities;
 
-	(void) memset((void*) &data, 0, sizeof(data));
-	gdata = &data;
-	gdata->jvm = jvm;
-	res = jvm->GetEnv((void **) &jvmti, JVMTI_VERSION_1_0);
+    gdata = &data;
+    gdata->jvm = jvm;
+    result = jvm->GetEnv((void **) &jvmti, JVMTI_VERSION_1_0);
 
-	if (res != JNI_OK || jvmti == NULL) {
-		/* This means that the VM was unable to obtain this version of the
-		 *   JVMTI interface, this is a fatal error.
-		 */
-		printf("ERROR: Unable to access JVMTI Version 1 (0x%x),"
-				" is your J2SE a 1.5 or newer version?"
-				" JNIEnv's GetEnv() returned %d\n", JVMTI_VERSION_1, res);
+    if (result != JNI_OK || jvmti == NULL) {
+        /* This means that the VM was unable to obtain this version of the
+         * JVMTI interface, this is a fatal error.
+         */
+        printf("ERROR: Unable to access JVMTI Version 1 (0x%x),"
+                       " is your J2SE a 1.5 or newer version?"
+                       " JNIEnv's GetEnv() returned %d\n", JVMTI_VERSION_1, result);
 
-	}
-	//save jvmti for later
-	gdata->jvmti = jvmti;
+    }
+    //save jvmti for later
+    gdata->jvmti = jvmti;
 
-	//Register our capabilities
-	(void) memset(&capa, 0, sizeof(jvmtiCapabilities));
-	capa.can_signal_thread = 1;
-	capa.can_generate_object_free_events = 1;
-	capa.can_tag_objects = 1;
-	capa.can_generate_garbage_collection_events = 1;
-	capa.can_generate_all_class_hook_events = 1;
+    //Register our capabilities
+    (void) memset(&capabilities, 0, sizeof(jvmtiCapabilities));
+    capabilities.can_signal_thread = 1;
+    capabilities.can_generate_object_free_events = 1;
+    capabilities.can_tag_objects = 1;
+    capabilities.can_generate_garbage_collection_events = 1;
+    capabilities.can_generate_all_class_hook_events = 1;
 
-	error = jvmti->AddCapabilities(&capa);
-	check_jvmti_error(jvmti, error,
-			"Unable to get necessary JVMTI capabilities.");
+    error = jvmti->AddCapabilities(&capabilities);
+    check_jvmti_error(jvmti, error,
+                      "Unable to get necessary JVMTI capabilities.");
 
-	//Register callbacks
-	(void) memset(&callbacks, 0, sizeof(callbacks));
-	callbacks.VMInit = &callbackVMInit;
-	callbacks.VMDeath = &callbackVMDeath;
-	callbacks.VMStart = &cbVMStart;
-	callbacks.ClassFileLoadHook = &cbClassFileLoadHook;
+    //Register callbacks
+    (void) memset(&callbacks, 0, sizeof(callbacks));
+    callbacks.VMInit = &callbackVMInit;
+    callbacks.VMDeath = &callbackVMDeath;
+    callbacks.VMStart = &cbVMStart;
+    callbacks.ClassFileLoadHook = &cbClassFileLoadHook;
 
-	error = jvmti->SetEventCallbacks(&callbacks, (jint) sizeof(callbacks));
-	check_jvmti_error(jvmti, error, "Cannot set jvmti callbacks");
+    error = jvmti->SetEventCallbacks(&callbacks, (jint) sizeof(callbacks));
+    check_jvmti_error(jvmti, error, "Cannot set jvmti callbacks");
 
-	//Register for events
+    //Register for events
     error = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_VM_INIT,
-            (jthread) NULL);
+                                            (jthread) NULL);
     check_jvmti_error(jvmti, error, "Cannot set event notification");
 
     error = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_VM_DEATH,
-    			(jthread) NULL);
+                                            (jthread) NULL);
     check_jvmti_error(jvmti, error, "Cannot set event notification");
 
-	error = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_VM_START,
-			(jthread) NULL);
-	check_jvmti_error(jvmti, error, "Cannot set event notification");
+    error = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_VM_START,
+                                            (jthread) NULL);
+    check_jvmti_error(jvmti, error, "Cannot set event notification");
 
-	error = jvmti->SetEventNotificationMode(JVMTI_ENABLE,
-			JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, (jthread) NULL);
-	check_jvmti_error(jvmti, error, "Cannot set event notification");
+    error = jvmti->SetEventNotificationMode(JVMTI_ENABLE,
+                                            JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, (jthread) NULL);
+    check_jvmti_error(jvmti, error, "Cannot set event notification");
 
 
-	return JNI_OK;
+    return JNI_OK;
 }
+
+
