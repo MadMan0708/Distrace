@@ -1,6 +1,11 @@
 # Distrace
 Monitoring Tool for Distributed Java Applications
 
+## Structure
+All the c++ files are in the agent-core/src/main/cpp directory
+
+This directory contains also CMakeLists file which allows to open this directory as a C++ project for example in CLion
+
 
 To build the core library and custom instrumentation libraries ( so far just H2O)
 
