@@ -12,7 +12,7 @@
 hs_err_pid*
 
 # ignore CLion priject files
-/agent-core/src/main/cpp/.idea
+/core-agent/.idea
 
 # IntelliJ files
 .idea/

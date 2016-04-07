@@ -18,7 +18,7 @@ endif()
 include_directories( ${JNI_INCLUDE_DIRS} )
 
 # specify source files
-set(SOURCE_FILES agent.cpp)
+set(SOURCE_FILES src/main/cpp/agent.cpp)
 
 # create a shared library
 add_library("-${PROJECT_NAME}" SHARED ${SOURCE_FILES})
