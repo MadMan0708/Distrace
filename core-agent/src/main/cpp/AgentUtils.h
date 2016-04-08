@@ -8,7 +8,7 @@
 namespace DistraceAgent {
     class AgentUtils {
     public:
-        static void check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, const char *error_description);
+        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, const char *error_description);
     };
 }
 
