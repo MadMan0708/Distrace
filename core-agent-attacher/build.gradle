@@ -1,0 +1,27 @@
+description = "Attacher which allows to attach jvmti agent lib to running JVM"
+
+import org.gradle.internal.jvm.Jvm
+
+dependencies {
+    testCompile "junit:junit:4.12"
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.5'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.5'
+
+    compile files(Jvm.current().toolsJar)
+}
+
+// Setup test environment
+test {
+    // Run with assertions ON
+    enableAssertions = true
+    // For a new JVM for each test class
+    forkEvery = 1
+}
+
+
+jar {
+    manifest {
+        attributes 'Manifest-Version': '1.0',
+                'Main-Class': 'com.distrace.Attacher'
+    }
+}

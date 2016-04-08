@@ -23,6 +23,7 @@ buildscript {
 ext {
     javaProjects = [
             project(':distrace-core-instrumenter'),
+            project(':distrace-core-agent-attacher'),
             project(':distrace-agent-h2o'),
             project(':distrace-example-apps')
     ]

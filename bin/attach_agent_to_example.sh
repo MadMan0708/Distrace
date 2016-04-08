@@ -8,5 +8,5 @@ pids=$(jps -l | grep "com.distrace.examples.$1" | cut -d" " -f1)
 for pid in $pids
 do
  echo "Attaching agent to process $pid"
- java -cp "$AGENT_FILE" "com.distrace.DistraceAgent" $pid "$AGENT_JAR_FILE"
+ java -cp "$ATTACHER_JAR_FILE" "com.distrace.Attacher" $pid "$AGENT_LIB_FILE"
 done

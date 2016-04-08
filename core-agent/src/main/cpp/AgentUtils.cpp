@@ -3,9 +3,9 @@
 //
 
 #include <cstring>
+#include <iostream>
 #include "AgentUtils.h"
 #include "AgentCallbacks.h"
-#include "Agent.h"
 
 namespace DistraceAgent {
 
@@ -29,12 +29,10 @@ namespace DistraceAgent {
         capabilities.can_signal_thread = 1;
         capabilities.can_generate_object_free_events = 1;
         capabilities.can_tag_objects = 1;
-        capabilities.can_generate_garbage_collection_events = 1;
         capabilities.can_generate_all_class_hook_events = 1;
 
         jvmtiError error = jvmti->AddCapabilities(&capabilities);
-        AgentUtils::check_jvmti_error(jvmti, error,
-                                      "Unable to get necessary JVMTI capabilities.");
+        AgentUtils::check_jvmti_error(jvmti, error,  "Unable to get necessary JVMTI capabilities.");
 
     }
 
@@ -82,6 +80,7 @@ namespace DistraceAgent {
             return JNI_ERR;
 
         }
+        Agent::globalData->jvmti=jvmti;
         return JNI_OK;
     }
 
@@ -100,17 +99,13 @@ namespace DistraceAgent {
         return JNI_OK;
     }
 
-    int AgentUtils::init_agent(GlobalAgentData *globalData){
-        if ( AgentUtils::create_JVMTI_env(globalData->jvm, globalData->jvmti) == JNI_ERR) {
+    int AgentUtils::init_agent(){
+        if (AgentUtils::create_JVMTI_env(Agent::globalData->jvm, Agent::globalData->jvmti) == JNI_ERR) {
             return JNI_ERR;
         };
-        if ( AgentUtils::create_JNI_env(globalData->jvm, globalData->jni) == JNI_ERR) {
-            return JNI_ERR;
-        };
-
-        AgentUtils::register_jvmti_capabilities(globalData->jvmti);
-        AgentUtils::register_jvmti_callbacks(globalData->jvmti);
-        AgentUtils::register_jvmti_events(globalData->jvmti);
+        AgentUtils::register_jvmti_capabilities(Agent::globalData->jvmti);
+        AgentUtils::register_jvmti_callbacks(Agent::globalData->jvmti);
+        AgentUtils::register_jvmti_events(Agent::globalData->jvmti);
         return JNI_OK;
     }
 }

@@ -18,6 +18,7 @@ namespace DistraceAgent {
     class Agent {
     public:
         static GlobalAgentData* globalData;
+        static void init_global_data();
     };
 }
 

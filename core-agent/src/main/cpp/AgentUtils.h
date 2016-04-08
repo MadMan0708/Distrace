@@ -36,7 +36,10 @@ namespace DistraceAgent {
         */
         static int create_JNI_env(JavaVM *jvm, JNIEnv *jni);
 
-        static int init_agent(GlobalAgentData *globalData);
+        /*
+         * Initializes the agent
+         */
+        static int init_agent();
     };
 }
 

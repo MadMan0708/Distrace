@@ -8,5 +8,5 @@ echo
 echo "Running example: $EXAMPLE"
 echo
 
-# Attach the agent library prior the start of the application
-java -agentpath:$AGENT_FILE -cp $EXAMPLES_JAR_FILE $EXAMPLE
+# Attach the agent library and start it together with the start of the application
+java -agentpath:$AGENT_LIB_FILE -cp $EXAMPLES_JAR_FILE $EXAMPLE
