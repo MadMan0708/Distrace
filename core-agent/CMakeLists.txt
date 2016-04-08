@@ -18,7 +18,7 @@ endif()
 include_directories( ${JNI_INCLUDE_DIRS} )
 
 # specify source files
-set(SOURCE_FILES src/main/cpp/AgentUtils.cpp src/main/cpp/AgentUtils.h src/main/cpp/Agent.cpp src/main/cpp/Agent.h src/main/cpp/AgentCallbacks.cpp src/main/cpp/AgentCallbacks.h)
+set(SOURCE_FILES src/main/cpp/AgentUtils.cpp src/main/cpp/AgentUtils.h src/main/cpp/AgentCallbacks.cpp src/main/cpp/AgentCallbacks.h src/main/cpp/Agent.cpp src/main/cpp/Agent.h)
 
 # create a shared library
 add_library("-${PROJECT_NAME}" SHARED ${SOURCE_FILES})
