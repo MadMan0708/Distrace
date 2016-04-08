@@ -35,19 +35,6 @@ artifacts {
 jar {
     manifest {
         attributes 'Manifest-Version': '1.0',
-                'Premain-Class': 'com.distrace.DistraceAgent',
-                'Main-Class': 'com.distrace.DistraceAgent',
-                'Agent-Class': 'com.distrace.DistraceAgent',
-                'Can-Redefine-Classes': 'true',
-                'Can-Retransform-Classes': 'true',
-                'Boot-Class-Path':'byte-buddy-1.3.5.jar'
+                'Main-Class': 'com.distrace.DistraceAgent'
     }
 }
-
-task copyNecessaryLibs(type: Copy) {
-    into "$buildDir/libs"
-    from configurations.compile.filter { it.toString().endsWith("byte-buddy-1.3.5.jar")}
-}
-
-build.dependsOn copyNecessaryLibs
-

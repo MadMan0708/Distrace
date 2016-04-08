@@ -1,5 +1,4 @@
 task launchCMake(type: Exec, group: "init") {
-
     workingDir = buildDir
     executable = "cmake"
     args  ".."
@@ -12,7 +11,6 @@ cpp {
     exec.with {
         execPath = 'echo'
         compileCppExecPath = "make"
-        compileCppBaseArgs = "compile"
-        compileCppExecWorkingDir = "build"
+        compileCppExecWorkingDir = "$buildDir"
     }
 }
