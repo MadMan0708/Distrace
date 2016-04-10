@@ -17,7 +17,6 @@ namespace DistraceAgent {
     }
 
     void JNICALL AgentCallbacks::callbackVMInit(jvmtiEnv *jvmti, JNIEnv *env, jthread thread) {
-        std::cout << "Initialized aaaa";
     }
 
     void JNICALL AgentCallbacks::callbackVMDeath(jvmtiEnv *jvmti_env, JNIEnv *jni_env) {
