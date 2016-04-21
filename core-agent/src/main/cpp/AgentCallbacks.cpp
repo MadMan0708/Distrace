@@ -4,6 +4,7 @@
 
 #include "AgentCallbacks.h"
 #include <spdlog/spdlog.h>
+
 #include "Logger.h"
 namespace DistraceAgent {
     std::shared_ptr<spdlog::logger> logger = Logger::getLogger("AgentCallbacks");
@@ -13,6 +14,13 @@ namespace DistraceAgent {
                                             const char *name, jobject protection_domain,
                                             jint class_data_len, const unsigned char *class_data,
                                             jint *new_class_data_len, unsigned char **new_class_data) {
+        logger->debug() << "The class "<< name << " has been loaded";
+
+        // here define all instrumentation - the instrumentation should run in another thread in order
+        // to not block this callback
+        if (strcmp(name,"java/lang/Object")==0){
+            logger->info() << "Instrumenting "<< name;
+        }
 
     }
 

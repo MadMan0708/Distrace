@@ -4,13 +4,18 @@
 #include <jni.h>
 #include <jvmti.h>
 #include <spdlog/logger.h>
+
 #include "Agent.h"
 #include "AgentUtils.h"
 #include "Logger.h"
-
+#include <boost/algorithm/string.hpp>
 
 using namespace DistraceAgent;
 
+// define argument names
+const std::string Agent::ARG_INSTRUMENTOR_JAR = "instrumentorJar";
+
+// define global structures
 GlobalAgentData* Agent::globalData;
 std::shared_ptr<spdlog::logger> logger = Logger::getLogger("Agent");
 
@@ -24,8 +29,44 @@ void Agent::init_global_data() {
     Agent::globalData = &data;
 }
 
+int Agent::parse_args(std::string options, std::map<std::string, std::string> args){
+    // first split to arguments pairs
+    std::vector<std::string> pairs;
+    boost::split(pairs, options,boost::is_any_of(";"),boost::token_compress_on);
+
+    for(int i=0; i<pairs.size(); i++) {
+        // Skip the empty pairs. For example, empty string is added to pairs vector of options ends with ;
+        if (!pairs[i].empty()) {
+            std::vector<std::string> arg_split;
+            boost::split(arg_split, pairs[i], boost::is_any_of("="));
+            if (arg_split.size() != 2) {
+                // it means the argument line does not match the pattern name1=value1;name2=value2
+                logger->error() << "Wrong argument pair:" << pairs[i] << ", arguments have to have format name=value";
+                return JNI_ERR;
+            } else {
+                auto previous = args.insert({arg_split[0], arg_split[1]});
+                if (!previous.second) {
+                    logger->error() << "Argument " << arg_split[0] << " is already defined. Arguments can be defined only once!";
+                    return JNI_ERR;
+                }
+            }
+        }
+    }
+
+    for( auto pair : args){
+        logger->info() << "Argument passed to the agent: "<< pair.first << "=" << pair.second;
+    }
+
+    if(args.find(ARG_INSTRUMENTOR_JAR) == args.end()){
+        logger->error() << "Mandatory argument \""<< ARG_INSTRUMENTOR_JAR<< "=<path>\" missing, stopping the agent!";
+        return JNI_ERR;
+    }
+    return JNI_OK;
+}
+
 JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
     logger->info("Attaching to running JVM");
+
     Agent::init_global_data();
     Agent::globalData->jvm = vm;
     return AgentUtils::init_agent();
@@ -33,6 +74,13 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) {
     logger->info("Agent started together with the start of the JVM");
+
+    std::map<std::string, std::string> args; // key = arg name, value = arg value
+    if(Agent::parse_args(options, args) == JNI_ERR){
+        // stop the agent in case arguments are wrong
+        return JNI_ERR;
+    }
+    // Agent::init_instrumenter()
     Agent::init_global_data();
     Agent::globalData->jvm = jvm;
     return AgentUtils::init_agent();
