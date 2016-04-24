@@ -8,6 +8,7 @@
 #include "Agent.h"
 #include "AgentUtils.h"
 #include "Logger.h"
+#include "Utils.h"
 #include <boost/algorithm/string.hpp>
 
 using namespace DistraceAgent;
@@ -29,10 +30,10 @@ void Agent::init_global_data() {
     Agent::globalData = &data;
 }
 
-int Agent::parse_args(std::string options, std::map<std::string, std::string> args){
+int Agent::parse_args(std::string options, std::map<std::string, std::string> *args){
     // first split to arguments pairs
     std::vector<std::string> pairs;
-    boost::split(pairs, options,boost::is_any_of(";"),boost::token_compress_on);
+    boost::split(pairs, options, boost::is_any_of(";"),boost::token_compress_on);
 
     for(int i=0; i<pairs.size(); i++) {
         // Skip the empty pairs. For example, empty string is added to pairs vector of options ends with ;
@@ -44,7 +45,7 @@ int Agent::parse_args(std::string options, std::map<std::string, std::string> ar
                 logger->error() << "Wrong argument pair:" << pairs[i] << ", arguments have to have format name=value";
                 return JNI_ERR;
             } else {
-                auto previous = args.insert({arg_split[0], arg_split[1]});
+                auto previous = args->insert({arg_split[0], arg_split[1]});
                 if (!previous.second) {
                     logger->error() << "Argument " << arg_split[0] << " is already defined. Arguments can be defined only once!";
                     return JNI_ERR;
@@ -53,17 +54,24 @@ int Agent::parse_args(std::string options, std::map<std::string, std::string> ar
         }
     }
 
-    for( auto pair : args){
+    for( auto pair : *args){
         logger->info() << "Argument passed to the agent: "<< pair.first << "=" << pair.second;
     }
 
-    if(args.find(ARG_INSTRUMENTOR_JAR) == args.end()){
+    if(args->find(ARG_INSTRUMENTOR_JAR) == args->end()){
         logger->error() << "Mandatory argument \""<< ARG_INSTRUMENTOR_JAR<< "=<path>\" missing, stopping the agent!";
         return JNI_ERR;
     }
     return JNI_OK;
 }
 
+int Agent::init_instrumenter(std::string path_to_jar) {
+    if(!system(NULL)){
+        logger->error() << "Could not fork instrumentor JVM";
+        return JNI_ERR;
+    }
+    system(Utils::stringToCharPointer("java -jar "+path_to_jar + " & "));
+}
 JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
     logger->info("Attaching to running JVM");
 
@@ -76,11 +84,15 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) 
     logger->info("Agent started together with the start of the JVM");
 
     std::map<std::string, std::string> args; // key = arg name, value = arg value
-    if(Agent::parse_args(options, args) == JNI_ERR){
+    if(Agent::parse_args(options, &args) == JNI_ERR){
         // stop the agent in case arguments are wrong
         return JNI_ERR;
     }
-    // Agent::init_instrumenter()
+
+    if(Agent::init_instrumenter(args.find(Agent::ARG_INSTRUMENTOR_JAR)->second) == JNI_ERR){
+        // stop the agent in case instrumenter could not be started
+        return JNI_ERR;
+    }
     Agent::init_global_data();
     Agent::globalData->jvm = jvm;
     return AgentUtils::init_agent();

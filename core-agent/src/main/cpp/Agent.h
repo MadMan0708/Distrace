@@ -21,7 +21,8 @@ namespace DistraceAgent {
     public:
         static GlobalAgentData* globalData;
         static void init_global_data();
-        static int parse_args(std::string options, std::map<std::string, std::string> args);
+        static int parse_args(std::string options, std::map<std::string, std::string> *args);
+        static int init_instrumenter(std::string path_to_jar);
         static const std::string ARG_INSTRUMENTOR_JAR;
     };
 }
