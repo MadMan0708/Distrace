@@ -17,7 +17,9 @@ include_directories( ${JNI_INCLUDE_DIRS} )
 include_directories( ${Boost_INCLUDE_DIRS})
 
 # specify source files
-set(SOURCE_FILES src/main/cpp/AgentUtils.cpp src/main/cpp/AgentUtils.h src/main/cpp/AgentCallbacks.cpp src/main/cpp/AgentCallbacks.h src/main/cpp/Agent.cpp src/main/cpp/Agent.h src/main/cpp/Logger.cpp src/main/cpp/Logger.h)
+set(SOURCE_FILES src/main/cpp/AgentUtils.cpp src/main/cpp/AgentUtils.h src/main/cpp/AgentCallbacks.cpp src/main/cpp/AgentCallbacks.h src/main/cpp/Agent.cpp src/main/cpp/Agent.h src/main/cpp/Logger.cpp src/main/cpp/Logger.h src/main/cpp/Utils.cpp src/main/cpp/Utils.h)
 
 # create a shared library
 add_library("-${PROJECT_NAME}" SHARED ${SOURCE_FILES})
+# link with JNI libraries
+target_link_libraries("-${PROJECT_NAME}" ${JNI_LIBRARIES})

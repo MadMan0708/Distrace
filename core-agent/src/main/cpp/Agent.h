@@ -19,10 +19,15 @@ namespace DistraceAgent {
 
     class Agent {
     public:
+        // cli arguments
+        static const std::string ARG_INSTRUMENTOR_JAR;
+        static const std::string ARG_JVM_LIB;
+
         static GlobalAgentData* globalData;
         static void init_global_data();
-        static int parse_args(std::string options, std::map<std::string, std::string> args);
-        static const std::string ARG_INSTRUMENTOR_JAR;
+        static int parse_args(std::string options, std::map<std::string, std::string> *args);
+
+        static int init_intrumenter(std::string path_to_jar, std::string jvm_lib);
     };
 }
 
