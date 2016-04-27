@@ -17,8 +17,17 @@ using namespace DistraceAgent;
 const std::string Agent::ARG_INSTRUMENTOR_JAR = "instrumentorJar";
 
 // define global structures
+std::vector<std::string> Agent::internal_classes_to_instrument = Agent::init_list_of_classes_to_instrument();
 GlobalAgentData* Agent::globalData;
 std::shared_ptr<spdlog::logger> logger = Logger::getLogger("Agent");
+
+std::vector<std::string> Agent::init_list_of_classes_to_instrument(){
+    std::vector<std::string> classes = {
+            "java/lang/Object"
+    };
+    std::sort(classes.begin(),classes.end());
+    return classes;
+}
 
 void Agent::init_global_data() {
     static GlobalAgentData data;
@@ -70,7 +79,11 @@ int Agent::init_instrumenter(std::string path_to_jar) {
         logger->error() << "Could not fork instrumentor JVM";
         return JNI_ERR;
     }
+    // fork instrumentor JVM
     system(Utils::stringToCharPointer("java -jar "+path_to_jar + " & "));
+
+
+    return JNI_OK;
 }
 JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
     logger->info("Attaching to running JVM");

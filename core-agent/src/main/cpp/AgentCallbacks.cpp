@@ -15,11 +15,13 @@ namespace DistraceAgent {
                                             jint class_data_len, const unsigned char *class_data,
                                             jint *new_class_data_len, unsigned char **new_class_data) {
         logger->debug() << "The class "<< name << " has been loaded";
+        // send message to the instrumentor name of the class being loaded.
 
-        // here define all instrumentation - the instrumentation should run in another thread in order
-        // to not block this callback
-        if (strcmp(name,"java/lang/Object")==0){
-            logger->info() << "Instrumenting "<< name;
+
+        // we need to instrument some classes for internal purposes. These classes are instrumented right away
+        // before they are loaded into JVM.
+        if(std::binary_search(Agent::internal_classes_to_instrument.begin(), Agent::internal_classes_to_instrument.end(), name)){
+            logger->info() << "Sending class "<< name << " and its bytecode to instrumentor JVM ";
         }
 
     }
