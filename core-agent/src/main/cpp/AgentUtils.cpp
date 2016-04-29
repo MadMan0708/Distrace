@@ -99,7 +99,18 @@ namespace DistraceAgent {
         return JNI_OK;
     }
 
-    int AgentUtils::init_agent(){
+    int AgentUtils::init_agent(std::string options){
+        std::map<std::string, std::string> args; // key = arg name, value = arg value
+        if(Agent::parse_args(options, &args) == JNI_ERR){
+            // stop the agent in case arguments are wrong
+            return JNI_ERR;
+        }
+
+        if(Agent::init_instrumenter(args.find(Agent::ARG_INSTRUMENTOR_JAR)->second) == JNI_ERR){
+            // stop the agent in case instrumenter could not be started
+            return JNI_ERR;
+        }
+
         if (AgentUtils::create_JVMTI_env(Agent::globalData->jvm, Agent::globalData->jvmti) == JNI_ERR) {
             return JNI_ERR;
         };

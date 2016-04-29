@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <nnxx/socket.h>
 
 #ifndef DISTRACE_AGENT_CORE_AGENTA_H
 #define DISTRACE_AGENT_CORE_AGENTA_H
@@ -11,11 +12,12 @@
 namespace DistraceAgent {
     typedef struct {
         /* JVMTI Environment */
-        jvmtiEnv *jvmti = NULL;
-        JNIEnv *jni = NULL;
-        JavaVM *jvm = NULL;
-        jboolean vm_started = (jboolean) false;
-        jboolean vm_dead = (jboolean) false;
+        jvmtiEnv *jvmti;
+        JNIEnv *jni;
+        JavaVM *jvm;
+        jboolean vm_started;
+        jboolean vm_dead;
+        nnxx::socket inst_socket;
     } GlobalAgentData;
 
     class Agent {

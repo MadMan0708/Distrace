@@ -14,6 +14,8 @@ class Instrumentor {
 
     public static void main(String[] args){
         System.out.println("Runnin forked JVM");
+        Server s = new Server();
+        s.start();
         try {
             Thread.sleep(1000);
         }catch (Exception ignore){

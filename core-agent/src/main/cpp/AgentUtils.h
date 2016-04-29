@@ -39,7 +39,7 @@ namespace DistraceAgent {
         /*
          * Initializes the agent
          */
-        static int init_agent();
+        static int init_agent(std::string options);
     };
 }
 

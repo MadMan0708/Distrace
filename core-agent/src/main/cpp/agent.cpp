@@ -10,6 +10,7 @@
 #include "Logger.h"
 #include "Utils.h"
 #include <boost/algorithm/string.hpp>
+#include <nnxx/reqrep.h>
 
 using namespace DistraceAgent;
 
@@ -23,6 +24,7 @@ std::shared_ptr<spdlog::logger> logger = Logger::getLogger("Agent");
 
 std::vector<std::string> Agent::init_list_of_classes_to_instrument(){
     std::vector<std::string> classes = {
+            // here declare list of all classes which needs to be instrumented and we know about them in advance
             "java/lang/Object"
     };
     std::sort(classes.begin(),classes.end());
@@ -82,31 +84,34 @@ int Agent::init_instrumenter(std::string path_to_jar) {
     // fork instrumentor JVM
     system(Utils::stringToCharPointer("java -jar "+path_to_jar + " & "));
 
-
+    nnxx::socket socket{nnxx::SP, nnxx::REQ};
+    const std::string addr = "ipc://test";
+    int endpoint = socket.connect(addr);
+    if(endpoint < 0){
+        logger->error() << "Returned error code "<< errno << ". Connection to the instrumentor JVM can't be established! Is instrumentor JVM running ?";
+        return JNI_ERR;
+    }else{
+        logger->info() << "Connection to the instrumentor JVM established via IPC. Assigned endpoint ID is "<< endpoint;
+    }
+    Agent::globalData->inst_socket = std::move(socket);
     return JNI_OK;
 }
-JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
-    logger->info("Attaching to running JVM");
 
+JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
+    logger->error("Attaching to running JVM is not supported at this moment");
+
+   /* logger->info("Attaching to running JVM");
     Agent::init_global_data();
     Agent::globalData->jvm = vm;
-    return AgentUtils::init_agent();
+    return AgentUtils::init_agent(options);*/
+    
+    return JNI_ERR;
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) {
     logger->info("Agent started together with the start of the JVM");
 
-    std::map<std::string, std::string> args; // key = arg name, value = arg value
-    if(Agent::parse_args(options, &args) == JNI_ERR){
-        // stop the agent in case arguments are wrong
-        return JNI_ERR;
-    }
-
-    if(Agent::init_instrumenter(args.find(Agent::ARG_INSTRUMENTOR_JAR)->second) == JNI_ERR){
-        // stop the agent in case instrumenter could not be started
-        return JNI_ERR;
-    }
     Agent::init_global_data();
     Agent::globalData->jvm = jvm;
-    return AgentUtils::init_agent();
+    return AgentUtils::init_agent(options);
 }

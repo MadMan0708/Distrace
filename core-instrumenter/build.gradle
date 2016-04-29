@@ -8,7 +8,8 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.5'
     compile 'net.bytebuddy:byte-buddy:1.3.5'
     compile 'net.bytebuddy:byte-buddy-agent:1.3.5'
-    compile 'org.zeromq:jzmq:3.1.0'
+    compile "jnanomsg:jnanomsg:0.4.3"
+    compile "org.zeromq:jzmq:3.1.0"
 }
 
 // Setup test environment
@@ -23,6 +24,9 @@ shadowJar{
     dependencies {
         include(dependency("net.bytebuddy:byte-buddy-agent:1.3.5"))
         include(dependency("net.bytebuddy:byte-buddy:1.3.5"))
+        include(dependency("jnanomsg:jnanomsg:0.4.3"))
+        include(dependency("net.java.dev.jna:jna:4.2.1"))
+        include(dependency("org.zeromq:jzmq:3.1.0"))
     }
 }
 
