@@ -1,4 +1,4 @@
-package com.distrace.examples;
+package cz.cuni.mff.d3s.distrace.examples;
 
 /**
  *
@@ -10,9 +10,11 @@ public class InfiniteLoop {
         while(true) {
             try {
                 randomSleep();
+                new Test().print();
             } catch (Exception ignored) {
             }
         }
+
     }
 
     public static void randomSleep() throws InterruptedException{

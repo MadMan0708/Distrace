@@ -13,11 +13,11 @@ namespace DistraceAgent {
     typedef struct {
         /* JVMTI Environment */
         jvmtiEnv *jvmti;
-        JNIEnv *jni;
         JavaVM *jvm;
         jboolean vm_started;
         jboolean vm_dead;
         nnxx::socket inst_socket;
+        std::map<std::string, std::string> *agent_args;
     } GlobalAgentData;
 
     class Agent {
@@ -27,6 +27,7 @@ namespace DistraceAgent {
         static int parse_args(std::string options, std::map<std::string, std::string> *args);
         static int init_instrumenter(std::string path_to_jar);
         static const std::string ARG_INSTRUMENTOR_JAR;
+        static const std::string ARG_LOG_LEVEL;
         static std::vector<std::string> internal_classes_to_instrument;
         /**
          * This method lists the classes which are needed to be instrumented by purposes of this library

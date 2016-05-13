@@ -8,23 +8,28 @@
 #define DISTRACE_AGENT_CORE_AGENTUTILS_H
 
 namespace DistraceAgent {
+
+    static int JNI_ALREADY_ATTACHED = 1;
+    static int JNI_ATTACHED_NOW = 2;
     class AgentUtils {
     public:
-        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, const char *error_description);
+        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string ok_description, std::string error_description);
+
+        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string error_description);
         /**
         * Register capabilities we need to have in the JVM
         */
-        static void register_jvmti_capabilities(jvmtiEnv *jvmti);
+        static int register_jvmti_capabilities(jvmtiEnv *jvmti);
 
         /**
          * Register all necessary callbacks in the JVM
          */
-        static void register_jvmti_callbacks(jvmtiEnv *jvmti);
+        static int register_jvmti_callbacks(jvmtiEnv *jvmti);
 
         /**
          * Register for events
          */
-        static void register_jvmti_events(jvmtiEnv *jvmti);
+        static int register_jvmti_events(jvmtiEnv *jvmti);
 
         /*
          * Creates JVMTI environment with the desired JVMTI version
@@ -34,12 +39,21 @@ namespace DistraceAgent {
         /*
         * Creates JNI environment with the desired JNI version
         */
-        static int create_JNI_env(JavaVM *jvm, JNIEnv *jni);
+        static int JNI_AttachCurrentThread(JNIEnv *jni);
 
+        static void JNI_DettachCurrentThread(int attachStatus);
         /*
          * Initializes the agent
          */
         static int init_agent(std::string options);
+
+
+        static jobject getInterceptorsClassLoader(JNIEnv* jni);
+
+        static  std::shared_ptr<spdlog::logger> logger;
+
+        static int attachJNIToCurrentThread(JavaVM* jvm, JNIEnv* jni);
+
     };
 }
 

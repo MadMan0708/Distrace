@@ -16,6 +16,7 @@ using namespace DistraceAgent;
 
 // define argument names
 const std::string Agent::ARG_INSTRUMENTOR_JAR = "instrumentorJar";
+const std::string Agent::ARG_LOG_LEVEL = "log_level";
 
 // define global structures
 std::vector<std::string> Agent::internal_classes_to_instrument = Agent::init_list_of_classes_to_instrument();
@@ -25,7 +26,8 @@ std::shared_ptr<spdlog::logger> logger = Logger::getLogger("Agent");
 std::vector<std::string> Agent::init_list_of_classes_to_instrument(){
     std::vector<std::string> classes = {
             // here declare list of all classes which needs to be instrumented and we know about them in advance
-            "java/lang/Object"
+            "com/distrace/examples/Test"
+            //"java/lang/Object"
     };
     std::sort(classes.begin(),classes.end());
     return classes;
@@ -35,9 +37,9 @@ void Agent::init_global_data() {
     static GlobalAgentData data;
     data.jvmti = NULL;
     data.jvm = NULL;
-    data.jni = NULL;
     data.vm_dead = (jboolean) false;
     data.vm_started = (jboolean) false;
+    data.agent_args = NULL;
     Agent::globalData = &data;
 }
 
@@ -73,6 +75,9 @@ int Agent::parse_args(std::string options, std::map<std::string, std::string> *a
         logger->error() << "Mandatory argument \""<< ARG_INSTRUMENTOR_JAR<< "=<path>\" missing, stopping the agent!";
         return JNI_ERR;
     }
+    Agent::globalData->agent_args = args;
+    logger->info() << "All agent argument parsed successfully";
+
     return JNI_OK;
 }
 

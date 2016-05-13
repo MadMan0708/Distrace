@@ -1,4 +1,4 @@
-description = "Example applications used for testing the instrumentation library"
+description = "Example applications used for testing of the Distrace platform"
 
 // Setup test environment
 test {
