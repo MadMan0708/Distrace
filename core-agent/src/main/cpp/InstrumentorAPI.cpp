@@ -19,6 +19,7 @@ using namespace Distrace::Logging;
 
 
  byte InstrumentorAPI::REQ_TYPE_INSTRUMENT=0;
+ byte InstrumentorAPI::REQ_TYPE_STOP=1;
  std::string InstrumentorAPI::ACK_REQ_MSG="ack_req_msg";
  std::string InstrumentorAPI::ACK_REQ_INST_YES="ack_req_int_yes";
  std::string InstrumentorAPI::ACK_REQ_INST_NO="ack_req_int_no";
@@ -109,9 +110,9 @@ using namespace Distrace::Logging;
         return send_and_receive(input_data, input_data_len, output_buffer);
     }
 
-    int InstrumentorAPI::stop(){
+    void InstrumentorAPI::stop(){
      log(LOGGER_INSTRUMENTOR_API)->info() << "Stopping the Instrumentor JVM";
-     return 0;
+     send_req_type(REQ_TYPE_STOP);
     }
 
     int InstrumentorAPI::init(std::string path_to_instrumentor_jar) {

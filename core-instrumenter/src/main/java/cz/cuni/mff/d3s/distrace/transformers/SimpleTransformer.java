@@ -14,6 +14,5 @@ public class SimpleTransformer implements AgentBuilder.Transformer {
     public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
         return builder.method(ElementMatchers.nameEndsWith("print"))
                 .intercept(MethodDelegation.to(SimpleInterceptor.class).andThen(SuperMethodCall.INSTANCE));
-
     }
 }

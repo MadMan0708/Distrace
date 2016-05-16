@@ -16,6 +16,7 @@ namespace Distrace {
     class InstrumentorAPI {
     public:
         static byte REQ_TYPE_INSTRUMENT;
+        static byte REQ_TYPE_STOP;
         static std::string ACK_REQ_MSG;
         static std::string ACK_REQ_INST_YES;
         static std::string ACK_REQ_INST_NO;
@@ -23,7 +24,7 @@ namespace Distrace {
         bool should_instrument(std::string class_name);
         int instrument(const byte* input_data, int input_data_len, byte** output_buffer);
         static int init(std::string path_to_instrumentor_jar);
-        int stop();
+        void stop();
     private:
         static std::mutex mtx;
         nnxx::socket socket;
