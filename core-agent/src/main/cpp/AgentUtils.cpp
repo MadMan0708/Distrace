@@ -9,23 +9,25 @@
 #include <jvmti.h>
 #include "AgentUtils.h"
 #include "AgentCallbacks.h"
-#include "Logger.h"
+#include "Logging.h"
+#include "Agent.h"
 
-namespace DistraceAgent {
-    std::shared_ptr<spdlog::logger> AgentUtils::logger = Logger::getLogger("AgentUtils");
+using namespace Distrace;
+using namespace Distrace::Logging;
+
 
     int AgentUtils::check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string ok_description, std::string error_description) {
         if (error_number != JVMTI_ERROR_NONE) {
             char *error_name = NULL;
             env->GetErrorName(error_number, &error_name);
 
-            logger->error() << "JVMTI ERROR "<< error_number << " - "
+            log(LOGGER_AGENT)->error() << "JVMTI ERROR "<< error_number << " - "
             << (error_name == NULL ? "Unknown" : error_name)
             << ": " <<  (error_description.empty() ? "" : error_description);
             return JNI_ERR;
         }
         if(!ok_description.empty()){
-            logger->info() << ok_description;
+            log(LOGGER_AGENT)->info() << ok_description;
         }
         return JNI_OK;
     }
@@ -103,7 +105,7 @@ namespace DistraceAgent {
         if(result == JNI_ERR){
             return result;
         }
-        logger->info() << "All JVMTI notifications successfully set";
+        log(LOGGER_AGENT)->info() << "All JVMTI notifications successfully set";
         return JNI_OK;
     }
 
@@ -111,14 +113,14 @@ namespace DistraceAgent {
         jint result = jvm->GetEnv((void **) &jvmti, JVMTI_VERSION_1_2);
         switch(result){
             case JNI_EVERSION:
-                AgentUtils::logger->error() << "Obtaining JVMTI Env: JVMTI version " << JVMTI_VERSION_1_2 << " not supported. Is your J2SE a 1.5 or newer version?";
+                log(LOGGER_AGENT)->error() << "Obtaining JVMTI Env: JVMTI version " << JVMTI_VERSION_1_2 << " not supported. Is your J2SE a 1.5 or newer version?";
                 return JNI_ERR;
             case JNI_OK:
                 Agent::globalData->jvmti=jvmti;
-                AgentUtils::logger->info() << "Obtaining JVMTI Env: JVMTI Env obtained successfully!";
+                log(LOGGER_AGENT)->info() << "Obtaining JVMTI Env: JVMTI Env obtained successfully!";
                 return JNI_OK;
             default:
-                AgentUtils::logger->info() << "Obtaining JVMTI Env: Unknown error "<< result <<".";
+                log(LOGGER_AGENT)->info() << "Obtaining JVMTI Env: Unknown error "<< result <<".";
                 return JNI_ERR;
         }
     }
@@ -127,28 +129,28 @@ namespace DistraceAgent {
         jint result = Agent::globalData->jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
         switch (result){
             case JNI_EDETACHED:
-                AgentUtils::logger->info() << "Obtaining JNI Env: Current thread not attached to JVM, trying to attach.";
+                log(LOGGER_AGENT)->info() << "Obtaining JNI Env: Current thread not attached to JVM, trying to attach.";
                 if (AgentUtils::attachJNIToCurrentThread(Agent::globalData->jvm, env) == JNI_ERR) {
-                    logger->error() << "Obtaining JNI Env: Failed to attach current thread to JVM. Terminating the agent!";
+                    log(LOGGER_AGENT)->error() << "Obtaining JNI Env: Failed to attach current thread to JVM. Terminating the agent!";
                     exit(JNI_ERR);
                 }else{
-                    logger->info() << "Obtaining JNI Env: Successfully attached current thread to JVM";
-                    return DistraceAgent::JNI_ATTACHED_NOW;
+                    log(LOGGER_AGENT)->info() << "Obtaining JNI Env: Successfully attached current thread to JVM";
+                    return JNI_ATTACHED_NOW;
                 }
             case JNI_EVERSION:
-                AgentUtils::logger->error() << "Obtaining JNI Env: JNI version " << JNI_VERSION_1_6 << " not supported. Terminating the agent!";
+                log(LOGGER_AGENT)->error() << "Obtaining JNI Env: JNI version " << JNI_VERSION_1_6 << " not supported. Terminating the agent!";
                 exit(JNI_ERR);
             case JNI_OK:
-                AgentUtils::logger->debug() << "Obtaining JNI Env: Current thread is already attached to the JVM!";
-                return DistraceAgent::JNI_ALREADY_ATTACHED;
+                log(LOGGER_AGENT)->debug() << "Obtaining JNI Env: Current thread is already attached to the JVM!";
+                return JNI_ALREADY_ATTACHED;
             default:
-                AgentUtils::logger->info() << "Obtaining JNI Env: Unknown error "<< result <<". Terminating!";
+                log(LOGGER_AGENT)->info() << "Obtaining JNI Env: Unknown error "<< result <<". Terminating!";
                 exit(result);
         }
     }
 
     void AgentUtils::JNI_DettachCurrentThread(int attachStatus){
-        if(attachStatus == DistraceAgent::JNI_ATTACHED_NOW){
+        if(attachStatus == JNI_ATTACHED_NOW){
             Agent::globalData->jvm->DetachCurrentThread();
         }
     }
@@ -163,19 +165,20 @@ namespace DistraceAgent {
 
     int AgentUtils::init_agent(std::string options){
         std::map<std::string, std::string> args; // key = arg name, value = arg value
-        if(Agent::parse_args(options, &args) == JNI_ERR){
+        if(Agent::parse_args(options, args) == JNI_ERR){
             // stop the agent in case arguments are wrong
-            return JNI_ERR;
-        }
-
-        if(Agent::init_instrumenter(args.find(Agent::ARG_INSTRUMENTOR_JAR)->second) == JNI_ERR){
-            // stop the agent in case instrumenter JVM could not be started
             return JNI_ERR;
         }
 
         if (AgentUtils::create_JVMTI_env(Agent::globalData->jvm, Agent::globalData->jvmti) == JNI_ERR) {
             return JNI_ERR;
-        };
+        }
+
+        if(InstrumentorAPI::init(args.find(Agent::ARG_INSTRUMENTOR_JAR)->second) == JNI_ERR){
+            // stop the agent in case Instrumentor JVM could not be started or connected to
+            return JNI_ERR;
+        }
+
 
         if(AgentUtils::register_jvmti_capabilities(Agent::globalData->jvmti) == JNI_ERR){
             return JNI_ERR;
@@ -189,24 +192,6 @@ namespace DistraceAgent {
             return JNI_ERR;
         }
 
-        logger->info() << "Agent successfully initialized";
+        log(LOGGER_AGENT)->info() << "Agent successfully initialized";
         return JNI_OK;
     }
-
-
-    jobject AgentUtils::getInterceptorsClassLoader(JNIEnv* jni) {
-        AgentUtils::logger->info() << "HEREHERE";
-        std::string loader_class_name = "java/net/URLClassLoader";
-        jclass loader_class = jni->FindClass(loader_class_name.c_str());
-        AgentUtils::logger->info() << "HEREHERE";
-        jmethodID  constructor = jni->GetMethodID(loader_class, "<init>", "([Ljava.net.URLClassLoader;)V");
-
-        std::string url_class_name = "java/net/URL";
-        jclass  url_class = jni->FindClass(url_class_name.c_str());
-        jobjectArray arg = jni->NewObjectArray(1,url_class,NULL);
-        jobject  loader_instance = jni->NewObject(loader_class,constructor,arg);
-        Agent::globalData->jvm->DetachCurrentThread();
-        return loader_instance;
-    }
-
-}

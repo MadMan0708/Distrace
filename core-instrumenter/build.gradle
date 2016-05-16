@@ -35,6 +35,6 @@ artifacts {
 jar {
     manifest {
         attributes 'Manifest-Version': '1.0',
-                'Main-Class': 'com.distrace.Instrumentor'
+                'Main-Class': 'cz.cuni.mff.d3s.distrace.Instrumentor'
     }
 }

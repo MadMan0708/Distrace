@@ -7,12 +7,14 @@
 #ifndef DISTRACE_AGENT_CORE_AGENTUTILS_H
 #define DISTRACE_AGENT_CORE_AGENTUTILS_H
 
-namespace DistraceAgent {
+namespace Distrace {
 
     static int JNI_ALREADY_ATTACHED = 1;
     static int JNI_ATTACHED_NOW = 2;
+
     class AgentUtils {
     public:
+
         static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string ok_description, std::string error_description);
 
         static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string error_description);
@@ -49,8 +51,6 @@ namespace DistraceAgent {
 
 
         static jobject getInterceptorsClassLoader(JNIEnv* jni);
-
-        static  std::shared_ptr<spdlog::logger> logger;
 
         static int attachJNIToCurrentThread(JavaVM* jvm, JNIEnv* jni);
 

@@ -7,9 +7,10 @@
 
 #include <jni.h>
 #include <jvmti.h>
+#include <spdlog/logger.h>
 #include "Agent.h"
 
-namespace DistraceAgent {
+namespace Distrace {
 
 class AgentCallbacks {
     public:

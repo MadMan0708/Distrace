@@ -2,11 +2,32 @@
 TOPDIR=$(cd `dirname $0`/..;pwd)
 source $TOPDIR/bin/prepare-env.sh
 
-EXAMPLE="com.distrace.examples.$1"
+PREFIX="cz.cuni.mff.d3s.distrace.examples"
+DEFAULT_EXAMPLE="InfiniteLoop"
+if [ $1 ]; then
+  EXAMPLE=$PREFIX.$1
+  shift
+else
+  EXAMPLE=$PREFIX.$DEFAULT_EXAMPLE
+fi
+
+IPC_FILE="file.ipc"
+
 
 echo
 echo "Running example: $EXAMPLE"
 echo
 
 # Attach the agent library and start it together with the start of the application
-java -agentpath:"$AGENT_LIB_FILE=instrumentorJar=$INSTRUMENTOR_LIB_FILE;" -cp $EXAMPLES_JAR_FILE $EXAMPLE
+java -agentpath:"$AGENT_LIB_FILE=instrumentorJar=$INSTRUMENTOR_LIB_FILE;sock_address=ipc://$IPC_FILE" -cp $EXAMPLES_JAR_FILE $EXAMPLE
+
+
+pids=$(jps -l | grep "distrace-core-instrumenter-0.0.0-all.jar" | cut -d" " -f1)
+
+for pid in $pids
+do
+ kill -9 $pid
+done
+
+rm -rf $IPC_FILE
+#rm -rf *.log

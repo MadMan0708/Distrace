@@ -8,7 +8,10 @@
 
 #include <jni.h>
 #include <string>
-namespace DistraceAgent{
+#include "Logging.h"
+
+namespace Distrace{
+
     class JavaUtils {
     public:
         /**

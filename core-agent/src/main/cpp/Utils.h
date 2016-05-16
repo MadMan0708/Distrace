@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace DistraceAgent {
+namespace Distrace {
 
     class Utils {
     public:

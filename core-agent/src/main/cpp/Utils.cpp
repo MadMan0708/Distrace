@@ -5,7 +5,7 @@
 #include "Utils.h"
 
 
-using namespace DistraceAgent;
+using namespace Distrace;
 
 char* Utils::stringToCharPointer(std::string input) {
     char *str_copy = new char[input.size()+1] ;

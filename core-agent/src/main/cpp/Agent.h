@@ -5,35 +5,37 @@
 #include <string>
 #include <vector>
 #include <nnxx/socket.h>
+#include <jvmti.h>
+#include "InstrumentorAPI.h"
 
 #ifndef DISTRACE_AGENT_CORE_AGENTA_H
 #define DISTRACE_AGENT_CORE_AGENTA_H
 
-namespace DistraceAgent {
+namespace Distrace {
+    static int INSTRUMENTOR_INSTRUMENT = 1;
+    static int INSTRUMENTOR_NO_INSTRUMENT = 2;
     typedef struct {
         /* JVMTI Environment */
         jvmtiEnv *jvmti;
         JavaVM *jvm;
         jboolean vm_started;
         jboolean vm_dead;
-        nnxx::socket inst_socket;
-        std::map<std::string, std::string> *agent_args;
+        InstrumentorAPI *inst_api;
+        std::map<std::string, std::string> agent_args; // key = arg name, value = arg value
     } GlobalAgentData;
 
     class Agent {
     public:
         static GlobalAgentData* globalData;
         static void init_global_data();
-        static int parse_args(std::string options, std::map<std::string, std::string> *args);
-        static int init_instrumenter(std::string path_to_jar);
+        /**
+         * Parses arguments and fill the agent_args map in the globalData
+         */
+        static int parse_args(std::string options, std::map<std::string, std::string> &args);
         static const std::string ARG_INSTRUMENTOR_JAR;
         static const std::string ARG_LOG_LEVEL;
-        static std::vector<std::string> internal_classes_to_instrument;
-        /**
-         * This method lists the classes which are needed to be instrumented by purposes of this library
-         * The list of classes is sorted in order to ensure faster lookup ( using binary_search )
-         */
-        static std::vector<std::string> init_list_of_classes_to_instrument();
+        static const std::string ARG_SOCKET_ADDRESS;
+        static std::string get_arg_value(std::string arg_name);
     };
 }
 
