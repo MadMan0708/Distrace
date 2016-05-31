@@ -39,7 +39,7 @@ using namespace Distrace::Logging;
     }
 
     int InstrumentorAPI::send_byte_arr_request(const byte *input_data, int input_data_len){
-        auto numBytesSent = socket.send(input_data, input_data_len,0);
+        auto numBytesSent = socket.send(input_data, input_data_len, 0);
         assert_bytes_sent(numBytesSent, input_data_len);
         return numBytesSent;
     }

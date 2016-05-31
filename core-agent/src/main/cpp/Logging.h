@@ -21,6 +21,12 @@ namespace Distrace {
         void registerLoggers();
 
         /**
+         * Set the log level if the log_level string represents existing log level and returns true, otherwise does
+         * not do anything and returns false
+         */
+        bool setLogLevel(std::string log_level);
+
+        /**
          * Get the registered logger using its name
          */
         Logger log(std::string logger_name);

@@ -163,18 +163,13 @@ using namespace Distrace::Logging;
         return jvm->AttachCurrentThread( (void**) &jni, &args);
     }
 
-    int AgentUtils::init_agent(std::string options){
-        std::map<std::string, std::string> args; // key = arg name, value = arg value
-        if(Agent::parse_args(options, args) == JNI_ERR){
-            // stop the agent in case arguments are wrong
-            return JNI_ERR;
-        }
+    int AgentUtils::init_agent(){
 
         if (AgentUtils::create_JVMTI_env(Agent::globalData->jvm, Agent::globalData->jvmti) == JNI_ERR) {
             return JNI_ERR;
         }
 
-        if(InstrumentorAPI::init(args.find(Agent::ARG_INSTRUMENTOR_JAR)->second) == JNI_ERR){
+        if(InstrumentorAPI::init(Agent::get_arg_value(Agent::ARG_INSTRUMENTOR_JAR)) == JNI_ERR){
             // stop the agent in case Instrumentor JVM could not be started or connected to
             return JNI_ERR;
         }

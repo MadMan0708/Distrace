@@ -21,7 +21,7 @@ using namespace Distrace::Logging;
                                             jint class_data_len, const unsigned char *class_data,
                                             jint *new_class_data_len, unsigned char **new_class_data) {
 
-        //TODO: Improve - attaching and dettaching after each request is quite costly - Write this to docs
+        //TODO: Improve - attaching and deattaching after each request is quite costly - Write this to docs
         int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
         auto loader_name = JavaUtils::getClassLoaderName(env, loader);
         log(LOGGER_AGENT_CALLBACKS)->debug() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";

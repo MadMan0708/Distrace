@@ -47,10 +47,8 @@ namespace Distrace {
         /*
          * Initializes the agent
          */
-        static int init_agent(std::string options);
+        static int init_agent();
 
-
-        static jobject getInterceptorsClassLoader(JNIEnv* jni);
 
         static int attachJNIToCurrentThread(JavaVM* jvm, JNIEnv* jni);
 

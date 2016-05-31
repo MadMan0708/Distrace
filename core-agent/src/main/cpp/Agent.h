@@ -34,9 +34,13 @@ namespace Distrace {
         static int parse_args(std::string options, std::map<std::string, std::string> &args);
         static const std::string ARG_INSTRUMENTOR_JAR;
         static const std::string ARG_LOG_LEVEL;
-        static const std::string ARG_LOG_DIR;
         static const std::string ARG_SOCKET_ADDRESS;
         static std::string get_arg_value(std::string arg_name);
+        static bool is_arg_set(std::string arg_name);
+
+    private:
+        static void set_log_level_and_warn( std::map<std::string, std::string> &args);
+        static int check_for_mandatory_args(std::map<std::string, std::string> &args);
     };
 }
 
