@@ -17,7 +17,9 @@ using namespace Distrace::Logging;
 // define argument names
 const std::string Agent::ARG_INSTRUMENTOR_JAR = "instrumentorJar";
 const std::string Agent::ARG_LOG_LEVEL = "log_level";
+const std::string Agent::ARG_LOG_DIR = "log_dir";
 const std::string Agent::ARG_SOCKET_ADDRESS = "sock_address";
+
 
 // define global structures
 GlobalAgentData* Agent::globalData;
@@ -79,10 +81,11 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
     registerLoggers();
     log(LOGGER_AGENT)->error("Attaching to running JVM is not supported at this moment");
 
-   /* getLogger(LOGGER_AGENT)->info("Attaching to running JVM");
+   /*
     Agent::init_global_data();
     Agent::globalData->jvm = vm;
-    return AgentUtils::init_agent(options);*/
+    return AgentUtils::init_agent(options);
+    */
     
     return JNI_ERR;
 }

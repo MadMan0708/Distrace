@@ -11,24 +11,30 @@ import net.bytebuddy.matcher.ElementMatchers;
 import java.lang.instrument.IllegalClassFormatException;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class InstrumentorServer {
+    private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
+
     public static final byte REQ_TYPE_INSTRUMENT = 0;
     public static final byte REQ_TYPE_STOP = 1;
     private ByteClassLoader cl = new ByteClassLoader();
     private PairSocket sock;
     private String sockAddr;
+    private TransformersManager transformersManager;
 
-    public InstrumentorServer(String sockAddr) {
+    public InstrumentorServer(String sockAddr, TransformersManager transformersManager) {
         this.sockAddr = sockAddr;
+        this.transformersManager = transformersManager;
     }
 
     public void handleInstrument() {
         try {
             byte[] name = sock.recvBytes();
             String nameString = new String(name, StandardCharsets.UTF_8);
-            if (TransformersManager.transformers.containsKey(nameString.replace("/", "."))) {
-                System.out.println("Handling instrumenting " + nameString.replace("/", ".") + " OK");
+            if (transformersManager.hasClass(nameString.replace("/", "."))) {
+                log.info("Handling instrumentation of class:  " + nameString.replace("/", "."));
                 sock.send("ack_req_int_yes");
 
                 byte[] byteCode = sock.recvBytes(); // receive the bytecode to instrument
@@ -65,13 +71,12 @@ public class InstrumentorServer {
                 byte req = requestType[0];
                 sock.send("ack_req_msg"); // confirm receiving of the message
                 if (req == REQ_TYPE_STOP) {
-                    System.out.println("Instrumentor JVM is being stopped!");
+                    log.info("Instrumentor JVM is being stopped!");
                     // exit the loop which results with stopping the Instrumentor JAR
                     break;
                 }
                 handleRequest(req);
             } catch (IOException e) {
-                System.out.println("exception" + e);
                 // nothing to receive, wait
                 try {
                     Thread.sleep(1000);
@@ -91,28 +96,28 @@ public class InstrumentorServer {
                 .with(new AgentBuilder.Listener() {
                     @Override
                     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, DynamicType dynamicType) {
-                        System.out.println("Transformed:" + typeDescription + " " + dynamicType);
+                        log.info("Transformed: " + typeDescription + " " + dynamicType);
                     }
 
                     @Override
                     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader) {
-                        System.out.println("Ignored" + typeDescription);
+                        log.info("Ignored: " + typeDescription);
                     }
 
                     @Override
                     public void onError(String typeName, ClassLoader classLoader, Throwable throwable) {
-                        System.out.println("Error:" + typeName + " " + throwable);
+                        log.info("Error: " + typeName + " " + throwable);
                     }
 
                     @Override
                     public void onComplete(String typeName, ClassLoader classLoader) {
-                        System.out.println("Complete:" + typeName + " " + classLoader);
+                        log.info("Complete: " + typeName + " " + classLoader);
                     }
                 })
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .type(ElementMatchers.named(nameAsInJava))
-                .transform(TransformersManager.transformers.get(nameAsInJava)).makeRaw().transform(cl, className, null, null, bytecode);
+                .transform(transformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(cl, className, null, null, bytecode);
     }
 
 }
