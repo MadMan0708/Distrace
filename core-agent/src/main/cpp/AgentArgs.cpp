@@ -23,19 +23,17 @@ std::map<std::string, std::string> AgentArgs::getArgsMap() {
 };
 
 std::string AgentArgs::get_arg_value(std::string arg_name) {
-    if (is_arg_set(arg_name)) {
+    if(is_arg_set(arg_name)){
         return args.find(arg_name)->second;
-    } else {
-        // test if NULL can be returned here
-        return NULL;
+    }else{
+        log(LOGGER_AGENT)->error() << "Argument \"" << arg_name << "\" is not set. Before getting the value check if it's set using the is_arg_set method";
+        assert(false);
     }
-
 }
 
 bool AgentArgs::is_arg_set(std::string arg_name) {
-    return args.find(arg_name) == args.end();
+     return args.count(arg_name) != 0;
 }
-
 
 int AgentArgs::check_for_mandatory_args(std::string &err_msg) {
     if (args.find(ARG_INSTRUMENTOR_JAR) == args.end()) {

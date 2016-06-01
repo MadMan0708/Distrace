@@ -49,6 +49,7 @@ void Agent::set_log_level_and_log() {
 
 JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
     register_loggers();
+    Agent::init_global_data();
 
     // parse the arguments
     std::string err_msg;
@@ -71,13 +72,13 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
 
     log(LOGGER_AGENT)->error("Attaching to running JVM is not supported at this moment");
 
-    Agent::init_global_data();
     Agent::globalData->jvm = vm;
     return JNI_ERR; //  return AgentUtils::init_agent();
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) {
     register_loggers();
+    Agent::init_global_data();
 
     // parse the arguments
     std::string err_msg;
@@ -97,8 +98,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) 
             log(LOGGER_AGENT)->info() << "Argument passed to the agent: " << pair.first << "=" << pair.second;
         }
     }
-
-    Agent::init_global_data();
+    
     Agent::globalData->jvm = jvm;
     return AgentUtils::init_agent();
 }

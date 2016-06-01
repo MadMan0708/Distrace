@@ -25,7 +25,7 @@ namespace Distrace {
         std::map<std::string, std::string> getArgsMap();
 
         /**
-         * Get argument value. Returns NULL if the argument value is not set
+         * Get argument value and fail if the argument value is not set.
          */
         std::string get_arg_value(std::string arg_name);
 

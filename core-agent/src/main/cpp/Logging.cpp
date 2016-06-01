@@ -36,7 +36,7 @@ namespace Distrace {
                 size_t q_size = 1048576; //queue size must be power of 2
                 spdlog::set_async_mode(q_size);
 
-                spdlog::set_level(spdlog::level::warn); // set default log level
+                spdlog::set_level(spdlog::level::info); // set default log level
 
                 // one sink to print logs on the console
                 sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
