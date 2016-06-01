@@ -4,13 +4,9 @@
 #include <jni.h>
 #include <jvmti.h>
 #include "AgentCallbacks.h"
-#include <spdlog/spdlog.h>
-#include <nnxx/reqrep.h>
-#include <nnxx/message.h>
 #include <future>
 #include "AgentUtils.h"
 #include "JavaUtils.h"
-#include "Agent.h"
 
 using namespace Distrace;
 using namespace Distrace::Logging;
@@ -25,7 +21,7 @@ using namespace Distrace::Logging;
         int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
         auto loader_name = JavaUtils::getClassLoaderName(env, loader);
         log(LOGGER_AGENT_CALLBACKS)->debug() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
-        AgentUtils::JNI_DettachCurrentThread(attachStatus);
+        AgentUtils::dettach_JNI_from_current_thread(attachStatus);
 
          if(Agent::globalData->inst_api->should_instrument(name)){
              *new_class_data_len = Agent::globalData->inst_api->instrument(class_data, class_data_len, new_class_data);

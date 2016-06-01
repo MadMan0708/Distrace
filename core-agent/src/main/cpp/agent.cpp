@@ -8,20 +8,15 @@
 #include "AgentUtils.h"
 #include "Logging.h"
 #include "Utils.h"
+#include "AgentArgs.h"
 #include <boost/algorithm/string.hpp>
 #include <nnxx/reqrep.h>
 
 using namespace Distrace;
 using namespace Distrace::Logging;
 
-// define argument names
-const std::string Agent::ARG_INSTRUMENTOR_JAR = "instrumentorJar";
-const std::string Agent::ARG_LOG_LEVEL = "log_level";
-const std::string Agent::ARG_SOCKET_ADDRESS = "sock_address";
-
-
 // define global structures
-GlobalAgentData* Agent::globalData;
+GlobalAgentData *Agent::globalData;
 
 
 void Agent::init_global_data() {
@@ -30,80 +25,50 @@ void Agent::init_global_data() {
     data.jvm = NULL;
     data.vm_dead = (jboolean) false;
     data.vm_started = (jboolean) false;
+    data.agent_args = new AgentArgs();
     Agent::globalData = &data;
 }
 
-std::string Agent::get_arg_value(std::string arg_name){
-    return globalData->agent_args.find(arg_name)->second;
+AgentArgs *Agent::getArgs() {
+    return Agent::globalData->agent_args;
 }
 
-bool Agent::is_arg_set(std::string arg_name){
-    return globalData->agent_args.find(arg_name) ==  globalData->agent_args.end();
-}
-
-void Agent::set_log_level_and_warn(std::map<std::string, std::string> &args){
-    if(args.find(Agent::ARG_LOG_LEVEL) !=args.end()){
-        if(!setLogLevel(args.find(Agent::ARG_LOG_LEVEL)->second)){
-            log(LOGGER_AGENT)->error() << "Log level contains unknown value, using default log level!";
+void Agent::set_log_level_and_log() {
+    auto args = Agent::getArgs();
+    if (args->is_arg_set(AgentArgs::ARG_LOG_LEVEL)) {
+        auto log_level = args->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
+        if (!set_log_level(log_level)) {
+            log(LOGGER_AGENT)->error() << "Log level \"" << log_level <<
+            "\" is not recognized value, using default log level!";
+        } else {
+            log(LOGGER_AGENT)->info() << "Log level successfully set to: " << log_level;
         }
     }
 }
 
-int Agent::check_for_mandatory_args(std::map<std::string, std::string> &args){
-    if(args.find(ARG_INSTRUMENTOR_JAR) == args.end()){
-        log(LOGGER_AGENT)->error() << "Mandatory argument \""<< ARG_INSTRUMENTOR_JAR<< "=<path>\" missing, stopping the agent!";
-        return JNI_ERR;
-    }
-
-    return JNI_OK;
-}
-
-int Agent::parse_args(std::string options, std::map<std::string, std::string> &args){
-    // first split to arguments pairs
-    std::vector<std::string> pairs;
-    boost::split(pairs, options, boost::is_any_of(";"),boost::token_compress_on);
-    for(int i=0; i<pairs.size(); i++) {
-        // Skip the empty pairs. For example, empty string is added to pairs vector of options ends with ;
-        if (!pairs[i].empty()) {
-            std::vector<std::string> arg_split;
-            boost::split(arg_split, pairs[i], boost::is_any_of("="));
-            if (arg_split.size() != 2) {
-                Agent::set_log_level_and_warn(args);
-                // it means the argument line does not match the pattern name1=value1;name2=value2
-                log(LOGGER_AGENT)->error() << "Wrong argument pair:" << pairs[i] << ", arguments have to have format name=value";
-                return JNI_ERR;
-            } else {
-                auto previous = args.insert({arg_split[0], arg_split[1]});
-                if (!previous.second) {
-                    Agent::set_log_level_and_warn(args);
-                    log(LOGGER_AGENT)->error() << "Argument " << arg_split[0] << " is already defined. Arguments can be defined only once!";
-                    return JNI_ERR;
-                }
-            }
-        }
-    }
-
-    Agent::set_log_level_and_warn(args);
-
-    for( auto pair : args){
-        log(LOGGER_AGENT)->info() << "Argument passed to the agent: "<< pair.first << "=" << pair.second;
-    }
-
-    if(Agent::check_for_mandatory_args(args)==JNI_ERR){
-        return JNI_ERR;
-    }
-    Agent::globalData->agent_args = args;
-    return JNI_OK;
-}
 
 JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
-    registerLoggers();
-    std::map<std::string, std::string> args; // key = arg name, value = arg value
-    if(Agent::parse_args(options, args) == JNI_ERR){
+    register_loggers();
+
+    // parse the arguments
+    std::string err_msg;
+    int res = Agent::globalData->agent_args->parse_args(options, err_msg);
+    // set the log level after arguments are parsed since log level can be specified using the argument ARG_LOG_LEVEL
+    Agent::set_log_level_and_log();
+    log(LOGGER_AGENT)->info("Agent attached to the running JVM");
+
+    // now print the result of parsing
+    if (res == JNI_ERR) {
+        log(LOGGER_AGENT)->error() << err_msg;
         // stop the agent in case arguments are wrong
         return JNI_ERR;
+    } else {
+        // print all parsed arguments
+        for (auto pair : Agent::getArgs()->getArgsMap()) {
+            log(LOGGER_AGENT)->info() << "Argument passed to the agent: " << pair.first << "=" << pair.second;
+        }
     }
-    log(LOGGER_AGENT)->info("Agent attached to the running JVM");
+
     log(LOGGER_AGENT)->error("Attaching to running JVM is not supported at this moment");
 
     Agent::init_global_data();
@@ -112,13 +77,26 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) {
-    registerLoggers();
-    std::map<std::string, std::string> args; // key = arg name, value = arg value
-    if(Agent::parse_args(options, args) == JNI_ERR){
+    register_loggers();
+
+    // parse the arguments
+    std::string err_msg;
+    int res = Agent::globalData->agent_args->parse_args(options, err_msg);
+    // set the log level after arguments are parsed since log level can be specified using the argument ARG_LOG_LEVEL
+    Agent::set_log_level_and_log();
+    log(LOGGER_AGENT)->info("Agent started together with the start of the JVM");
+
+    // now print the result of parsing
+    if (res == JNI_ERR) {
+        log(LOGGER_AGENT)->error() << err_msg;
         // stop the agent in case arguments are wrong
         return JNI_ERR;
+    } else {
+        // print all parsed arguments
+        for (auto pair : Agent::getArgs()->getArgsMap()) {
+            log(LOGGER_AGENT)->info() << "Argument passed to the agent: " << pair.first << "=" << pair.second;
+        }
     }
-    log(LOGGER_AGENT)->info("Agent started together with the start of the JVM");
 
     Agent::init_global_data();
     Agent::globalData->jvm = jvm;

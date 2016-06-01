@@ -8,11 +8,16 @@
 #include <string>
 
 namespace Distrace {
+    /**
+     * This namespace contains various utilities methods
+     */
+    namespace Utilities {
 
-    class Utils {
-    public:
-        static char* stringToCharPointer(std::string input);
-    };
+        /**
+         * Convert std::string to char*
+         */
+        char *stringToCharPointer(std::string input);
+    }
 }
 
 

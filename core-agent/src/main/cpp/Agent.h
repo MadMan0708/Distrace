@@ -7,13 +7,15 @@
 #include <nnxx/socket.h>
 #include <jvmti.h>
 #include "InstrumentorAPI.h"
+#include "AgentArgs.h"
 
 #ifndef DISTRACE_AGENT_CORE_AGENTA_H
 #define DISTRACE_AGENT_CORE_AGENTA_H
 
 namespace Distrace {
-    static int INSTRUMENTOR_INSTRUMENT = 1;
-    static int INSTRUMENTOR_NO_INSTRUMENT = 2;
+    /**
+     * Structure representing globally available data in the agent
+     */
     typedef struct {
         /* JVMTI Environment */
         jvmtiEnv *jvmti;
@@ -21,26 +23,33 @@ namespace Distrace {
         jboolean vm_started;
         jboolean vm_dead;
         InstrumentorAPI *inst_api;
-        std::map<std::string, std::string> agent_args; // key = arg name, value = arg value
+        AgentArgs *agent_args; // key = arg name, value = arg value
     } GlobalAgentData;
 
+    /**
+     * This class represent main entry point to the agent.
+     */
     class Agent {
     public:
-        static GlobalAgentData* globalData;
-        static void init_global_data();
         /**
-         * Parses arguments and fill the agent_args map in the globalData
+         * Set log level and log whether the log level has been successfully set or not
          */
-        static int parse_args(std::string options, std::map<std::string, std::string> &args);
-        static const std::string ARG_INSTRUMENTOR_JAR;
-        static const std::string ARG_LOG_LEVEL;
-        static const std::string ARG_SOCKET_ADDRESS;
-        static std::string get_arg_value(std::string arg_name);
-        static bool is_arg_set(std::string arg_name);
+        static void set_log_level_and_log();
 
-    private:
-        static void set_log_level_and_warn( std::map<std::string, std::string> &args);
-        static int check_for_mandatory_args(std::map<std::string, std::string> &args);
+        /**
+         * Get the AgentArgs from global data
+         */
+        static AgentArgs *getArgs();
+
+        /**
+         * Globally available data in the whole native agent
+         */
+        static GlobalAgentData *globalData;
+
+        /**
+         * Initialize global data with default values
+         */
+        static void init_global_data();
     };
 }
 

@@ -5,10 +5,13 @@
 #include "Utils.h"
 
 
-using namespace Distrace;
-
-char* Utils::stringToCharPointer(std::string input) {
-    char *str_copy = new char[input.size()+1] ;
-    strcpy(str_copy, input.c_str());
-    return str_copy;
+namespace Distrace {
+    namespace Utilities {
+        char *stringToCharPointer(std::string input) {
+            char *str_copy = new char[input.size() + 1];
+            strcpy(str_copy, input.c_str());
+            return str_copy;
+        }
+    }
 }
+

@@ -12,23 +12,25 @@
 
 namespace Distrace{
 
-    class JavaUtils {
-    public:
+    /**
+     * This namespace contains various utilities methods to work with JVM and Java objects
+     */
+    namespace JavaUtils {
         /**
-         * Gets fully qualified class name of class
+         * Get fully qualified class name of class
          */
-        static std::string getClassName(JNIEnv* env, jclass klazz);
+        std::string getClassName(JNIEnv* env, jclass klazz);
 
         /**
-        * Gets fully qualified class name of object's class
-        */
-        static std::string getObjectClassName(JNIEnv *env, jobject object);
+         * Get fully qualified class name of object's class
+         */
+        std::string getObjectClassName(JNIEnv *env, jobject object);
 
         /**
-         * Gets fully qualified class name of provided classloader. Loader set to NULL represents bootstrap classloader.
+         * Get fully qualified class name of provided classloader. Loader set to NULL represents bootstrap classloader.
          */
-        static std::string getClassLoaderName(JNIEnv* env, jobject loader);
-    };
+        std::string getClassLoaderName(JNIEnv* env, jobject loader);
+    }
 }
 
 #endif //DISTRACE_AGENT_CORE_JAVAUTILS_H

@@ -15,12 +15,21 @@ namespace Distrace {
     class AgentUtils {
     public:
 
-        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string ok_description, std::string error_description);
-
-        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string error_description);
         /**
-        * Register capabilities we need to have in the JVM
-        */
+         * Check for error after a JVMTI method was called. If there was no error then content of ok_description
+         * is logged out
+         */
+        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string ok_description,
+                                     std::string error_description);
+
+        /**
+         * Check for error after a JVMTI method was called
+         */
+        static int check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string error_description);
+
+        /**
+         * Register capabilities we need to have in the JVM
+         */
         static int register_jvmti_capabilities(jvmtiEnv *jvmti);
 
         /**
@@ -33,24 +42,30 @@ namespace Distrace {
          */
         static int register_jvmti_events(jvmtiEnv *jvmti);
 
-        /*
+        /**
          * Creates JVMTI environment with the desired JVMTI version
          */
         static int create_JVMTI_env(JavaVM *jvm, jvmtiEnv *jvmti);
 
-        /*
-        * Creates JNI environment with the desired JNI version
-        */
+        /**
+         * Creates JNI environment with the desired JNI version
+         */
         static int JNI_AttachCurrentThread(JNIEnv *jni);
 
-        static void JNI_DettachCurrentThread(int attachStatus);
-        /*
-         * Initializes the agent
+        /**
+         * Initialize the agent
          */
         static int init_agent();
 
+        /**
+         * Dettach JNI from the current Java thread
+         */
+        static void dettach_JNI_from_current_thread(int attachStatus);
 
-        static int attachJNIToCurrentThread(JavaVM* jvm, JNIEnv* jni);
+        /**
+         * Attach JNI to the current Java thread
+         */
+        static int attach_JNI_to_current_thread(JavaVM *jvm, JNIEnv *jni);
 
     };
 }
