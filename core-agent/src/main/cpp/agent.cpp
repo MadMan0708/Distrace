@@ -6,11 +6,8 @@
 
 #include "Agent.h"
 #include "AgentUtils.h"
-#include "Logging.h"
 #include "Utils.h"
-#include "AgentArgs.h"
 #include <boost/algorithm/string.hpp>
-#include <nnxx/reqrep.h>
 
 using namespace Distrace;
 using namespace Distrace::Logging;
