@@ -47,6 +47,9 @@ namespace Distrace {
         /** Internal arguments holder where key = arg name, value = arg value */
         std::map<std::string, std::string> args;
 
+        /** Validates if argument log_level has correct format in case it is set */
+        int validate_log_level(std::string &err_msg);
+
         /**
          * Check for mandatory arguments and in case of error fills err_msg with the error message which
          * can be further logged out

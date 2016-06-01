@@ -36,7 +36,7 @@ namespace Distrace {
                 size_t q_size = 1048576; //queue size must be power of 2
                 spdlog::set_async_mode(q_size);
 
-                spdlog::set_level(spdlog::level::info); // set default log level
+                spdlog::set_level(spdlog::level::err); // set default log level
 
                 // one sink to print logs on the console
                 sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
@@ -56,12 +56,16 @@ namespace Distrace {
             return spdlog::get(logger_name);
         }
 
-        bool set_log_level(std::string log_level) {
-            if (log_levels_map.find(log_level) != log_levels_map.end()) {
+        bool is_valid_log_level(std::string log_level){
+            return log_levels_map.find(log_level) != log_levels_map.end();
+        }
+
+        void set_log_level(std::string log_level) {
+            if(is_valid_log_level(log_level)){
                 spdlog::set_level(log_levels_map.at(log_level));
-                return true;
+            }else{
+                assert(false);
             }
-            return false;
         }
 
         void register_loggers() {

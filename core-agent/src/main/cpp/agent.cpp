@@ -34,12 +34,8 @@ void Agent::set_log_level_and_log() {
     auto args = Agent::getArgs();
     if (args->is_arg_set(AgentArgs::ARG_LOG_LEVEL)) {
         auto log_level = args->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
-        if (!set_log_level(log_level)) {
-            log(LOGGER_AGENT)->error() << "Log level \"" << log_level <<
-            "\" is not recognized value, using default log level!";
-        } else {
-            log(LOGGER_AGENT)->info() << "Log level successfully set to: " << log_level;
-        }
+        set_log_level(log_level);
+        log(LOGGER_AGENT)->info() << "Log level successfully set to: " << log_level;
     }
 }
 
@@ -48,7 +44,7 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
     register_loggers();
     Agent::init_global_data();
 
-    // parse the arguments
+    // parse the arguments before we do other work since other methods depends on valid arguments
     std::string err_msg;
     int res = Agent::globalData->agent_args->parse_args(options, err_msg);
     // set the log level after arguments are parsed since log level can be specified using the argument ARG_LOG_LEVEL
@@ -77,7 +73,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) 
     register_loggers();
     Agent::init_global_data();
 
-    // parse the arguments
+    // parse the arguments before we do other work since other methods depends on valid arguments
     std::string err_msg;
     int res = Agent::globalData->agent_args->parse_args(options, err_msg);
     // set the log level after arguments are parsed since log level can be specified using the argument ARG_LOG_LEVEL

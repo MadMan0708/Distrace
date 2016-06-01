@@ -19,7 +19,7 @@ echo "Running example: $EXAMPLE"
 echo
 
 # Attach the agent library and start it together with the start of the application
-java -agentpath:"$AGENT_LIB_FILE=instrumentorJar=$INSTRUMENTOR_LIB_FILE;sock_address=ipc://$IPC_FILE" -cp $EXAMPLES_JAR_FILE $EXAMPLE
+java -agentpath:"$AGENT_LIB_FILE=log_level=error;instrumentorJar=$INSTRUMENTOR_LIB_FILE;sock_address=ipc://$IPC_FILE" -cp $EXAMPLES_JAR_FILE $EXAMPLE
 
 
 pids=$(jps -l | grep "distrace-core-instrumenter-0.0.0-all.jar" | cut -d" " -f1)

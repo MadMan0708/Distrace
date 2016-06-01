@@ -35,6 +35,20 @@ bool AgentArgs::is_arg_set(std::string arg_name) {
      return args.count(arg_name) != 0;
 }
 
+int AgentArgs::validate_log_level(std::string &err_msg){
+    if (is_arg_set(AgentArgs::ARG_LOG_LEVEL)) {
+        auto log_level = get_arg_value(AgentArgs::ARG_LOG_LEVEL);
+        if (!is_valid_log_level(log_level)) {
+            err_msg = "Log level \"" + log_level + "\" is not recognized value, using default log level!";
+            return JNI_ERR;
+        } else {
+          return JNI_OK;
+        }
+    }else{
+        return JNI_OK;
+    }
+}
+
 int AgentArgs::check_for_mandatory_args(std::string &err_msg) {
     if (args.find(ARG_INSTRUMENTOR_JAR) == args.end()) {
         err_msg = "Mandatory argument \"" + ARG_INSTRUMENTOR_JAR + "=<path>\" missing, stopping the agent!";
@@ -78,6 +92,10 @@ int AgentArgs::parse_args(std::string options, std::string &err_msg) {
     }
 
     if (check_for_mandatory_args(err_msg) == JNI_ERR) {
+        return JNI_ERR;
+    }
+
+    if(validate_log_level(err_msg) == JNI_ERR){
         return JNI_ERR;
     }
 
