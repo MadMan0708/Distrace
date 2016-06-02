@@ -42,13 +42,29 @@ namespace Distrace {
          */
         int parse_args(std::string options, std::string &err_msg);
 
-
     private:
         /** Internal arguments holder where key = arg name, value = arg value */
         std::map<std::string, std::string> args;
 
-        /** Validates if argument log_level has correct format in case it is set */
+        /**
+         * Fill missing arguments with missing values
+         */
+        void fill_missing_with_defaults();
+
+        /**
+         * Validate the arguments
+         */
+        int validate_args(std::string &err_msg);
+
+        /**
+         * Validates the log_level in case it is set
+         */
         int validate_log_level(std::string &err_msg);
+
+        /**
+         * Validate the log dir argument in case it is set
+         */
+        int validate_log_dir(std::string &err_msg);
 
         /**
          * Check for mandatory arguments and in case of error fills err_msg with the error message which

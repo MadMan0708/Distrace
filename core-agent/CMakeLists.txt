@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # load required modules
 find_package(JNI REQUIRED) # JNI libraries
-find_package(BOOST REQUIRED) #  Boost libraries
+find_package(Boost COMPONENTS system filesystem REQUIRED) #  Boost libraries
 find_package(nanomsg REQUIRED) # nanomsg library
 find_package(nanomsgxx REQUIRED) # nanomsg binding for c++
 
@@ -28,3 +28,4 @@ set(SOURCE_FILES src/main/cpp/AgentUtils.cpp src/main/cpp/AgentUtils.h src/main/
 add_library("-${PROJECT_NAME}" SHARED ${SOURCE_FILES})
 target_link_libraries("-${PROJECT_NAME}" ${NANOMSG_LIBRARY})
 target_link_libraries("-${PROJECT_NAME}" ${NANOMSGXX_LIBRARY})
+target_link_libraries("-${PROJECT_NAME}" ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})

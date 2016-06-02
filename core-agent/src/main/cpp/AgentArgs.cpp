@@ -5,6 +5,8 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 #include <jni.h>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 #include "AgentArgs.h"
 #include "Logging.h"
 
@@ -39,15 +41,43 @@ int AgentArgs::validate_log_level(std::string &err_msg){
     if (is_arg_set(AgentArgs::ARG_LOG_LEVEL)) {
         auto log_level = get_arg_value(AgentArgs::ARG_LOG_LEVEL);
         if (!is_valid_log_level(log_level)) {
-            err_msg = "Log level \"" + log_level + "\" is not recognized value, using default log level!";
+            err_msg = "Log level \"" + log_level + "\" is not recognized value!";
             return JNI_ERR;
         } else {
-          return JNI_OK;
+            return JNI_OK;
         }
     }else{
         return JNI_OK;
     }
 }
+
+int AgentArgs::validate_log_dir(std::string &err_msg){
+    if (is_arg_set(AgentArgs::ARG_LOG_DIR)) {
+        auto log_dir = get_arg_value(AgentArgs::ARG_LOG_DIR);
+
+        if(!boost::filesystem::exists(log_dir)){
+            err_msg = "Log dir \"" + log_dir + "\" is not valid directory!";
+            return JNI_ERR;
+        } else {
+            return JNI_OK;
+        }
+    }else{
+        return JNI_OK;
+    }
+}
+
+int AgentArgs::validate_args(std::string &err_msg){
+    if(validate_log_level(err_msg) == JNI_ERR){
+        return JNI_ERR;
+    }
+
+    if(validate_log_dir(err_msg) == JNI_ERR){
+        return JNI_ERR;
+    }
+
+    return JNI_OK;
+}
+
 
 int AgentArgs::check_for_mandatory_args(std::string &err_msg) {
     if (args.find(ARG_INSTRUMENTOR_JAR) == args.end()) {
@@ -62,6 +92,16 @@ int AgentArgs::check_for_mandatory_args(std::string &err_msg) {
     return JNI_OK;
 }
 
+void AgentArgs::fill_missing_with_defaults(){
+    if(!is_arg_set(ARG_LOG_LEVEL)){
+        args.insert({ARG_LOG_LEVEL, "error"});
+    }
+
+    if(!is_arg_set(ARG_LOG_DIR)){
+        boost::filesystem::path full_current_path(boost::filesystem::current_path());
+        args.insert({ARG_LOG_DIR, full_current_path.string()});
+    }
+}
 
 int AgentArgs::parse_args(std::string options, std::string &err_msg) {
     // we cannot use logging in this method since some arguments may alter the logging sybsystem
@@ -95,9 +135,11 @@ int AgentArgs::parse_args(std::string options, std::string &err_msg) {
         return JNI_ERR;
     }
 
-    if(validate_log_level(err_msg) == JNI_ERR){
+    if(validate_args(err_msg) == JNI_ERR){
         return JNI_ERR;
     }
+
+    fill_missing_with_defaults();
 
     return JNI_OK;
 }

@@ -70,12 +70,14 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) {
-    register_loggers();
     Agent::init_global_data();
 
     // parse the arguments before we do other work since other methods depends on valid arguments
     std::string err_msg;
     int res = Agent::globalData->agent_args->parse_args(options, err_msg);
+
+    register_loggers();
+
     // set the log level after arguments are parsed since log level can be specified using the argument ARG_LOG_LEVEL
     Agent::set_log_level_and_log();
     log(LOGGER_AGENT)->info("Agent started together with the start of the JVM");

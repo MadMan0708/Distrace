@@ -17,6 +17,11 @@ namespace Distrace {
          * Convert std::string to char*
          */
         char *stringToCharPointer(std::string input);
+
+        /**
+         * Create directories specified by directories path. Return true in case of success and false otherwise
+         */
+        bool create_directories(std::string dir_path);
     }
 }
 
