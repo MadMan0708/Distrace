@@ -12,14 +12,16 @@ else
 fi
 
 IPC_FILE="file.ipc"
+LOG_DIR="logs"
 
-
+# remove previous logs
+rm -rf $LOG_DIR
 echo
 echo "Running example: $EXAMPLE"
 echo
 
 # Attach the agent library and start it together with the start of the application
-java -agentpath:"$AGENT_LIB_FILE=log_level=error;instrumentorJar=$INSTRUMENTOR_LIB_FILE;sock_address=ipc://$IPC_FILE" -cp $EXAMPLES_JAR_FILE $EXAMPLE
+java -agentpath:"$AGENT_LIB_FILE=log_dir=$LOG_DIR;log_level=info;instrumentor_jar=$INSTRUMENTOR_LIB_FILE;sock_address=ipc://$IPC_FILE" -cp $EXAMPLES_JAR_FILE $EXAMPLE
 
 
 pids=$(jps -l | grep "distrace-core-instrumenter-0.0.0-all.jar" | cut -d" " -f1)
@@ -30,4 +32,3 @@ do
 done
 
 rm -rf $IPC_FILE
-#rm -rf *.log

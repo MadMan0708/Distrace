@@ -21,7 +21,8 @@ namespace Distrace {
         const std::string LOGGER_AGENT_CALLBACKS = "AgentCallbacks";
 
         /**
-         * Register the loggers. The loggers can be obtained using getLogger method
+         * Register the loggers. The loggers can be obtained using log method. This method has to be called after
+         * after the arguments has been parsed because arguments also contain arguments refining logging.
          */
         void register_loggers();
 

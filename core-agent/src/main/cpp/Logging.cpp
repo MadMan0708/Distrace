@@ -4,7 +4,11 @@
 
 #include <iomanip>
 #include <sstream>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 #include "Logging.h"
+#include "AgentArgs.h"
+#include "Agent.h"
 
 namespace Distrace {
     namespace Logging {
@@ -32,21 +36,25 @@ namespace Distrace {
         namespace {
             std::vector<spdlog::sink_ptr> create_sinks() {
                 std::vector<spdlog::sink_ptr> sinks;
+
                 // setup asynchronous logging
                 size_t q_size = 1048576; //queue size must be power of 2
                 spdlog::set_async_mode(q_size);
 
                 spdlog::set_level(spdlog::level::err); // set default log level
 
-                // one sink to print logs on the console
+                // sink to print logs on the console
                 sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
 
-                auto t = std::time(nullptr);
-                auto tm = *std::localtime(&t);
-                std::stringstream file_name_buffer;
-                file_name_buffer << "distrace_" << std::put_time(&tm, "%d_%m_%Y:%H_%M_%S") << ".log";
+                // sink to print logs to the file
+                std::string  log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
+                boost::filesystem::path full_current_path(log_dir);
+                boost::filesystem::create_directories(full_current_path);
 
-                sinks.push_back(std::make_shared<spdlog::sinks::simple_file_sink_mt>(file_name_buffer.str(), true));
+                std::string path_to_log_file = log_dir + boost::filesystem::path::preferred_separator + "distrace_agent.log";
+
+                // create shared log using both sinks created above
+                sinks.push_back(std::make_shared<spdlog::sinks::simple_file_sink_mt>(path_to_log_file, true));
                 return sinks;
             }
         } // anonymous namespace to hide functions in it
@@ -69,6 +77,7 @@ namespace Distrace {
             }
         }
 
+
         void register_loggers() {
             auto sinks = create_sinks();
 
@@ -76,6 +85,11 @@ namespace Distrace {
                 auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
                 spdlog::register_logger(logger);
             }
+
+            auto log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
+            set_log_level(log_level);
+            log(LOGGER_AGENT)->info() << "Log level successfully set to: " << log_level;
+
         }
     }
 }

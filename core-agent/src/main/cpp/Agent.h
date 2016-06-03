@@ -31,10 +31,6 @@ namespace Distrace {
      */
     class Agent {
     public:
-        /**
-         * Set log level and log whether the log level has been successfully set or not
-         */
-        static void set_log_level_and_log();
 
         /**
          * Get the AgentArgs from global data

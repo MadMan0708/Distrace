@@ -14,7 +14,7 @@ using namespace Distrace;
 using namespace Distrace::Logging;
 
 // instantiate argument names
-const std::string AgentArgs::ARG_INSTRUMENTOR_JAR = "instrumentorJar";
+const std::string AgentArgs::ARG_INSTRUMENTOR_JAR = "instrumentor_jar";
 const std::string AgentArgs::ARG_SOCKET_ADDRESS = "sock_address";
 
 const std::string AgentArgs::ARG_LOG_LEVEL = "log_level";
@@ -51,27 +51,8 @@ int AgentArgs::validate_log_level(std::string &err_msg){
     }
 }
 
-int AgentArgs::validate_log_dir(std::string &err_msg){
-    if (is_arg_set(AgentArgs::ARG_LOG_DIR)) {
-        auto log_dir = get_arg_value(AgentArgs::ARG_LOG_DIR);
-
-        if(!boost::filesystem::exists(log_dir)){
-            err_msg = "Log dir \"" + log_dir + "\" is not valid directory!";
-            return JNI_ERR;
-        } else {
-            return JNI_OK;
-        }
-    }else{
-        return JNI_OK;
-    }
-}
-
 int AgentArgs::validate_args(std::string &err_msg){
     if(validate_log_level(err_msg) == JNI_ERR){
-        return JNI_ERR;
-    }
-
-    if(validate_log_dir(err_msg) == JNI_ERR){
         return JNI_ERR;
     }
 
