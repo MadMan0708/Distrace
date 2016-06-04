@@ -129,7 +129,9 @@ int InstrumentorAPI::init(std::string path_to_instrumentor_jar) {
 
     // fork instrumentor JVM
     const std::string addr = Agent::getArgs()->get_arg_value(AgentArgs::ARG_SOCKET_ADDRESS);
-    int result = system(stringToCharPointer("java -jar " + path_to_instrumentor_jar + " " + addr + " & "));
+    const std::string log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
+    const std::string log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
+    int result = system(stringToCharPointer("java -jar " + path_to_instrumentor_jar + " " + addr + " " + log_level + " " + log_dir + " & "));
     if (result < 0) {
         log(LOGGER_INSTRUMENTOR_API)->error() << "Instrumentor JVM couldn't be forked because of error:" <<
         strerror(errno);

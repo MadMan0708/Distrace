@@ -13,16 +13,15 @@
 namespace Distrace {
     namespace Logging {
 
-        // Map containing mapping from string to log level
+        // Map containing mapping from string to log level. This list of log levels corresponds to log leves
+        // used in the instrumentor ( log4j )
         std::map<std::string, spdlog::level::level_enum> log_levels_map = {
                 {"trace",    spdlog::level::level_enum::trace},
                 {"debug",    spdlog::level::level_enum::debug},
                 {"info",     spdlog::level::level_enum::info},
                 {"warn",     spdlog::level::level_enum::warn},
                 {"error",    spdlog::level::level_enum::err},
-                {"critical", spdlog::level::level_enum::critical},
-                {"alert",    spdlog::level::level_enum::alert},
-                {"emerg",    spdlog::level::level_enum::emerg},
+                {"fatal",    spdlog::level::level_enum::critical},
                 {"off",      spdlog::level::level_enum::off}
         };
 

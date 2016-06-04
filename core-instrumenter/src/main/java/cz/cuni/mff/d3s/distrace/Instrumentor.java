@@ -3,16 +3,20 @@ package cz.cuni.mff.d3s.distrace;
 import cz.cuni.mff.d3s.distrace.transformers.SimpleTransformer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.ConfigurationFactory;
 
 class Instrumentor {
-    private static final Logger log = LogManager.getLogger(Instrumentor.class);
+    private static Logger log;
 
     public static void main(String[] args){
-        if(args.length != 1){
-            log.error("Missing argument - socket address");
-            System.exit(-1);
-        }
+        assert args.length == 3; // we always start Instrumentor from native agent and 3 parameters should be
+        // always passed to it - socket address, log level and log dir
+
         String socketAddress = args[0];
+        String logLevel = args[1];
+        String logDir = args[2];
+        ConfigurationFactory.setConfigurationFactory(new InstrumentorConfFactory(logLevel, logDir));
+        log = LogManager.getLogger(Instrumentor.class);
         log.info("Running forked JVM");
 
         TransformersManager manager = new TransformersManager();
