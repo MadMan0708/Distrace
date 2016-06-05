@@ -1,4 +1,12 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
 description = "Example applications used for testing of the Distrace platform"
+
+
+dependencies {
+    // we need to pack all the changes to basic Instrumentor to one big jar
+    compile project(path: ':distrace-core-instrumenter', configuration: 'shadow')
+}
 
 // Setup test environment
 test {
@@ -7,4 +15,9 @@ test {
 
     // For a new JVM for each test class
     forkEvery = 1
+}
+
+
+artifacts {
+    archives shadowJar
 }

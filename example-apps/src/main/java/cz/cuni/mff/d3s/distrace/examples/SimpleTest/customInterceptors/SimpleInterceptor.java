@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.interceptors;
+package cz.cuni.mff.d3s.distrace.examples.SimpleTest.customInterceptors;
 
 public class SimpleInterceptor {
     public static void print(){

@@ -1,7 +1,7 @@
-package cz.cuni.mff.d3s.distrace.examples;
+package cz.cuni.mff.d3s.distrace.examples.SimpleTest;
 
 
-public class Test {
+public class Printer {
 
     public void print(){
         System.out.println("Original message");

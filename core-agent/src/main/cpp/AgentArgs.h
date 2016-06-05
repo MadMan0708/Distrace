@@ -18,6 +18,7 @@ namespace Distrace {
     public:
         static const std::string ARG_INSTRUMENTOR_JAR;
         static const std::string ARG_SOCKET_ADDRESS;
+        static const std::string ARG_INSTRUMENTOR_MAIN_CLASS;
         static const std::string ARG_LOG_LEVEL;
         static const std::string ARG_LOG_DIR;
 
@@ -60,6 +61,11 @@ namespace Distrace {
          * Validates the log_level in case it is set
          */
         int validate_log_level(std::string &err_msg);
+
+        /**
+         * Check for single mandatory argument
+         */
+        int check_for_mandatory_arg(std::string arg_name, std::string &err_msg);
 
         /**
          * Check for mandatory arguments and in case of error fills err_msg with the error message which

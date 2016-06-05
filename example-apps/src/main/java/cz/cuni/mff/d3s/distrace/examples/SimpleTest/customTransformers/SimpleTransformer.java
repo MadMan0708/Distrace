@@ -1,6 +1,7 @@
-package cz.cuni.mff.d3s.distrace.transformers;
+package cz.cuni.mff.d3s.distrace.examples.SimpleTest.customTransformers;
 
-import cz.cuni.mff.d3s.distrace.interceptors.SimpleInterceptor;
+
+import cz.cuni.mff.d3s.distrace.examples.SimpleTest.customInterceptors.SimpleInterceptor;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;

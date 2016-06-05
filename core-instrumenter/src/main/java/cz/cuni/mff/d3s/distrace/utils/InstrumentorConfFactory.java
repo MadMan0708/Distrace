@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace;
+package cz.cuni.mff.d3s.distrace.utils;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;

@@ -15,6 +15,7 @@ using namespace Distrace::Logging;
 
 // instantiate argument names
 const std::string AgentArgs::ARG_INSTRUMENTOR_JAR = "instrumentor_jar";
+const std::string AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS = "instrumentor_main_class";
 const std::string AgentArgs::ARG_SOCKET_ADDRESS = "sock_address";
 
 const std::string AgentArgs::ARG_LOG_LEVEL = "log_level";
@@ -59,17 +60,27 @@ int AgentArgs::validate_args(std::string &err_msg){
     return JNI_OK;
 }
 
+int AgentArgs::check_for_mandatory_arg(std::string arg_name, std::string &err_msg){
+    if (args.find(arg_name) == args.end()) {
+        err_msg = "Mandatory argument \"" + arg_name + "\" is missing, stopping the agent!";
+        return JNI_ERR;
+    }
+    return JNI_OK;
+}
 
 int AgentArgs::check_for_mandatory_args(std::string &err_msg) {
-    if (args.find(ARG_INSTRUMENTOR_JAR) == args.end()) {
-        err_msg = "Mandatory argument \"" + ARG_INSTRUMENTOR_JAR + "=<path>\" missing, stopping the agent!";
+    if(check_for_mandatory_arg(ARG_INSTRUMENTOR_JAR, err_msg) == JNI_ERR){
         return JNI_ERR;
     }
 
-    if (args.find(ARG_SOCKET_ADDRESS) == args.end()) {
-        err_msg = "Mandatory argument \"" + ARG_SOCKET_ADDRESS + "=<path>\" missing, stopping the agent!";
+    if(check_for_mandatory_arg(ARG_SOCKET_ADDRESS, err_msg) == JNI_ERR){
         return JNI_ERR;
     }
+
+    if(check_for_mandatory_arg(ARG_INSTRUMENTOR_MAIN_CLASS, err_msg) == JNI_ERR){
+        return JNI_ERR;
+    }
+
     return JNI_OK;
 }
 

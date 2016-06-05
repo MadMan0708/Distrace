@@ -173,7 +173,7 @@ int AgentUtils::init_agent() {
         return JNI_ERR;
     }
 
-    if (InstrumentorAPI::init(Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR)) == JNI_ERR) {
+    if (InstrumentorAPI::init() == JNI_ERR) {
         // stop the agent in case Instrumentor JVM could not be started or connected to
         return JNI_ERR;
     }

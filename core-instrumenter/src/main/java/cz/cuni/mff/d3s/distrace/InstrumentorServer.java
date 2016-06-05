@@ -22,18 +22,16 @@ public class InstrumentorServer {
     private ByteClassLoader cl = new ByteClassLoader();
     private PairSocket sock;
     private String sockAddr;
-    private TransformersManager transformersManager;
 
-    public InstrumentorServer(String sockAddr, TransformersManager transformersManager) {
+    public InstrumentorServer(String sockAddr) {
         this.sockAddr = sockAddr;
-        this.transformersManager = transformersManager;
     }
 
     public void handleInstrument() {
         try {
             byte[] name = sock.recvBytes();
             String nameString = new String(name, StandardCharsets.UTF_8);
-            if (transformersManager.hasClass(nameString.replace("/", "."))) {
+            if (TransformersManager.hasClass(nameString.replace("/", "."))) {
                 log.info("Handling instrumentation of class:  " + nameString.replace("/", "."));
                 sock.send("ack_req_int_yes");
 
@@ -117,7 +115,7 @@ public class InstrumentorServer {
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .type(ElementMatchers.named(nameAsInJava))
-                .transform(transformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(cl, className, null, null, bytecode);
+                .transform(TransformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(cl, className, null, null, bytecode);
     }
 
 }

@@ -40,7 +40,7 @@ namespace Distrace {
         /**
          * This method initializes the instrumentor JAR and return JNI_OK in case of success and JNI_ERR otherwise
          */
-        static int init(std::string path_to_instrumentor_jar);
+        static int init();
 
         /**
          * Inform the instrumentor JVM that the monitored JVM has been stopped

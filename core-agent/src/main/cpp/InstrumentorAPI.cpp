@@ -121,17 +121,21 @@ void InstrumentorAPI::stop() {
     send_req_type(REQ_TYPE_STOP);
 }
 
-int InstrumentorAPI::init(std::string path_to_instrumentor_jar) {
+int InstrumentorAPI::init() {
     if (!system(NULL)) {
         log(LOGGER_INSTRUMENTOR_API)->error() << "Can't fork Instrumentor JVM, shell not available!";
         return JNI_ERR;
     }
 
     // fork instrumentor JVM
-    const std::string addr = Agent::getArgs()->get_arg_value(AgentArgs::ARG_SOCKET_ADDRESS);
+    const std::string path_to_instrumentor_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR);
+    const std::string instrumentor_main_class = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS);
+    const std::string socket_addr = Agent::getArgs()->get_arg_value(AgentArgs::ARG_SOCKET_ADDRESS);
     const std::string log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
     const std::string log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
-    int result = system(stringToCharPointer("java -jar " + path_to_instrumentor_jar + " " + addr + " " + log_level + " " + log_dir + " & "));
+    std::string launch_command = "java -cp " + path_to_instrumentor_jar + " " + instrumentor_main_class + " " + socket_addr + " " + log_level + " " + log_dir + " & ";
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Starting Instrumentor JVM with the command: " << launch_command;
+    int result = system(stringToCharPointer(launch_command));
     if (result < 0) {
         log(LOGGER_INSTRUMENTOR_API)->error() << "Instrumentor JVM couldn't be forked because of error:" <<
         strerror(errno);
@@ -140,7 +144,7 @@ int InstrumentorAPI::init(std::string path_to_instrumentor_jar) {
     // create socket which is used to connect to the Instrumentor JVM
     nnxx::socket socket{nnxx::SP, nnxx::PAIR};
 
-    int endpoint = socket.connect(addr);
+    int endpoint = socket.connect(socket_addr);
     if (endpoint < 0) {
         log(LOGGER_INSTRUMENTOR_API)->error() << "Returned error code " << errno <<
         ". Connection to the instrumentor JVM can't be established! Is instrumentor JVM running ?";

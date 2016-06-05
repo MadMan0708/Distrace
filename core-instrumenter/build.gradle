@@ -33,10 +33,3 @@ shadowJar{
 artifacts {
     archives shadowJar
 }
-
-jar {
-    manifest {
-        attributes 'Manifest-Version': '1.0',
-                'Main-Class': 'cz.cuni.mff.d3s.distrace.Instrumentor'
-    }
-}
