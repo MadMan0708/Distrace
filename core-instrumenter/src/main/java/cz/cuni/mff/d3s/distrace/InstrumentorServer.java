@@ -70,7 +70,8 @@ public class InstrumentorServer {
                 sock.send("ack_req_msg"); // confirm receiving of the message
                 if (req == REQ_TYPE_STOP) {
                     log.info("Instrumentor JVM is being stopped!");
-                    // exit the loop which results with stopping the Instrumentor JAR
+                    // finish all the work which needs to be done and then stop the Instrumentor
+                    
                     break;
                 }
                 handleRequest(req);
