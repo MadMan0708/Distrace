@@ -8,6 +8,8 @@
 #include <nnxx/message.h>
 #include <jni.h>
 #include <nnxx/pair.h>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include "InstrumentorAPI.h"
 #include "Utils.h"
 #include "Agent.h"
@@ -117,6 +119,15 @@ int InstrumentorAPI::instrument(const byte *input_data, int input_data_len, byte
 }
 
 void InstrumentorAPI::stop() {
+    // in case of IPC communication delete the file used for the communication
+    std::string connection_str = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR);
+    if((boost::starts_with(connection_str,"ipc://"))){
+        std::string file = connection_str.substr(6); // remove ipc://, the remaining part represents file ( when running
+        // on linux)
+        boost::filesystem::path file_to_delete(file);
+        boost::filesystem::remove(file_to_delete);
+    }
+
     log(LOGGER_INSTRUMENTOR_API)->info() << "Stopping the Instrumentor JVM";
     send_req_type(REQ_TYPE_STOP);
 }
@@ -130,21 +141,26 @@ int InstrumentorAPI::init() {
     // fork instrumentor JVM
     const std::string path_to_instrumentor_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR);
     const std::string instrumentor_main_class = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS);
-    const std::string socket_addr = Agent::getArgs()->get_arg_value(AgentArgs::ARG_SOCKET_ADDRESS);
+    const std::string connection_str = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR);
     const std::string log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
     const std::string log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
-    std::string launch_command = "java -cp " + path_to_instrumentor_jar + " " + instrumentor_main_class + " " + socket_addr + " " + log_level + " " + log_dir + " & ";
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Starting Instrumentor JVM with the command: " << launch_command;
-    int result = system(stringToCharPointer(launch_command));
-    if (result < 0) {
-        log(LOGGER_INSTRUMENTOR_API)->error() << "Instrumentor JVM couldn't be forked because of error:" <<
-        strerror(errno);
-        return JNI_ERR;
+    if(boost::starts_with(connection_str,"ipc://")) {
+        // launch Instrumentor JVM only in case of ipc, when tcp is set, the instrumentor JVM should be already running.
+        std::string launch_command =
+                "java -cp " + path_to_instrumentor_jar + " " + instrumentor_main_class + " " + connection_str + " " +
+                log_level + " " + log_dir + " & ";
+        log(LOGGER_INSTRUMENTOR_API)->info() << "Starting Instrumentor JVM with the command: " << launch_command;
+        int result = system(stringToCharPointer(launch_command));
+        if (result < 0) {
+            log(LOGGER_INSTRUMENTOR_API)->error() << "Instrumentor JVM couldn't be forked because of error:" <<
+            strerror(errno);
+            return JNI_ERR;
+        }
     }
     // create socket which is used to connect to the Instrumentor JVM
     nnxx::socket socket{nnxx::SP, nnxx::PAIR};
 
-    int endpoint = socket.connect(socket_addr);
+    int endpoint = socket.connect(connection_str);
     if (endpoint < 0) {
         log(LOGGER_INSTRUMENTOR_API)->error() << "Returned error code " << errno <<
         ". Connection to the instrumentor JVM can't be established! Is instrumentor JVM running ?";

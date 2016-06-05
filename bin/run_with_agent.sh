@@ -25,9 +25,7 @@ INSTRUMENTOR_LIB_FILE=$EXAMPLES_JAR_FILE
 INSTRUMENTOR_MAIN_CLASS="$EXAMPLE_PACKAGE.Starter"
 LOG_DIR="logs"
 LOG_LEVEL="info"
-
-IPC_FILE="file.ipc"
-SOCK_ADDR="ipc://$IPC_FILE"
+COMM_TYPE="ipc"
 
 echo
 echo "Running example: $EXAMPLE_CLASS"
@@ -38,7 +36,7 @@ echo "Using following configuration:"
 echo
 echo "Instrumentor JAR file:      $INSTRUMENTOR_LIB_FILE"
 echo "Instrumentor main class:    $INSTRUMENTOR_MAIN_CLASS"
-echo "Socket address:              $SOCK_ADDR"
+echo "Socket address:             $COMM_TYPE"
 echo "Log dir:                    $LOG_DIR"
 echo "Log level:                  $LOG_LEVEL"
 echo
@@ -47,7 +45,7 @@ echo
 rm -rf $LOG_DIR
 
 # Attach the agent library and start it together with the start of the application
-java -agentpath:"$AGENT_LIB_FILE=log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_jar=$INSTRUMENTOR_LIB_FILE;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;sock_address=$SOCK_ADDR" -cp $EXAMPLES_JAR_FILE $EXAMPLE_CLASS
+java -agentpath:"$AGENT_LIB_FILE=log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_jar=$INSTRUMENTOR_LIB_FILE;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;comm_type=$COMM_TYPE" -cp $EXAMPLES_JAR_FILE $EXAMPLE_CLASS
 
 # Stop running instrumentor JVM in case of some kind of failure
 pids=$(jps -l | grep "distrace-example-apps-0.0.0-all.jar" | cut -d" " -f1)
@@ -56,6 +54,3 @@ for pid in $pids
 do
  kill -9 $pid
 done
-
-# remove file used for IPC communication
-rm -rf $IPC_FILE

@@ -17,7 +17,7 @@ namespace Distrace {
 
     public:
         static const std::string ARG_INSTRUMENTOR_JAR;
-        static const std::string ARG_SOCKET_ADDRESS;
+        static const std::string ARG_CONNECTION_STR;
         static const std::string ARG_INSTRUMENTOR_MAIN_CLASS;
         static const std::string ARG_LOG_LEVEL;
         static const std::string ARG_LOG_DIR;
@@ -58,7 +58,12 @@ namespace Distrace {
         int validate_args(std::string &err_msg);
 
         /**
-         * Validates the log_level in case it is set
+         * Validates conenction_str argument in case it is set
+         */
+        int validate_connection_str(std::string &err_msg);
+
+        /**
+         * Validates log_level argument in case it is set
          */
         int validate_log_level(std::string &err_msg);
 
@@ -66,6 +71,11 @@ namespace Distrace {
          * Check for single mandatory argument
          */
         int check_for_mandatory_arg(std::string arg_name, std::string &err_msg);
+
+        /**
+         * Replace Distrace connection string in arguments by nanomsg address in the arguments
+         */
+        void connection_str_to_nanomsg_addr();
 
         /**
          * Check for mandatory arguments and in case of error fills err_msg with the error message which

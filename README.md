@@ -49,13 +49,28 @@ java -agentpath:PATH_TO_AGENT_LIB_FILE=param1=value1;param2=value2 -jar javaProg
 
 There are 5 arguments at the moment which can be set:
 
-* log_dir - optional. It allows us to specify directory where logs are generated for both Instrumentor and native agent.
-* log_level - optional.  It allows us to specify logging level for both Instrumentor and native agent. The value can be one
+* log_dir - optional with directory from where the application has been started as default value. It allows us to specify directory
+ where logs are generated for both Instrumentor and native agent.
+* log_level - optional with "error" as default value.  It allows us to specify logging level for both Instrumentor and native agent. The value can be one
 of these: trace, debug, info, warn, error, fatal, off.
-* sock_address - mandatory. This argument is used to specify type of communication used between Instrumentor and native agent.
+* connection_str - optional with "ipc" as default value. This argument is used to specify type of communication used between Instrumentor and native agent.
 * instrumentor_jar - mandatory. This argument points to Instrumentor JAR. It is needed since Instrumentor is started from
 native agent.
 * instrumentor_main_class - mandatory. This argument has to contain class name from where the Instrumentor is started.
+
+### Setting communication type
+Currently available types of communication types are:
+
+* IPC - transport between processes on a single machine. To use IPC, `connection_str` argument has to be set to as
+`connection_str=ipc`. 
+Distrace automatically creates the underlying communication mechanism. In this case the Instrumentor is automatically
+started by the native agent when the monitored application is started.
+* TCP - network transport via TCP. 
+To use TCP, `connection_str` argument has to be set to as `connection_str=IP:port`, where IP and port
+specifies node where the Instrumentor JVM is running. In this case is the native agent expects the Instrumentor to be
+already running on the specified node.
+
+For more information about the communication types please visit [http://nanomsg.org](http://nanomsg.org)
 
 
 ## How to start examples
