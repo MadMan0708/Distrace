@@ -1,25 +1,25 @@
 package cz.cuni.mff.d3s.distrace;
 
-import cz.cuni.mff.d3s.distrace.utils.ByteClassLoader;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatchers;
-
-import java.lang.instrument.IllegalClassFormatException;
-import java.nio.charset.StandardCharsets;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.lang.instrument.IllegalClassFormatException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 
 public class InstrumentorServer {
     private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
 
     public static final byte REQ_TYPE_INSTRUMENT = 0;
     public static final byte REQ_TYPE_STOP = 1;
-    private ByteClassLoader cl = new ByteClassLoader();
+    private URLClassLoader cl = new URLClassLoader(new URL[]{});
     private PairSocket sock;
     private String sockAddr;
 
