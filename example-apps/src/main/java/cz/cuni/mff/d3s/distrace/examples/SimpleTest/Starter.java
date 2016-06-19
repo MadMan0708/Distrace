@@ -5,7 +5,7 @@ import cz.cuni.mff.d3s.distrace.TransformersManager;
 import cz.cuni.mff.d3s.distrace.examples.SimpleTest.customTransformers.SimpleTransformer;
 
 /**
- * Started of instrumentor
+ * Starter of instrumentor
  */
 public class Starter {
     public static void main(String[] args){
