@@ -14,7 +14,7 @@ import java.io.File;
 import java.net.URI;
 
 /**
- * Created by kuba on 03/06/16.
+ * This class is used to create logger configuration at runtime
  */
 public class InstrumentorConfFactory extends ConfigurationFactory {
 
