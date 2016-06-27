@@ -1,19 +1,36 @@
 package cz.cuni.mff.d3s.distrace.api;
 
+import oracle.jrockit.jfr.StringConstantPool;
+
+import java.util.UUID;
+
 /**
- * Created by kuba on 14/03/16.
+ * Main API for creating spans and traces
  */
 public class API {
-    public long initSpan(long traceId){
+    /**
+     * Initializes a Span. Span represents a small unit of work
+     */
+    public long openSpan(String traceId){
         return 7777;
     }
 
-    public void finishSpan(long traceId, long spanId){
+    /**
+     *
+     * @param traceId
+     * @param spanId
+     */
+    public void closeSpan(long traceId, long spanId){
     }
 
-    public long initTrace(){
-        return 7777;
+    /**
+     * Initialize new trace. This method create trace context in the thread which called this method
+     * @return ID of created trace
+     */
+    public static String initTrace(){
+        return UUID.randomUUID().toString();
     }
+
 
     public int  finishTrace(long traceId){
         return 7777;
