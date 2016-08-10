@@ -6,6 +6,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -93,23 +94,24 @@ public class InstrumentorServer {
         String nameAsInJava = className.replace("/", ".");
         return new AgentBuilder.Default()
                 .with(new AgentBuilder.Listener() {
+
                     @Override
-                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, DynamicType dynamicType) {
+                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader,JavaModule module, DynamicType dynamicType) {
                         log.info("Transformed: " + typeDescription + " " + dynamicType);
                     }
 
                     @Override
-                    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader) {
+                    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
                         log.info("Ignored: " + typeDescription);
                     }
 
                     @Override
-                    public void onError(String typeName, ClassLoader classLoader, Throwable throwable) {
+                    public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
                         log.info("Error: " + typeName + " " + throwable);
                     }
 
                     @Override
-                    public void onComplete(String typeName, ClassLoader classLoader) {
+                    public void onComplete(String typeName, ClassLoader classLoader, JavaModule module) {
                         log.info("Complete: " + typeName + " " + classLoader);
                     }
                 })
