@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.examples.SimpleTest;
+package cz.cuni.mff.d3s.distrace.examples;
 
 
 public class Printer {

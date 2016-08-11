@@ -1,7 +1,7 @@
-package cz.cuni.mff.d3s.distrace.examples.SimpleTest;
+package cz.cuni.mff.d3s.distrace.examples;
 
 /**
- * Super Simple Example. The method print on Printer is expected to be instrumented
+ * Super simple Example. The method print on Printer is expected to be instrumented
  * by adding new print statement.
  */
 public class SimpleTest {

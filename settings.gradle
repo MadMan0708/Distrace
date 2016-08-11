@@ -3,8 +3,24 @@ rootProject.name = 'distrace'
 include 'core-agent'
 include 'core-agent-attacher'
 include 'core-instrumenter'
-include 'agent-h2o'
-include 'example-apps'
+
+
+def includeAllTestProjects(File startPath) {
+    startPath.eachDirRecurse {
+        dir ->
+            dir.eachFileMatch({ it == 'build.gradle'},{
+                def projectName = "examples-" + dir.parentFile.name + "-" + dir.name
+                include projectName
+
+                project(":"+projectName).projectDir = file("examples"+File.separator+dir.parentFile.name+File.separator+dir.name)
+            })
+    }
+}
+
+
+// include all test projects in the examples directory
+// that includes agent and application for each example
+includeAllTestProjects(new File(rootDir, "examples"))
 
 // Prefix all projects with project name
-rootProject.children.each { it.name = rootProject.name + "-" + it.name }
+rootProject.children.each { it.name = rootProject.name + "-" + it.name}

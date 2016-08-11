@@ -21,13 +21,14 @@ buildscript {
 ext {
     javaProjects = [
             project(':distrace-core-instrumenter'),
-            project(':distrace-core-agent-attacher'),
-            project(':distrace-agent-h2o'),
-            project(':distrace-example-apps')
+            project(':distrace-core-agent-attacher')
     ]
+    javaProjects.addAll(rootProject.childProjects.values().findAll { it.name.startsWith("distrace-examples") })
+
     cppProjects = [
             project(':distrace-core-agent')
     ]
+
 }
 //
 // For all projects (this and all subprojects) specify common properties and tasks
@@ -57,9 +58,7 @@ configure(subprojects) { project ->
         // CMake plugin
         apply plugin: "fr.echoes.gradle.cpp"
     }
-
 }
-
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.11'

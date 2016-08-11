@@ -96,7 +96,7 @@ public class InstrumentorServer {
                 .with(new AgentBuilder.Listener() {
 
                     @Override
-                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader,JavaModule module, DynamicType dynamicType) {
+                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, DynamicType dynamicType) {
                         log.info("Transformed: " + typeDescription + " " + dynamicType);
                     }
 

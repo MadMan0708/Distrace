@@ -1,8 +1,7 @@
-package cz.cuni.mff.d3s.distrace.examples.SimpleTest.customTransformers;
+package cz.cuni.mff.d3s.distrace.examples.transformers;
 
 
-import cz.cuni.mff.d3s.distrace.api.TraceContext;
-import cz.cuni.mff.d3s.distrace.examples.SimpleTest.customInterceptors.SimpleInterceptor;
+import cz.cuni.mff.d3s.distrace.examples.interceptors.SimpleInterceptor;
 import cz.cuni.mff.d3s.distrace.interceptors.FieldGetterSetter;
 import cz.cuni.mff.d3s.distrace.utils.CodeUtils;
 import net.bytebuddy.agent.builder.AgentBuilder;

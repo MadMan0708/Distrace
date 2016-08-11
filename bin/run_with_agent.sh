@@ -6,10 +6,8 @@ source $TOPDIR/bin/prepare-env.sh
 # main class with the name <example_name> which is main starting point for the example and class named "Starter"
 # which starts the Instrumentor for the given example
 
-PREFIX="cz.cuni.mff.d3s.distrace.examples"
-
 # Get the example name
-DEFAULT_EXAMPLE_NAME="SimpleTest"
+DEFAULT_EXAMPLE_NAME="Simple"
 if [ $1 ]; then
   EXAMPLE_NAME=$1
   shift
@@ -17,24 +15,28 @@ else
   EXAMPLE_NAME=$DEFAULT_EXAMPLE_NAME
 fi
 
-EXAMPLE_PACKAGE=$PREFIX.$EXAMPLE_NAME
-EXAMPLE_CLASS=$EXAMPLE_PACKAGE.$EXAMPLE_NAME
+EXAMPLE_AGENT_JAR_NAME="distrace-examples-$EXAMPLE_NAME-agent-$VERSION-all.jar"
+EXAMPLE_AGENT_JAR_PATH="$TOPDIR/examples/$EXAMPLE_NAME/agent/build/libs/$EXAMPLE_AGENT_JAR_NAME"
+
+EXAMPLE_APP_JAR_NAME="distrace-examples-$EXAMPLE_NAME-app-$VERSION.jar"
+EXAMPLE_APP_JAR_PATH="$TOPDIR/examples/$EXAMPLE_NAME/app/build/libs/$EXAMPLE_APP_JAR_NAME"
 
 
-INSTRUMENTOR_LIB_FILE=$EXAMPLES_JAR_FILE
-INSTRUMENTOR_MAIN_CLASS="$EXAMPLE_PACKAGE.Starter"
+# For testing purposes we always expect main class to be this one
+INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
 LOG_LEVEL="info"
 COMM_TYPE="ipc"
 
 echo
-echo "Running example: $EXAMPLE_CLASS"
+echo "Running example: $EXAMPLE_NAME"
 echo
 
 echo
 echo "Using following configuration:"
 echo
-echo "Instrumentor JAR file:      $INSTRUMENTOR_LIB_FILE"
+echo "Example JAR file:           $EXAMPLE_APP_JAR_PATH"
+echo "Instrumentor JAR file:      $EXAMPLE_AGENT_JAR_PATH"
 echo "Instrumentor main class:    $INSTRUMENTOR_MAIN_CLASS"
 echo "Socket address:             $COMM_TYPE"
 echo "Log dir:                    $LOG_DIR"
@@ -45,7 +47,7 @@ echo
 rm -rf $LOG_DIR
 
 # Attach the agent library and start it together with the start of the application
-java -agentpath:"$AGENT_LIB_FILE=log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_jar=$INSTRUMENTOR_LIB_FILE;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;comm_type=$COMM_TYPE" -cp $EXAMPLES_JAR_FILE $EXAMPLE_CLASS
+java -agentpath:"$NATIVE_AGENT_LIB_PATH=log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_jar=$EXAMPLE_AGENT_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;comm_type=$COMM_TYPE" -jar $EXAMPLE_APP_JAR_PATH
 
 # Stop running instrumentor JVM in case of some kind of failure
 pids=$(jps -l | grep "distrace-example-apps-0.0.0-all.jar" | cut -d" " -f1)
@@ -54,3 +56,6 @@ for pid in $pids
 do
  kill -9 $pid
 done
+
+
+

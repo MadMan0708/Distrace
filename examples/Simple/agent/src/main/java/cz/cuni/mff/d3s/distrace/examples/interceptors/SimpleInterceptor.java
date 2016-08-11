@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.examples.SimpleTest.customInterceptors;
+package cz.cuni.mff.d3s.distrace.examples.interceptors;
 
 import cz.cuni.mff.d3s.distrace.interceptors.FieldGetterSetter;
 import net.bytebuddy.implementation.bind.annotation.FieldProxy;
