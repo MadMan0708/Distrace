@@ -107,7 +107,7 @@ public class InstrumentorServer {
 
                     @Override
                     public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
-                        log.info("Error: " + typeName + " " + throwable);
+                        log.error("Error: " + typeName + " " + throwable);
                     }
 
                     @Override
