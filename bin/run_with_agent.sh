@@ -7,7 +7,7 @@ source $TOPDIR/bin/prepare-env.sh
 # which starts the Instrumentor for the given example
 
 # Get the example name
-DEFAULT_EXAMPLE_NAME="Simple"
+DEFAULT_EXAMPLE_NAME="SingleJVMThreadTest"
 if [ $1 ]; then
   EXAMPLE_NAME=$1
   shift
