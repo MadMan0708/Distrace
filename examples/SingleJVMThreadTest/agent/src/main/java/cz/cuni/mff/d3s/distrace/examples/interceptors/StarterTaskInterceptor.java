@@ -10,11 +10,11 @@ public class StarterTaskInterceptor {
 
     public static void start(@This Thread thread){
         CodeUtils.injectTraceContextOn(thread);
-        System.out.println("Method start starter task" + thread.getId() + " was called");
+        System.out.println("Method start on starter task was called. Thread id: " + thread.getId());
     }
 
     public static void run(){
-        System.out.println("Method run on starter task" + Thread.currentThread().getId() + " was called. Current trace id is "+ CodeUtils.getTraceContext().getTraceId());
+        System.out.println("Method run on starter task was called. Thread id: " + Thread.currentThread().getId() + ", trace id: "+ CodeUtils.getTraceContext().getTraceId());
 
     }
 }

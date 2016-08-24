@@ -21,17 +21,22 @@ public class Instrumentor {
      * @param args command line arguments of the instrumentor
      */
     public static void start(String[] args){
-        assert args.length == 3; // we always start Instrumentor from native agent and 3 parameters should be
-        // always passed to it - socket address, log level and log dir
+        assert args.length == 4; // we always start Instrumentor from native agent and 4 parameters should be
+        // always passed to it
+        // - socket address
+        // - log level
+        // - log dir
+        // - monitored application classpath. It is needed in order to resolve dependencies on class being instrumented
 
         String socketAddress = args[0];
         String logLevel = args[1];
         String logDir = args[2];
+        String classPath = args[3];
         ConfigurationFactory.setConfigurationFactory(new InstrumentorConfFactory(logLevel, logDir));
         log = LogManager.getLogger(Instrumentor.class);
         log.info("Running forked JVM");
 
-        InstrumentorServer server = new InstrumentorServer(socketAddress);
+        InstrumentorServer server = new InstrumentorServer(socketAddress, classPath);
         server.start();
     }
 

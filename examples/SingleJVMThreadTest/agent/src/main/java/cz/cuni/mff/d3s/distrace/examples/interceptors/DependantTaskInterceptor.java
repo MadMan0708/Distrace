@@ -10,12 +10,12 @@ public class DependantTaskInterceptor {
 
     public static void start(@This Thread thread){
         CodeUtils.propagateTraceContext(thread);
-        System.out.println("Method start on dependant task " + thread.getId() + " was called");
+        System.out.println("Method start on dependant task was called. Thread id: " + thread.getId());
     }
 
     public static void run(){
-        System.out.println("Method run on dependant task " + Thread.currentThread().getId() + " was called." +
-                "Current trace id is "+ CodeUtils.getTraceContext().getTraceId());
+        System.out.println("Method run on dependant task was called. Thread id: " + Thread.currentThread().getId() +
+                ", trace id: "+ CodeUtils.getTraceContext().getTraceId());
 
     }
 }

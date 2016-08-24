@@ -1,5 +1,7 @@
 package cz.cuni.mff.d3s.distrace.api;
 
+import java.util.Random;
+
 /**
  * Per thread context containing information about the trace, span and parent span id
  */
@@ -9,7 +11,7 @@ public class TraceContext {
     private long traceId = 0;
 
     public TraceContext(){
-        traceId = traceId+1;
+        traceId = Math.abs(new Random().nextLong());
         // TODO: improve trace id generation, right it it's super simple and will work only in single
         // TODO: JVM
     }

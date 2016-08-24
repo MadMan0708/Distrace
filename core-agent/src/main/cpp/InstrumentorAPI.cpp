@@ -144,11 +144,15 @@ int InstrumentorAPI::init() {
     const std::string connection_str = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR);
     const std::string log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
     const std::string log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
+
+    // class path of the monitored application
+    char *class_path;
+    Agent::globalData->jvmti->GetSystemProperty("java.class.path", &class_path );
     if(boost::starts_with(connection_str,"ipc://")) {
         // launch Instrumentor JVM only in case of ipc, when tcp is set, the instrumentor JVM should be already running.
         std::string launch_command =
                 "java -cp " + path_to_instrumentor_jar + " " + instrumentor_main_class + " " + connection_str + " " +
-                log_level + " " + log_dir + " & ";
+                log_level + " " + log_dir + " " + class_path + " & ";
         log(LOGGER_INSTRUMENTOR_API)->info() << "Starting Instrumentor JVM with the command: " << launch_command;
         int result = system(stringToCharPointer(launch_command));
         if (result < 0) {

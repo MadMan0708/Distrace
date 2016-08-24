@@ -10,7 +10,5 @@ public class Task extends Thread {
         this.taskName = taskName;
     }
 
-    public void run() {
-        System.out.println("Task: " +taskName + ", run method called, " + "trace id = " + Thread.currentThread().getId() + " was called");
-    }
+    public void run() {}
 }

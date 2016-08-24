@@ -4,13 +4,16 @@ import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.lang.instrument.IllegalClassFormatException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -20,12 +23,22 @@ public class InstrumentorServer {
 
     public static final byte REQ_TYPE_INSTRUMENT = 0;
     public static final byte REQ_TYPE_STOP = 1;
-    private URLClassLoader cl = new URLClassLoader(new URL[]{});
     private PairSocket sock;
     private String sockAddr;
+    private URL[] class_path_entries;
 
-    public InstrumentorServer(String sockAddr) {
+    public InstrumentorServer(String sockAddr, String classPath) {
         this.sockAddr = sockAddr;
+
+        String[] split = classPath.split(":");
+        class_path_entries = new URL[split.length];
+        for (int i = 0; i < split.length; i++) {
+            try {
+                class_path_entries[i] = new File(split[i]).toURI().toURL();
+            } catch (MalformedURLException e) {
+                // ignore
+            }
+        }
     }
 
     public void handleInstrument() {
@@ -37,6 +50,7 @@ public class InstrumentorServer {
                 sock.send("ack_req_int_yes");
 
                 byte[] byteCode = sock.recvBytes(); // receive the bytecode to instrument
+                log.info("Bytecode+"+ byteCode[0] + " a "+byteCode[1] + " a "+byteCode[2] +" a "+ byteCode[3]);
                 byte[] transformedByteCode = instrument(nameString, byteCode);
                 sock.send(transformedByteCode.length + ""); // send length of instrumented code
                 sock.send(transformedByteCode); // send instrumented bytecode
@@ -91,6 +105,7 @@ public class InstrumentorServer {
     }
 
     public byte[] instrument(String className, final byte[] bytecode) throws IllegalClassFormatException {
+        ClassLoader cl = new URLClassLoader(class_path_entries);
         String nameAsInJava = className.replace("/", ".");
         return new AgentBuilder.Default()
                 .with(new AgentBuilder.Listener() {
@@ -107,7 +122,7 @@ public class InstrumentorServer {
 
                     @Override
                     public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
-                        log.error("Error: " + typeName + " " + throwable);
+                        log.error("Error: " + typeName + " " + throwable + ", classloader: " + classLoader.toString());
                     }
 
                     @Override
@@ -117,6 +132,7 @@ public class InstrumentorServer {
                 })
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(cl)))
                 .type(ElementMatchers.named(nameAsInJava))
                 .transform(TransformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(cl, className, null, null, bytecode);
     }
