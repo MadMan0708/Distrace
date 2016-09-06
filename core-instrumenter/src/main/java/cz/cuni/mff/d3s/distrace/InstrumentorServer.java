@@ -61,7 +61,6 @@ public class InstrumentorServer {
                 log.info("Handling instrumentation of class:  " + nameString.replace("/", "."));
                 sock.send("ack_req_int_yes");
 
-
                 byte[] transformedByteCode = instrument(nameString);
                 sock.send(transformedByteCode.length + ""); // send length of instrumented code
                 sock.send(transformedByteCode); // send instrumented bytecode
@@ -119,8 +118,6 @@ public class InstrumentorServer {
         final ClassLoader cl = new URLClassLoader(class_path_entries);
         final ClassLoader byteCodeLoader = new ByteCodeClassLoader(sock);
         String nameAsInJava = className.replace("/", ".");
-
-
         return new AgentBuilder.Default()
                 .with(new AgentBuilder.Listener() {
 
@@ -171,7 +168,8 @@ public class InstrumentorServer {
                 })
                 .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(byteCodeLoader)))
                 .type(ElementMatchers.named(nameAsInJava))
-                .transform(TransformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(byteCodeLoader,nameAsInJava, null, null, null);
+                // we do not have to provide bytecode as parameter to transform method since it is fetched when needed by our class file locator
+                .transform(TransformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(new URLClassLoader(new URL[0]), nameAsInJava, null, null, null);
     }
 
 }
