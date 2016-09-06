@@ -1,12 +1,23 @@
 package cz.cuni.mff.d3s.distrace;
 
+import cz.cuni.mff.d3s.distrace.utils.ByteCodeClassLoader;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.description.annotation.AnnotationList;
+import net.bytebuddy.description.field.FieldDescription;
+import net.bytebuddy.description.field.FieldList;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.method.MethodList;
+import net.bytebuddy.description.type.PackageDescription;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.description.type.TypeList;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.implementation.bytecode.StackSize;
+import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.pool.TypePool;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,13 +56,13 @@ public class InstrumentorServer {
         try {
             byte[] name = sock.recvBytes();
             String nameString = new String(name, StandardCharsets.UTF_8);
+            log.info("NAME OF THE CLASS " + nameString);
             if (TransformersManager.hasClass(nameString.replace("/", "."))) {
                 log.info("Handling instrumentation of class:  " + nameString.replace("/", "."));
                 sock.send("ack_req_int_yes");
 
-                byte[] byteCode = sock.recvBytes(); // receive the bytecode to instrument
-                log.info("Bytecode+"+ byteCode[0] + " a "+byteCode[1] + " a "+byteCode[2] +" a "+ byteCode[3]);
-                byte[] transformedByteCode = instrument(nameString, byteCode);
+
+                byte[] transformedByteCode = instrument(nameString);
                 sock.send(transformedByteCode.length + ""); // send length of instrumented code
                 sock.send(transformedByteCode); // send instrumented bytecode
             } else {
@@ -104,15 +115,19 @@ public class InstrumentorServer {
         sock.close();
     }
 
-    public byte[] instrument(String className, final byte[] bytecode) throws IllegalClassFormatException {
-        ClassLoader cl = new URLClassLoader(class_path_entries);
+    public byte[] instrument(String className) throws IllegalClassFormatException {
+        final ClassLoader cl = new URLClassLoader(class_path_entries);
+        final ClassLoader byteCodeLoader = new ByteCodeClassLoader(sock);
         String nameAsInJava = className.replace("/", ".");
+
+
         return new AgentBuilder.Default()
                 .with(new AgentBuilder.Listener() {
 
                     @Override
                     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, DynamicType dynamicType) {
                         log.info("Transformed: " + typeDescription + " " + dynamicType);
+                        log.info("About to transform this " + typeDescription);
                     }
 
                     @Override
@@ -132,9 +147,31 @@ public class InstrumentorServer {
                 })
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(cl)))
+                .with(new AgentBuilder.TypeLocator() {
+                    @Override
+                    public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
+                        return new TypePool() {
+                            @Override
+                            public Resolution describe(String name) {
+                                log.info("Describing :::::: " + name);
+                                try {
+                                    return new Resolution.Simple(new TypeDescription.ForLoadedType(cl.loadClass(name)));
+                                } catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
+                                }
+                                return null;
+                            }
+
+                            @Override
+                            public void clear() {
+
+                            }
+                        };
+                    }
+                })
+                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(byteCodeLoader)))
                 .type(ElementMatchers.named(nameAsInJava))
-                .transform(TransformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(cl, className, null, null, bytecode);
+                .transform(TransformersManager.getTransformerForClass(nameAsInJava)).makeRaw().transform(byteCodeLoader,nameAsInJava, null, null, null);
     }
 
 }

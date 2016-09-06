@@ -180,6 +180,7 @@ int InstrumentorAPI::init() {
     std::string instrumentor_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR);
     jvmtiError error = Agent::globalData->jvmti->AddToSystemClassLoaderSearch(instrumentor_jar.c_str());
 
+
     return AgentUtils::check_jvmti_error(Agent::globalData->jvmti, error,
                                          "Path: " + instrumentor_jar +
                                          " successfully added on the system's classloader search path",

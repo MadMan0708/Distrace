@@ -9,9 +9,9 @@ import org.apache.logging.log4j.core.config.ConfigurationFactory;
 public class Instrumentor {
     private static Logger log;
 
-    public static void addTransformer(String className, BaseTransformer transformer){
+    public Instrumentor addTransformer(String className, BaseTransformer transformer){
         TransformersManager.register(className, transformer);
-        //return this;
+        return this;
     }
 
     /**
@@ -20,7 +20,7 @@ public class Instrumentor {
      * using TransformerManager
      * @param args command line arguments of the instrumentor
      */
-    public static void start(String[] args){
+    public void start(String[] args){
         assert args.length == 4; // we always start Instrumentor from native agent and 4 parameters should be
         // always passed to it
         // - socket address

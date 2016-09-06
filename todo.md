@@ -7,6 +7,10 @@ This is list of future task on this project:
 - create example for callback handling
 - instrument network communication
 - create API for storing spans on disk
+
+- add support for instrumenting anonymous classes
+
+[ARCHITECTONICALLY NOT POSSIBLE]
 - add possibility to cancel loading of class and load different first
   - ( more I think about it it won't be possible at the end anyway,
       since the class would be already loaded and we will retransform it,

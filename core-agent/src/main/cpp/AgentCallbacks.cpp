@@ -23,6 +23,10 @@ using namespace Distrace::Logging;
         log(LOGGER_AGENT_CALLBACKS)->debug() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
         AgentUtils::dettach_JNI_from_current_thread(attachStatus);
 
+
+        //jclass typeCls = env->FindClass("net/bytebuddy/description/type/TypeDescription");
+
+
          if(Agent::globalData->inst_api->should_instrument(name)){
              *new_class_data_len = Agent::globalData->inst_api->instrument(class_data, class_data_len, new_class_data);
              log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented";
