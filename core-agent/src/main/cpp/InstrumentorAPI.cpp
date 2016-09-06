@@ -179,6 +179,7 @@ int InstrumentorAPI::init() {
     // add instrumentor jar on the classpath so our jvm can see interceptors defined in the Instrumentor JVM
     std::string instrumentor_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR);
     jvmtiError error = Agent::globalData->jvmti->AddToSystemClassLoaderSearch(instrumentor_jar.c_str());
+    error = Agent::globalData->jvmti->AddToBootstrapClassLoaderSearch(instrumentor_jar.c_str());
 
 
     return AgentUtils::check_jvmti_error(Agent::globalData->jvmti, error,

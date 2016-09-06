@@ -17,25 +17,31 @@ using namespace Distrace::Logging;
                                             jint class_data_len, const unsigned char *class_data,
                                             jint *new_class_data_len, unsigned char **new_class_data) {
 
-        //TODO: Improve - attaching and deattaching after each request is quite costly - Write this to docs
-        int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
-        auto loader_name = JavaUtils::getClassLoaderName(env, loader);
-        log(LOGGER_AGENT_CALLBACKS)->debug() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
-        AgentUtils::dettach_JNI_from_current_thread(attachStatus);
+          if(Agent::globalData->vm_started){
+            //TODO: Improve - attaching and deattaching after each request is quite costly - Write this to docs
+            int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
+            auto loader_name = JavaUtils::getClassLoaderName(env, loader);
 
 
-        //jclass typeCls = env->FindClass("net/bytebuddy/description/type/TypeDescription");
+            jclass typeDescription = env->FindClass("net/bytebuddy/description/type/TypeDescription");
+            // the classes loaded during vm initialization are system classes and classes we do not want to be instrumented
+            log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
+            AgentUtils::dettach_JNI_from_current_thread(attachStatus);
+          }
 
 
-         if(Agent::globalData->inst_api->should_instrument(name)){
-             *new_class_data_len = Agent::globalData->inst_api->instrument(class_data, class_data_len, new_class_data);
-             log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented";
-         }
+        // if(Agent::globalData->inst_api->should_instrument(name)){
+        //     *new_class_data_len = Agent::globalData->inst_api->instrument(class_data, class_data_len, new_class_data);
+        //    log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented";
+        // }
     }
 
 
     void JNICALL AgentCallbacks::callbackVMInit(jvmtiEnv *jvmti, JNIEnv *env, jthread thread) {
-        log(LOGGER_AGENT_CALLBACKS)->info("The virtual machine has been initialized!");
+      // this forces JVM to load this class in the initialization phase
+      env->FindClass("net/bytebuddy/description/type/TypeDescription");
+      Agent::globalData->vm_started = JNI_TRUE;
+      log(LOGGER_AGENT_CALLBACKS)->info("The virtual machine has been initialized!");
     }
 
     void JNICALL AgentCallbacks::callbackVMDeath(jvmtiEnv *jvmti_env, JNIEnv *jni_env) {

@@ -173,12 +173,6 @@ int AgentUtils::init_agent() {
         return JNI_ERR;
     }
 
-    if (InstrumentorAPI::init() == JNI_ERR) {
-        // stop the agent in case Instrumentor JVM could not be started or connected to
-        return JNI_ERR;
-    }
-
-
     if (AgentUtils::register_jvmti_capabilities(Agent::globalData->jvmti) == JNI_ERR) {
         return JNI_ERR;
     }
@@ -188,6 +182,11 @@ int AgentUtils::init_agent() {
     }
 
     if (AgentUtils::register_jvmti_events(Agent::globalData->jvmti) == JNI_ERR) {
+        return JNI_ERR;
+    }
+
+    if (InstrumentorAPI::init() == JNI_ERR) {
+        // stop the agent in case Instrumentor JVM could not be started or connected to
         return JNI_ERR;
     }
 
