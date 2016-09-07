@@ -20,12 +20,12 @@ public class BaseAgentBuilder {
     private static final Logger log = LogManager.getLogger(BaseAgentBuilder.class);
 
     private Map<String, TypeDescription> typeDescriptions;
-    private ByteCodeClassLoader byteCodeClassLoader;
+    private ByteCodeClassLoaderFromNative byteCodeClassLoader;
     private PairSocket sock;
 
     public BaseAgentBuilder(Map<String, TypeDescription> typeDescriptions, PairSocket sock) {
         this.typeDescriptions = typeDescriptions;
-        this.byteCodeClassLoader = new ByteCodeClassLoader(sock);
+        this.byteCodeClassLoader = new ByteCodeClassLoaderFromNative(sock);
         this.sock = sock;
     }
 
