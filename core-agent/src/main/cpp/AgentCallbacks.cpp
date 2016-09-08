@@ -17,28 +17,28 @@ using namespace Distrace::Logging;
                                             jint class_data_len, const unsigned char *class_data,
                                             jint *new_class_data_len, unsigned char **new_class_data) {
 
-          if(Agent::globalData->vm_started){
-            //TODO: Improve - attaching and deattaching after each request is quite costly - Write this to docs
+        //TODO: Improve this. Attaching and deattaching JNIafter each request is quite costly
+
+        // the classes loaded during vm initialization and the ones loaded by bootstrap
+        // classloader are system classes or our custom classes which we usually do not want to be instrumented
+        if(Agent::globalData->vm_started && loader != NULL){
             int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
             auto loader_name = JavaUtils::getClassLoaderName(env, loader);
-
-             jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoader");
-              jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"loadClass","([BLjava/lang/String;)Ljava/lang/Class;");
-
-              auto ret = env->CallStaticObjectMethod(byteLoader,methodLoadClass, class_data,name);
-
-              jclass typeDescription = env->FindClass("net/bytebuddy/description/type/TypeDescription$ForLoadedType");
-            jmethodID constructor = env->GetMethodID(typeDescription, "<init>", "(Ljava/lang/Class;)V");
-
-            jobject instance = env->NewObject(typeDescription, constructor, typeDescription);
-              jmethodID method_name = env->GetMethodID(typeDescription,"getName","()Ljava/lang/String;");
-              jstring type_name = (jstring) env->CallObjectMethod(instance,method_name);
-              auto str = env->GetStringUTFChars(type_name, NULL);
-              log(LOGGER_AGENT_CALLBACKS)->info() << "CLASS NAME IS " << str;
-              log(LOGGER_AGENT_CALLBACKS)->info() << "TypeDescription class loaded:  " << JavaUtils::getClassName(env, typeDescription);
-
-            // the classes loaded during vm initialization are system classes and classes we do not want to be instrumented
             log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
+
+            if(loader_name!="cz.cuni.mff.d3s.distrace.utils.ByteCodeClassLoader" && loader_name!="sun.reflect.DelegatingClassLoader"){
+
+                jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoader");
+                jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"typeDescrFor","([BLjava/lang/String;)[B");
+
+                auto bytes_for_java = env->NewByteArray(class_data_len);
+                env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
+                jstring name_for_java = env->NewStringUTF(name);
+
+                auto java_bytes_type_desc = env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
+
+            }
+
             AgentUtils::dettach_JNI_from_current_thread(attachStatus);
           }
 
@@ -52,7 +52,6 @@ using namespace Distrace::Logging;
 
     void JNICALL AgentCallbacks::callbackVMInit(jvmtiEnv *jvmti, JNIEnv *env, jthread thread) {
       // this forces JVM to load this class in the initialization phase
-      env->FindClass("net/bytebuddy/description/type/TypeDescription");
       env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoader");
       Agent::globalData->vm_started = JNI_TRUE;
       log(LOGGER_AGENT_CALLBACKS)->info("The virtual machine has been initialized!");
