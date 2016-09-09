@@ -4,7 +4,6 @@
 #include <jni.h>
 #include <jvmti.h>
 #include "AgentCallbacks.h"
-#include <future>
 #include "AgentUtils.h"
 #include "JavaUtils.h"
 
@@ -18,15 +17,12 @@ using namespace Distrace::Logging;
                                             jint *new_class_data_len, unsigned char **new_class_data) {
 
         //TODO: Improve this. Attaching and deattaching JNIafter each request is quite costly
-
-        // the classes loaded during vm initialization and the ones loaded by bootstrap
-        // classloader are system classes or our custom classes which we usually do not want to be instrumented
-        if(Agent::globalData->vm_started && loader != NULL){
+        // Don't handle classes which are being loaded during vm initialization and the ones loaded by ignored class loaders
+        if(Agent::globalData->vm_started){
             int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
             auto loader_name = JavaUtils::getClassLoaderName(env, loader);
-            log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
-
-            if(loader_name!="cz.cuni.mff.d3s.distrace.utils.ByteCodeClassLoader" && loader_name!="sun.reflect.DelegatingClassLoader"){
+            if(!JavaUtils::isIgnoredClassLoader(loader_name)){
+                log(LOGGER_AGENT_CALLBACKS)->debug() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
 
                 jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoader");
                 jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"typeDescrFor","([BLjava/lang/String;)[B");
@@ -35,18 +31,16 @@ using namespace Distrace::Logging;
                 env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
                 jstring name_for_java = env->NewStringUTF(name);
 
-                auto java_bytes_type_desc = env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
-
+                jbyteArray java_bytes_type_desc = (jbyteArray)env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
+                auto typeD = JavaUtils::as_unsigned_char_array(env, java_bytes_type_desc);
+                
+                if(Agent::globalData->inst_api->should_instrument(name, typeD, env->GetArrayLength(java_bytes_type_desc))){
+                    *new_class_data_len = Agent::globalData->inst_api->instrument(class_data, class_data_len, new_class_data);
+                    log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented";
+                }
             }
-
             AgentUtils::dettach_JNI_from_current_thread(attachStatus);
           }
-
-
-        // if(Agent::globalData->inst_api->should_instrument(name)){
-        //     *new_class_data_len = Agent::globalData->inst_api->instrument(class_data, class_data_len, new_class_data);
-        //    log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented";
-        // }
     }
 
 

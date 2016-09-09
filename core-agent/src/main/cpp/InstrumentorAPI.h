@@ -30,7 +30,7 @@ namespace Distrace {
          * This method send request to the instrumentor JVM which decides whether this class should be instrumented
          * or not.
          */
-        bool should_instrument(std::string class_name);
+        bool should_instrument(std::string class_name, const byte *type_descr, int type_descr_length);
 
         /**
          * This method sent bytecode to the instrumentor JVM and receives back the instrumented bytecode

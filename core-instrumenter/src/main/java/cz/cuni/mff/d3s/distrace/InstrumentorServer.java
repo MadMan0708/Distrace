@@ -39,9 +39,8 @@ public class InstrumentorServer {
         TypeDescription typeDescription;
         try {
             typeDescription = (TypeDescription) new ObjectInputStream(bis).readObject();
-            byte[] transformedByteCode = instrument(typeDescription);
-            sock.send(transformedByteCode.length + ""); // send length of instrumented code
-            sock.send(transformedByteCode); // send instrumented bytecode
+            log.info("TYPE DESC AS STRING "+ typeDescription.getName());
+            instrument(typeDescription);
         } catch (java.io.IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }catch (IllegalClassFormatException e) {
@@ -91,12 +90,19 @@ public class InstrumentorServer {
         sock.close();
     }
 
-    private byte[] instrument(final TypeDescription typeDescription) throws IllegalClassFormatException {
+    private void instrument(final TypeDescription typeDescription) throws IllegalClassFormatException {
         // register this typeDescription
         typeDescriptions.put(typeDescription.getName(), typeDescription);
         // we do not have to provide bytecode as parameter to transform method since it is fetched when needed by our class file locator
         // implemented using byte code class loader
-        return transformer.transform(new URLClassLoader(new URL[0]), typeDescription.getName(), null, null, null);
+
+        // it returns null in case the class shouldn't have been transformed
+        byte[] transformed = transformer.transform(new URLClassLoader(new URL[0]), typeDescription.getName(), null, null, null);
+
+        if(transformed!=null) { // the class was transformed
+            sock.send(transformed.length + ""); // send length of instrumented code
+            sock.send(transformed); // send instrumented bytecode
+        }
     }
 
 }

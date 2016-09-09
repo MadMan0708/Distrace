@@ -87,7 +87,7 @@ void InstrumentorAPI::send_req_type(byte req_type) {
     assert(reply == ACK_REQ_MSG);
 }
 
-bool InstrumentorAPI::should_instrument(std::string class_name) {
+bool InstrumentorAPI::should_instrument(std::string class_name, const byte *type_descr, int type_descr_length) {
     // critical section. Communication started from different threads would break nanomsg
     mtx.lock();
     log(LOGGER_INSTRUMENTOR_API)->debug() << "Asking Instrumentor whether it needs to instrument class \"" <<
@@ -95,8 +95,9 @@ bool InstrumentorAPI::should_instrument(std::string class_name) {
     send_req_type(REQ_TYPE_INSTRUMENT);
 
     bool ret_value = false;
-    // send class name to the Instrumentor JVM
-    std::string reply = send_and_receive(class_name);
+    // send type description to the Instrumentor JVM
+    send_byte_arr_request(type_descr, type_descr_length);
+    auto reply = receive_string_reply();
     if (reply == ACK_REQ_INST_YES) {
         log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
         "\" will be instrumented.";

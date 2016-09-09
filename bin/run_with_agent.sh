@@ -50,7 +50,7 @@ rm -rf $LOG_DIR
 java -agentpath:"$NATIVE_AGENT_LIB_PATH=log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_jar=$EXAMPLE_AGENT_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;comm_type=$COMM_TYPE" -jar $EXAMPLE_APP_JAR_PATH
 
 # Stop running instrumentor JVM in case of some kind of failure
-pids=$(jps -l | grep "distrace-example-apps-0.0.0-all.jar" | cut -d" " -f1)
+pids=$(jps -l | grep "distrace-examples\|cz.cuni.mff.d3s.distrace.examples.Starter" | cut -d" " -f1)
 
 for pid in $pids
 do

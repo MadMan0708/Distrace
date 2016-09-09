@@ -36,7 +36,7 @@ public class BaseAgentBuilder {
                 @Override
                 public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
                         module, DynamicType dynamicType) {
-                    log.info("Handling instrumentation of class:  " + typeDescription);
+                    log.info("Before: Deciding whether to instrument class:  " + typeDescription);
                     sock.send("ack_req_int_yes");
                 }
 
@@ -48,17 +48,18 @@ public class BaseAgentBuilder {
 
                 @Override
                 public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
-                    log.error("Error: " + typeName + " " + throwable + ", classloader: " + classLoader.toString());
+                    throwable.printStackTrace();
+                    log.error("Error: " + typeName + " " );
                 }
 
                 @Override
                 public void onComplete(String typeName, ClassLoader classLoader, JavaModule module) {
-                    log.info("Complete: " + typeName + " " + classLoader);
+                    log.info("Complete: " + typeName);
                 }
             })
             .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
             .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-            .with(new AgentBuilder.TypeLocator() {
+            .with(new AgentBuilder.PoolStrategy() {
                 @Override
                 public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
                     return new TypePool() {

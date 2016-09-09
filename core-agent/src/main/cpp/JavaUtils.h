@@ -16,6 +16,21 @@ namespace Distrace{
      * This namespace contains various utilities methods to work with JVM and Java objects
      */
     namespace JavaUtils {
+
+        /**
+         * Converts jbytearray to char*
+         */
+        unsigned char* as_unsigned_char_array(JNIEnv *env, jbyteArray array);
+
+        /**
+         *  The list of class loaders for which we don't want to instrument classes loaded by these class loaders
+         */
+        extern std::vector<std::string> ignoredLoaders;
+
+        /**
+         * Check whether the classloader on the input is ignored classloader
+         */
+        bool isIgnoredClassLoader(std::string cl);
         /**
          * Get fully qualified class name of class
          */
