@@ -35,7 +35,7 @@ namespace Distrace {
         /**
          * This method sent bytecode to the instrumentor JVM and receives back the instrumented bytecode
          */
-        int instrument(const byte* input_data, int input_data_len, byte** output_buffer);
+        int instrument(byte** output_buffer);
 
         /**
          * This method initializes the instrumentor JAR and return JNI_OK in case of success and JNI_ERR otherwise

@@ -1,6 +1,7 @@
 package cz.cuni.mff.d3s.distrace;
 
 import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
+import cz.cuni.mff.d3s.distrace.utils.ByteCodeClassLoader;
 import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
@@ -14,18 +15,19 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class InstrumentorServer {
     private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
-    private static Map<String, TypeDescription> typeDescriptions = new HashMap<>();
     private static final byte REQ_TYPE_INSTRUMENT = 0;
     private static final byte REQ_TYPE_STOP = 1;
     private PairSocket sock;
     private String sockAddr;
     private ClassFileTransformer transformer;
     private CustomAgentBuilder builder;
+    ByteCodeClassLoader cl = new ByteCodeClassLoader();
 
     InstrumentorServer(String sockAddr, CustomAgentBuilder builder) {
         this.sockAddr = sockAddr;
@@ -33,19 +35,30 @@ public class InstrumentorServer {
     }
 
     private void handleInstrument() {
-        byte[] typeDescriptionAsBytes = sock.recvBytes();
+        byte[] name = sock.recvBytes();
+        String className = new String(name, StandardCharsets.UTF_8);
+        byte[] bytes = sock.recvBytes();
+        //cl.registerByteCode(className.replaceAll("/","."),bytes);
 
-        ByteArrayInputStream bis = new ByteArrayInputStream(typeDescriptionAsBytes);
-        TypeDescription typeDescription;
         try {
-            typeDescription = (TypeDescription) new ObjectInputStream(bis).readObject();
-            log.info("TYPE DESC AS STRING "+ typeDescription.getName());
-            instrument(typeDescription);
-        } catch (java.io.IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }catch (IllegalClassFormatException e) {
+            instrument(className);
+        } catch (IllegalClassFormatException e) {
             System.out.println("INVALID");
             sock.send("ERROR_INVALID_FORMAT");
+        }
+    }
+
+    private void instrument(String className) throws IllegalClassFormatException {
+
+        // we do not have to provide bytecode as parameter to transform method since it is fetched when needed by our class file locator
+        // implemented using byte code class loader
+
+        // it returns null in case the class shouldn't have been transformed
+        byte[] transformed = transformer.transform(new URLClassLoader(new URL[0]), className, null, null, null);
+
+        if(transformed!=null) { // the class was transformed
+            sock.send(transformed.length + ""); // send length of instrumented code
+            sock.send(transformed); // send instrumented bytecode
         }
     }
 
@@ -60,7 +73,7 @@ public class InstrumentorServer {
     void start() {
         sock = new PairSocket();
         sock.bind(sockAddr);
-        transformer = builder.createAgent(new BaseAgentBuilder(typeDescriptions, sock)).makeRaw();
+        transformer = builder.createAgent(new BaseAgentBuilder(sock, cl)).makeRaw();
         //noinspection InfiniteLoopStatement
         while (true) {
 
@@ -90,19 +103,5 @@ public class InstrumentorServer {
         sock.close();
     }
 
-    private void instrument(final TypeDescription typeDescription) throws IllegalClassFormatException {
-        // register this typeDescription
-        typeDescriptions.put(typeDescription.getName(), typeDescription);
-        // we do not have to provide bytecode as parameter to transform method since it is fetched when needed by our class file locator
-        // implemented using byte code class loader
-
-        // it returns null in case the class shouldn't have been transformed
-        byte[] transformed = transformer.transform(new URLClassLoader(new URL[0]), typeDescription.getName(), null, null, null);
-
-        if(transformed!=null) { // the class was transformed
-            sock.send(transformed.length + ""); // send length of instrumented code
-            sock.send(transformed); // send instrumented bytecode
-        }
-    }
 
 }

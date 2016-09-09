@@ -22,20 +22,10 @@ using namespace Distrace::Logging;
             int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
             auto loader_name = JavaUtils::getClassLoaderName(env, loader);
             if(!JavaUtils::isIgnoredClassLoader(loader_name)){
-                log(LOGGER_AGENT_CALLBACKS)->debug() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
+                log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
 
-                jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoader");
-                jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"typeDescrFor","([BLjava/lang/String;)[B");
-
-                auto bytes_for_java = env->NewByteArray(class_data_len);
-                env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
-                jstring name_for_java = env->NewStringUTF(name);
-
-                jbyteArray java_bytes_type_desc = (jbyteArray)env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
-                auto typeD = JavaUtils::as_unsigned_char_array(env, java_bytes_type_desc);
-                
-                if(Agent::globalData->inst_api->should_instrument(name, typeD, env->GetArrayLength(java_bytes_type_desc))){
-                    *new_class_data_len = Agent::globalData->inst_api->instrument(class_data, class_data_len, new_class_data);
+                if(Agent::globalData->inst_api->should_instrument(name, class_data, class_data_len)){
+                    *new_class_data_len = Agent::globalData->inst_api->instrument(new_class_data);
                     log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented";
                 }
             }

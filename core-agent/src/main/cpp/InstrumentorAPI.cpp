@@ -94,6 +94,9 @@ bool InstrumentorAPI::should_instrument(std::string class_name, const byte *type
     class_name << "\"";
     send_req_type(REQ_TYPE_INSTRUMENT);
 
+    // send class name
+    send_string_request(class_name);
+    // send bytecode
     bool ret_value = false;
     // send type description to the Instrumentor JVM
     send_byte_arr_request(type_descr, type_descr_length);
@@ -114,9 +117,12 @@ bool InstrumentorAPI::should_instrument(std::string class_name, const byte *type
 
 }
 
-int InstrumentorAPI::instrument(const byte *input_data, int input_data_len, byte **output_buffer) {
+int InstrumentorAPI::instrument(byte **output_buffer) {
     // fill the output_buffer with the new bytecode and return it's length
-    return send_and_receive(input_data, input_data_len, output_buffer);
+    auto length_as_string = receive_string_reply();
+    auto expected_length = std::atoi(length_as_string.c_str());
+    *output_buffer = (byte *) malloc(sizeof(byte) * expected_length);
+    return receive_byte_arr_reply(output_buffer, expected_length);
 }
 
 void InstrumentorAPI::stop() {

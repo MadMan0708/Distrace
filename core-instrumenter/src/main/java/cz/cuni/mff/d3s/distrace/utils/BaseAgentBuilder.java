@@ -19,13 +19,12 @@ import java.util.Map;
 public class BaseAgentBuilder {
     private static final Logger log = LogManager.getLogger(BaseAgentBuilder.class);
 
-    private Map<String, TypeDescription> typeDescriptions;
-    private ByteCodeClassLoaderFromNative byteCodeClassLoader;
+
+    private ByteCodeClassLoader byteCodeClassLoader;
     private PairSocket sock;
 
-    public BaseAgentBuilder(Map<String, TypeDescription> typeDescriptions, PairSocket sock) {
-        this.typeDescriptions = typeDescriptions;
-        this.byteCodeClassLoader = new ByteCodeClassLoaderFromNative(sock);
+    public BaseAgentBuilder(PairSocket sock, ByteCodeClassLoader cl) {
+        this.byteCodeClassLoader = cl;
         this.sock = sock;
     }
 
@@ -61,12 +60,18 @@ public class BaseAgentBuilder {
             .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
             .with(new AgentBuilder.PoolStrategy() {
                 @Override
-                public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
+                public TypePool typePool(ClassFileLocator classFileLocator, final ClassLoader classLoader) {
                     return new TypePool() {
                         @Override
                         public Resolution describe(String name) {
                             log.info("Describing :::::: " + name);
-                            return new Resolution.Simple(typeDescriptions.get(name));
+
+                            try {
+                                return new Resolution.Simple( new TypeDescription.ForLoadedType(byteCodeClassLoader.loadClass(name)));
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                                return null;
+                            }
                         }
 
                         @Override
