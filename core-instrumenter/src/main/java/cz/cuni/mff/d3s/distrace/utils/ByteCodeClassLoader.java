@@ -1,10 +1,10 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
-import net.bytebuddy.description.type.TypeDescription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 
 /**
@@ -20,8 +20,10 @@ public class ByteCodeClassLoader extends ClassLoader{
     }
     @Override
     public InputStream getResourceAsStream(String name) {
-        log.info("LOADING FOR NAME STREAM: " + name);
-        return new ByteArrayInputStream(cache.get(name));
+        String validName = name.replaceAll("/",".").substring(0,name.lastIndexOf("."));
+        log.info("LOADING FOR NAME STREAM: " + validName);
+        byte[] bytes = cache.get(validName);
+        return new ByteArrayInputStream(bytes);
         //return super.getResourceAsStream(name);
     }
 

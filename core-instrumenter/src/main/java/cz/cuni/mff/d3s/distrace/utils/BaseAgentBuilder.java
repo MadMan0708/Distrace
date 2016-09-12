@@ -26,63 +26,69 @@ public class BaseAgentBuilder {
     public BaseAgentBuilder(PairSocket sock, ByteCodeClassLoader cl) {
         this.byteCodeClassLoader = cl;
         this.sock = sock;
+        agentBuilder = initBuilder();
     }
 
+    private AgentBuilder initBuilder(){
+        return new AgentBuilder.Default()
+                .with(new AgentBuilder.Listener() {
 
-    private AgentBuilder agentBuilder = new AgentBuilder.Default()
-            .with(new AgentBuilder.Listener() {
+                    @Override
+                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
+                            module, DynamicType dynamicType) {
+                        log.info("Before: Deciding whether to instrument class:  " + typeDescription);
+                        sock.send("ack_req_int_yes");
+                    }
 
-                @Override
-                public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
-                        module, DynamicType dynamicType) {
-                    log.info("Before: Deciding whether to instrument class:  " + typeDescription);
-                    sock.send("ack_req_int_yes");
-                }
+                    @Override
+                    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+                        log.info("Ignored: " + typeDescription);
+                        sock.send("ack_req_int_no");
+                    }
 
-                @Override
-                public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-                    log.info("Ignored: " + typeDescription);
-                    sock.send("ack_req_int_no");
-                }
+                    @Override
+                    public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
+                        throwable.printStackTrace();
+                        log.error("Error: " + typeName + " " );
+                    }
 
-                @Override
-                public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
-                    throwable.printStackTrace();
-                    log.error("Error: " + typeName + " " );
-                }
+                    @Override
+                    public void onComplete(String typeName, ClassLoader classLoader, JavaModule module) {
+                        log.info("Complete: " + typeName);
+                    }
+                })
+                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(new AgentBuilder.PoolStrategy() {
+                    @Override
+                    public TypePool typePool(ClassFileLocator classFileLocator, final ClassLoader classLoader) {
+                        return new TypePool() {
+                            @Override
+                            public Resolution describe(String name) {
+                                log.info("Describing :::::: " + name);
 
-                @Override
-                public void onComplete(String typeName, ClassLoader classLoader, JavaModule module) {
-                    log.info("Complete: " + typeName);
-                }
-            })
-            .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
-            .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-            .with(new AgentBuilder.PoolStrategy() {
-                @Override
-                public TypePool typePool(ClassFileLocator classFileLocator, final ClassLoader classLoader) {
-                    return new TypePool() {
-                        @Override
-                        public Resolution describe(String name) {
-                            log.info("Describing :::::: " + name);
-
-                            try {
-                                return new Resolution.Simple( new TypeDescription.ForLoadedType(byteCodeClassLoader.loadClass(name)));
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                                return null;
+                                try {
+                                    Class<?> clazz = byteCodeClassLoader.loadClass(name);
+                                    log.info("DESCRIBED CLAZZ " + clazz.getName());
+                                    return new Resolution.Simple( new TypeDescription.ForLoadedType(clazz));
+                                } catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
+                                    return null;
+                                }
                             }
-                        }
 
-                        @Override
-                        public void clear() {
-                            // no need to implement
-                        }
-                    };
-                }
-            })
-            .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(byteCodeClassLoader)));
+                            @Override
+                            public void clear() {
+                                // no need to implement
+                            }
+                        };
+                    }
+                })
+                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(byteCodeClassLoader)));
 
+    }
+
+    private AgentBuilder agentBuilder;
 
     public AgentBuilder.Identified.Narrowable type(ElementMatcher<? super TypeDescription> typeMatcher) {
         return agentBuilder.type(typeMatcher);

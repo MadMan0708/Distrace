@@ -1,35 +1,35 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
-import nanomsg.pair.PairSocket;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 /**
  * Created by kuba on 06/09/16.
  */
 public class ByteCodeClassLoaderFromNative extends ClassLoader{
-    private static final Logger log = LogManager.getLogger(ByteCodeClassLoaderFromNative.class);
-    private PairSocket sock;
+    public static void typeDescrFor(byte[] code, String className){
+        try {
+            ByteCodeClassLoaderFromNative cl = new ByteCodeClassLoaderFromNative(code);
+            System.out.println("CREATING FAKE CLASS: " + className);
 
-    public ByteCodeClassLoaderFromNative(PairSocket sock) {
-        this.sock = sock;
+            Class<?> clazz = cl.findClass(className.replaceAll("/","."));
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
-    @Override
-    public InputStream getResourceAsStream(String name) {
-        log.info("LOADING FOR NAME STREAM: " + name);
-        return new ByteArrayInputStream(sock.recvBytes());
-        //return super.getResourceAsStream(name);
+    private ByteCodeClassLoaderFromNative(byte[] bytes) {
+        this.bytes = bytes;
+
     }
+
+    private byte[] bytes;
+
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        byte[] byteCode = sock.recvBytes(); // receive the bytecode to instrument
-        log.info("LOADING FOR NAME: " + name);
-        return defineClass(name, byteCode, 0, byteCode.length);
+        Class<?> cl =  defineClass(name, bytes, 0, bytes.length);
+        System.out.println("LOADING FOR NAME: " + name +" cl: "+cl);
+
+        return cl;
         //return super.findClass(name);
     }
 }

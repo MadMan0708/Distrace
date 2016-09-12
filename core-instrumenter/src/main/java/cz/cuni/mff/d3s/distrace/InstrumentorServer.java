@@ -36,10 +36,17 @@ public class InstrumentorServer {
 
     private void handleInstrument() {
         byte[] name = sock.recvBytes();
-        String className = new String(name, StandardCharsets.UTF_8);
-        byte[] bytes = sock.recvBytes();
-        //cl.registerByteCode(className.replaceAll("/","."),bytes);
 
+        String className = new String(name, StandardCharsets.UTF_8);
+        log.info("RECEIVE CLASS " + className);
+        byte[] bytes = sock.recvBytes();
+        cl.registerByteCode(className.replaceAll("/","."), bytes);
+        try {
+            Class<?> loaded = cl.loadClass(className.replaceAll("/","."));
+            log.info("CLASS REALLY LOADED: "+loaded.getName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         try {
             instrument(className);
         } catch (IllegalClassFormatException e) {
@@ -54,7 +61,7 @@ public class InstrumentorServer {
         // implemented using byte code class loader
 
         // it returns null in case the class shouldn't have been transformed
-        byte[] transformed = transformer.transform(new URLClassLoader(new URL[0]), className, null, null, null);
+        byte[] transformed = transformer.transform(cl, className, null, null, null);
 
         if(transformed!=null) { // the class was transformed
             sock.send(transformed.length + ""); // send length of instrumented code
