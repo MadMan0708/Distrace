@@ -1,6 +1,5 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
-import nanomsg.pair.PairSocket;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -11,7 +10,7 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Base agent builder exposing relevant method on ByteBuddy's agent builder
@@ -19,42 +18,35 @@ import java.util.Map;
 public class BaseAgentBuilder {
     private static final Logger log = LogManager.getLogger(BaseAgentBuilder.class);
 
-    private Map<String, TypeDescription> typeDescriptions;
-    private ByteCodeClassLoaderFromNative byteCodeClassLoader;
-    private PairSocket sock;
-
-    public BaseAgentBuilder(Map<String, TypeDescription> typeDescriptions, PairSocket sock) {
-        this.typeDescriptions = typeDescriptions;
-        this.byteCodeClassLoader = new ByteCodeClassLoaderFromNative(sock);
-        this.sock = sock;
+    private HashMap<String, TypeDescription> cache;
+    private ByteCodeClassLoader cl;
+    public BaseAgentBuilder(HashMap<String, TypeDescription> cache, ByteCodeClassLoader cl){
+        this.cache = cache;
+        this.cl = cl;
     }
-
-
     private AgentBuilder agentBuilder = new AgentBuilder.Default()
             .with(new AgentBuilder.Listener() {
 
                 @Override
                 public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
                         module, DynamicType dynamicType) {
-                    log.info("Before: Deciding whether to instrument class:  " + typeDescription);
-                    sock.send("ack_req_int_yes");
+                    System.out.println("Before: Deciding whether to instrument class:  " + typeDescription);
                 }
 
                 @Override
                 public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-                    log.info("Ignored: " + typeDescription);
-                    sock.send("ack_req_int_no");
+                    System.out.println("Ignored: " + typeDescription);
                 }
 
                 @Override
                 public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
                     throwable.printStackTrace();
-                    log.error("Error: " + typeName + " " );
+                    System.out.println("Error: " + typeName + " " );
                 }
 
                 @Override
                 public void onComplete(String typeName, ClassLoader classLoader, JavaModule module) {
-                    log.info("Complete: " + typeName);
+                    System.out.println("Complete: " + typeName);
                 }
             })
             .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
@@ -65,8 +57,8 @@ public class BaseAgentBuilder {
                     return new TypePool() {
                         @Override
                         public Resolution describe(String name) {
-                            log.info("Describing :::::: " + name);
-                            return new Resolution.Simple(typeDescriptions.get(name));
+                            System.out.println("Describing :::::: " + name);
+                            return new Resolution.Simple(cache.get(name));
                         }
 
                         @Override
@@ -76,7 +68,7 @@ public class BaseAgentBuilder {
                     };
                 }
             })
-            .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(byteCodeClassLoader)));
+            .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(cl)));
 
 
     public AgentBuilder.Identified.Narrowable type(ElementMatcher<? super TypeDescription> typeMatcher) {

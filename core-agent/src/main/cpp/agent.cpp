@@ -7,6 +7,7 @@
 #include "Agent.h"
 #include "AgentUtils.h"
 #include "Utils.h"
+#include "Logging.h"
 #include <boost/algorithm/string.hpp>
 
 using namespace Distrace;

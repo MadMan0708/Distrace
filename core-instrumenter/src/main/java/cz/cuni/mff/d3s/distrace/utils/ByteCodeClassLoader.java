@@ -1,49 +1,42 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
-import cz.cuni.mff.d3s.distrace.stubs.TypeDescriptionStub;
-import net.bytebuddy.description.type.TypeDescription;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  * Byte code classloader exposed to native agent
  */
 public class ByteCodeClassLoader extends ClassLoader {
 
-    private byte[] bytes;
+    private HashMap<String, byte[]> cache = new HashMap<>();
 
-    private ByteCodeClassLoader(byte[] bytes) {
-        this.bytes = bytes;
+
+    public void registerBytes(String name, byte[] bytes){
+        if(!cache.containsKey(name)) {
+            cache.put(name, bytes);
+        }
     }
 
-    public static byte[] typeDescrFor(byte[] code, String className) {
-        try {
-            ByteCodeClassLoader cl = new ByteCodeClassLoader(code);
-            Class<?> clazz = cl.findClass(className.replaceAll("/", "."));
-            TypeDescription typeDescr = new TypeDescription.ForLoadedType(clazz);
-            TypeDescription holder = TypeDescriptionStub.from(typeDescr);
-            cl = null;
-            // Only one class was loaded using this classloader. The class gets "unloaded"
-            // from JVM if the classloader which loaded it gets garbage collected and we ensure this
-            // by this call
+    public Class<?> getClass(String name) throws ClassNotFoundException {
+        return findClass(name);
+    }
 
-            // http://geekrai.blogspot.cz/2013/05/class-loading-and-unloading-in-jvm.html
-            // If the application has no references to a given type, then the type can be unloaded or garbage collected (like heap memory).
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
+    @Override
+    public InputStream getResourceAsStream(String name) {
+        System.out.println("FINDING RESOURCE " + name);
 
-            oos.writeObject(holder);
-            return bos.toByteArray(); // return it as byte array
-        } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        byte[] bytes = cache.get(name.replaceAll("/", ".").substring(0,name.lastIndexOf(".")));
+        return new ByteArrayInputStream(bytes);
     }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
+
+        byte[] bytes = cache.get(name);
+        System.out.println("FINDING CLASS " + name + " b "+ bytes);
         return defineClass(name, bytes, 0, bytes.length);
     }
 }

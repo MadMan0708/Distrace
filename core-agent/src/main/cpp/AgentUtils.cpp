@@ -185,10 +185,12 @@ int AgentUtils::init_agent() {
         return JNI_ERR;
     }
 
-    if (InstrumentorAPI::init() == JNI_ERR) {
-        // stop the agent in case Instrumentor JVM could not be started or connected to
-        return JNI_ERR;
-    }
+    // add instrumentor jar on the classpath so our jvm can see interceptors defined in the Instrumentor JVM
+    std::string instrumentor_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR);
+    Agent::globalData->jvmti->AddToSystemClassLoaderSearch(instrumentor_jar.c_str());
+    Agent::globalData->jvmti->AddToBootstrapClassLoaderSearch(instrumentor_jar.c_str());
+
+
 
     log(LOGGER_AGENT)->info() << "Agent successfully initialized";
     return JNI_OK;

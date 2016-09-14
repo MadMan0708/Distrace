@@ -6,7 +6,6 @@
 #include <vector>
 #include <nnxx/socket.h>
 #include <jvmti.h>
-#include "InstrumentorAPI.h"
 #include "AgentArgs.h"
 
 #ifndef DISTRACE_AGENT_CORE_AGENTA_H
@@ -22,7 +21,6 @@ namespace Distrace {
         JavaVM *jvm;
         jboolean vm_started;
         jboolean vm_dead;
-        InstrumentorAPI *inst_api;
         AgentArgs *agent_args; // key = arg name, value = arg value
     } GlobalAgentData;
 

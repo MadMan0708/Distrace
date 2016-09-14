@@ -1,40 +1,57 @@
 package cz.cuni.mff.d3s.distrace;
 
-import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentorConfFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.ConfigurationFactory;
+import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
+import cz.cuni.mff.d3s.distrace.utils.ByteCodeClassLoader;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.description.type.TypeDescription;
 
-public class Instrumentor {
-    private static Logger log;
+import java.lang.instrument.IllegalClassFormatException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.HashMap;
 
-    /**
-     * This method has to be called in a custom implementation of Instrumentor in order to start the Instrumentor.
-     * Usually before this method is called the programmer should register all classes which should be instrumented
-     * using TransformerManager
-     * @param args command line arguments of the instrumentor
-     */
-    public void start(String[] args, CustomAgentBuilder builder){
-        assert args.length == 4; // we always start Instrumentor from native agent and 4 parameters should be
-        // always passed to it
-        // - socket address
-        // - log level
-        // - log dir
-        // - monitored application classpath. It is needed in order to resolve dependencies on class being instrumented
+public abstract class Instrumentor {
 
-        String socketAddress = args[0];
-        String logLevel = args[1];
-        String logDir = args[2];
-        String classPath = args[3];
-        ConfigurationFactory.setConfigurationFactory(new InstrumentorConfFactory(logLevel, logDir));
-        log = LogManager.getLogger(Instrumentor.class);
-        log.info("Running forked JVM");
+    private static HashMap<String, TypeDescription> cache = new HashMap<>();
+    private ByteCodeClassLoader cl = new ByteCodeClassLoader();
+    private BaseAgentBuilder agent = new BaseAgentBuilder(cache, cl);
 
-        new InstrumentorServer(socketAddress, builder)
-                .start();
+    public byte[] instrument(String className, byte[] bytes) {
+
+        String classNameDots = className.replaceAll("/", ".");
+        System.out.println("Instrumenting "+ classNameDots);
+        cl.registerBytes(classNameDots, bytes);
+        Class<?> clazz = null;
+        try {
+            clazz = cl.getClass(classNameDots);
+
+            System.out.println("aaaaaa "+ clazz.getClassLoader());
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        cache.put(classNameDots, new TypeDescription.ForLoadedType(clazz));
+
+
+        // register this typeDescription
+        // we do not have to provide bytecode as parameter to transform method since it is fetched when needed by our class file locator
+        // implemented using byte code class loader
+        // it returns null in case the class shouldn't have been transformed
+        try {
+            byte[] transformed = createAgentBuilder(agent).makeRaw().
+                    transform(cl, className, null, null, null);
+            System.out.println("transformed !!!!" + transformed);
+            return transformed;
+        } catch (IllegalClassFormatException e) {
+            e.printStackTrace();
+            System.out.println("NULL");
+            return null;
+        }
+
 
     }
+
+    public abstract AgentBuilder createAgentBuilder(BaseAgentBuilder builder);
 
 
 }
