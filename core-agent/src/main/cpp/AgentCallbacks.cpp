@@ -22,8 +22,7 @@ using namespace Distrace::Logging;
             int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
             auto loader_name = JavaUtils::getClassLoaderName(env, loader);
 
-
-
+            log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
 
             if(!JavaUtils::isIgnoredClassLoader(loader_name)){
 
@@ -35,12 +34,13 @@ using namespace Distrace::Logging;
                 jstring name_for_java = env->NewStringUTF(name);
                 auto ret = env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
 
-                log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
+                //log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " is about to be loaded by \"" << loader_name << "\" class loader ";
 
                 if(Agent::globalData->inst_api->should_instrument(name, class_data, class_data_len)){
                     *new_class_data_len = Agent::globalData->inst_api->instrument(new_class_data);
-                    log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented";
+                    log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented " << loader_name;
                 }
+                log(LOGGER_AGENT_CALLBACKS)->info() << "FINISH " << name << "LOADER " << loader_name;
             }
             AgentUtils::dettach_JNI_from_current_thread(attachStatus);
           }
