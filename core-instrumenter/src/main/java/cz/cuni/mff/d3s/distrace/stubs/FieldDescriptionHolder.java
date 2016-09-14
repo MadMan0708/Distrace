@@ -49,7 +49,7 @@ public class FieldDescriptionHolder  extends FieldDescription.InDefinedShape.Abs
     public static FieldDescription.InDefinedShape create(FieldDescription.InDefinedShape fieldDescription){
         FieldDescriptionHolder holder = new FieldDescriptionHolder();
         holder.declaringType = TypeDescriptionStub.from(fieldDescription.getDeclaringType());
-        holder.type = TypeDescriptionGeneric.create(fieldDescription.getType());
+        holder.type = TypeDescriptionGenericStub.from(fieldDescription.getType());
         holder.modifiers = fieldDescription.getModifiers();
         holder.name = fieldDescription.getName();
 

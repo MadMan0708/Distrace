@@ -87,7 +87,7 @@ public class ParameterDescriptionHolder extends ParameterDescription.InDefinedSh
         holder.setIndex(paramDescription.getIndex());
         holder.setModifiers(paramDescription.hasModifiers());
         holder.setNamed(paramDescription.isNamed());
-        holder.setType(TypeDescriptionGeneric.create(paramDescription.getType()));
+        holder.setType(TypeDescriptionGenericStub.from(paramDescription.getType()));
         // improve annotations handling
         //holder.setDeclaredAnnotations(paramDescription.getDeclaredAnnotations());
         return holder;

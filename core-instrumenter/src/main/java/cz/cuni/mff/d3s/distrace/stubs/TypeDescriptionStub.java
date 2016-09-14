@@ -71,14 +71,14 @@ public class TypeDescriptionStub extends TypeDescription.AbstractBase implements
         holder.name = typeDescr.getName();
         holder.descriptor = typeDescr.getDescriptor();
         holder.methods = MethodDescriptionInDefinedShapeHolder.convert(typeDescr.getDeclaredMethods());
-        holder.superClass = TypeDescriptionGeneric.create(typeDescr.getSuperClass());
-        holder.interfaces = TypeDescriptionGeneric.convert(typeDescr.getInterfaces());
-        holder.fields = FieldDescriptionHolder.convert(typeDescr.getDeclaredFields());
-        holder.declaredTypes = TypeListStub.from(typeDescr.getDeclaredTypes());
-        holder.enclosingMethod = MethodDescriptionStub.from(typeDescr.getEnclosingMethod());
-        holder.packageDescription = PackageDescriptionHolder.create(typeDescr.getPackage());
-        holder.typeVariables = TypeDescriptionGeneric.convert(typeDescr.getTypeVariables());
-        holder.declaredAnnotations = AnnotationListStub.from(typeDescr.getDeclaredAnnotations());
+        holder.superClass = TypeDescriptionGenericStub.from(typeDescr.getSuperClass());
+        //holder.interfaces = TypeListGenericStub.from(typeDescr.getInterfaces());
+        //holder.fields = FieldDescriptionHolder.convert(typeDescr.getDeclaredFields());
+        //holder.declaredTypes = TypeListStub.from(typeDescr.getDeclaredTypes());
+        //holder.enclosingMethod = MethodDescriptionStub.from(typeDescr.getEnclosingMethod());
+        //holder.packageDescription = PackageDescriptionHolder.create(typeDescr.getPackage());
+        //holder.typeVariables = TypeListGenericStub.from(typeDescr.getTypeVariables());
+        //holder.declaredAnnotations = AnnotationListStub.from(typeDescr.getDeclaredAnnotations());
 
         return holder;
     }

@@ -17,6 +17,7 @@ class TypeListGenericStub extends TypeList.Generic.AbstractBase implements Seria
     private List<TypeDescription.Generic> typeDescriptions = new ArrayList<>();
 
     static TypeList.Generic from(TypeList.Generic typeList) {
+        System.out.println("HERE");
         if (!cache.containsKey(typeList)) {
             TypeListGenericStub stub = new TypeListGenericStub();
             cache.put(typeList, stub);
@@ -27,7 +28,7 @@ class TypeListGenericStub extends TypeList.Generic.AbstractBase implements Seria
 
     private static TypeList.Generic from(TypeList.Generic typeList, TypeListGenericStub stub) {
         for (TypeDescription.Generic typeDescription : typeList) {
-            stub.typeDescriptions.add(TypeDescriptionGeneric.create(typeDescription));
+            stub.typeDescriptions.add(TypeDescriptionGenericStub.from(typeDescription));
         }
         return stub;
     }

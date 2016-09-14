@@ -18,7 +18,7 @@ import java.util.Iterator;
 /**
  * Stub for TypeDescription.Generic
  */
-class TypeDescGenericStub extends TypeDescription.Generic.AbstractBase implements Serializable{
+class TypeDescriptionGenericStub extends TypeDescription.Generic.AbstractBase implements Serializable{
     private TypeList.Generic upperBounds;
     private TypeList.Generic lowerBounds;
     private TypeList.Generic typeArguments;
@@ -46,35 +46,36 @@ class TypeDescGenericStub extends TypeDescription.Generic.AbstractBase implement
 
     static TypeDescription.Generic from(TypeDescription.Generic typeDescr) {
         if (!cache.containsKey(typeDescr)) {
-            TypeDescGenericStub stub = new TypeDescGenericStub();
+            TypeDescriptionGenericStub stub = new TypeDescriptionGenericStub();
             cache.put(typeDescr, stub);
-            TypeDescGenericStub.from(typeDescr, stub);
+            TypeDescriptionGenericStub.from(typeDescr, stub);
         }
         return cache.get(typeDescr);
     }
 
-    private static TypeDescription.Generic from(TypeDescription.Generic typeDescr, TypeDescGenericStub stub){
+    private static TypeDescription.Generic from(TypeDescription.Generic typeDescr, TypeDescriptionGenericStub stub){
         if(typeDescr == null){
             return null;
         }
-        stub.upperBounds = TypeListGenericStub.from(typeDescr.getUpperBounds());
-        stub.lowerBounds = TypeListGenericStub.from(typeDescr.getLowerBounds());
-        stub.typeArguments = TypeListGenericStub.from(typeDescr.getTypeArguments());
-        stub.ownerType = from(typeDescr.getOwnerType());
-        stub.typeVariableSource = typeDescr.getTypeVariableSource(); // ?
-        stub.symbol = typeDescr.getSymbol();
-        stub.componentType = from(typeDescr.getComponentType());
+        System.out.print("Creatin typeDesc generic for "+typeDescr);
+        //stub.upperBounds = TypeListGenericStub.from(typeDescr.getUpperBounds());
+        //stub.lowerBounds = TypeListGenericStub.from(typeDescr.getLowerBounds());
+        //stub.typeArguments = TypeListGenericStub.from(typeDescr.getTypeArguments());
+        //stub.ownerType = from(typeDescr.getOwnerType());
+        //stub.typeVariableSource = typeDescr.getTypeVariableSource(); // ?
+        //stub.symbol = typeDescr.getSymbol();
+        //stub.componentType = from(typeDescr.getComponentType());
         stub.sort = typeDescr.getSort();
         stub.typeName = typeDescr.getTypeName();
         stub.stackSize = typeDescr.getStackSize();
         stub.isArray = typeDescr.isArray();
         stub.isPrimitive = typeDescr.isPrimitive();
         stub.erasure = TypeDescriptionStub.from(typeDescr.asErasure());
-        stub.superClass = from(typeDescr.getSuperClass());
+        //stub.superClass = from(typeDescr.getSuperClass());
         stub.interfaces = TypeListGenericStub.from(typeDescr.getInterfaces());
         //stub.fields = FieldDescriptionHolder.convert(typeDescr.getDeclaredFields());
         //stub.methods =
-        stub.declaredAnnotations = AnnotationListStub.from(typeDescr.getDeclaredAnnotations());
+        //stub.declaredAnnotations = AnnotationListStub.from(typeDescr.getDeclaredAnnotations());
         //stub.iterator = typeDescr.i
         stub.actualName = typeDescr.getActualName();
 

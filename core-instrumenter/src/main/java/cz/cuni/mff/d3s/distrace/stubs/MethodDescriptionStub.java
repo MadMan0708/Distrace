@@ -52,7 +52,7 @@ class MethodDescriptionStub extends MethodDescription.AbstractBase implements Se
         stub.defaultValue = methodDescription.getDefaultValue();
         stub.exceptionTypes = methodDescription.getExceptionTypes();
         stub.parameters = methodDescription.getParameters();
-        stub.returnType = TypeDescriptionGeneric.create(methodDescription.getReturnType());
+        stub.returnType = TypeDescriptionGenericStub.from(methodDescription.getReturnType());
         return stub;
     }
 

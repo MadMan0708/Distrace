@@ -57,10 +57,10 @@ public class MethodDescriptionInDefinedShapeHolder extends MethodDescription.InD
         holder.modifiers = methodDescription.getModifiers();
         holder.declaringType = TypeDescriptionStub.from(methodDescription.getDeclaringType());
         holder.defined = MethodDescriptionInDefinedShapeHolder.getOrCreate(methodDescription.asDefined());
-        holder.receiverType = TypeDescriptionGeneric.create(methodDescription.getReceiverType());
-        holder.exceptionTypes = TypeDescriptionGeneric.convert(methodDescription.getExceptionTypes());
+        holder.receiverType = TypeDescriptionGenericStub.from(methodDescription.getReceiverType());
+        holder.exceptionTypes = TypeListGenericStub.from(methodDescription.getExceptionTypes());
         holder.parameters = ParameterDescriptionHolder.convert(methodDescription.getParameters());
-        holder.returnType = TypeDescriptionGeneric.create(methodDescription.getReturnType());
+        holder.returnType = TypeDescriptionGenericStub.from(methodDescription.getReturnType());
 
         // TODO: Proper stub
         //holder.defaultValue = methodDescription.getDefaultValue();
