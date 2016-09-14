@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.stubs;
 
 import net.bytebuddy.description.TypeVariableSource;
 import net.bytebuddy.description.annotation.AnnotationList;
@@ -150,14 +150,34 @@ public class TypeDescriptionGeneric implements TypeDescription.Generic, Serializ
         this.iterator = iterator;
     }
 
+
+    private static class TypeListGenericHolder extends TypeList.Generic.AbstractBase implements Serializable{
+        private ArrayList<TypeDescription.Generic> types;
+
+        public TypeListGenericHolder(ArrayList<TypeDescription.Generic> types){
+            this.types = types;
+        }
+
+
+        @Override
+        public int size() {
+            return types.size();
+        }
+
+        @Override
+        public TypeDescription.Generic get(int index) {
+           return types.get(index);
+        }
+    }
+
     public static TypeList.Generic convert(TypeList.Generic list){
 
         ArrayList<TypeDescription.Generic> methodList = new ArrayList<>();
-        for(TypeDescription.Generic s: methodList){
+        for(TypeDescription.Generic s: list){
             System.out.println("Converting method "+ s);
             methodList.add(create(s));
         }
-        return new TypeList.Generic.Explicit(methodList);
+        return new TypeListGenericHolder(methodList);
     }
 
     public static TypeDescription.Generic create(TypeDescription.Generic typeDescr){
@@ -180,7 +200,7 @@ public class TypeDescriptionGeneric implements TypeDescription.Generic, Serializ
 
         //TODO: proper stub
         holder.setAnnotation(typeDescr.isAnnotation());
-        holder.setDeclaredAnnotations(typeDescr.getDeclaredAnnotations());
+        //holder.setDeclaredAnnotations(typeDescr.getDeclaredAnnotations());
         
         //holder.setIterator(typeDescr.iterator());
         //holder.setVisitor(typeDescr.ac);

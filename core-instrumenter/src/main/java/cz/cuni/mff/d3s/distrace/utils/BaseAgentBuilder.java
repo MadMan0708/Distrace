@@ -61,7 +61,7 @@ public class BaseAgentBuilder {
             .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
             .with(new AgentBuilder.PoolStrategy() {
                 @Override
-                public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
+                public TypePool typePool(ClassFileLocator classFileLocator, final ClassLoader classLoader) {
                     return new TypePool() {
                         @Override
                         public Resolution describe(String name) {

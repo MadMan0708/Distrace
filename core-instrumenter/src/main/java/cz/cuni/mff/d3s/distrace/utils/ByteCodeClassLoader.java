@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
+import cz.cuni.mff.d3s.distrace.stubs.TypeDescriptionStub;
 import net.bytebuddy.description.type.TypeDescription;
 
 import java.io.ByteArrayOutputStream;
@@ -9,16 +10,20 @@ import java.io.ObjectOutputStream;
 /**
  * Byte code classloader exposed to native agent
  */
-public class ByteCodeClassLoader extends ClassLoader{
+public class ByteCodeClassLoader extends ClassLoader {
 
-    public static byte[] typeDescrFor(byte[] code, String className){
+    private byte[] bytes;
+
+    private ByteCodeClassLoader(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    public static byte[] typeDescrFor(byte[] code, String className) {
         try {
             ByteCodeClassLoader cl = new ByteCodeClassLoader(code);
-            Class<?> clazz = cl.findClass(className.replaceAll("/","."));
+            Class<?> clazz = cl.findClass(className.replaceAll("/", "."));
             TypeDescription typeDescr = new TypeDescription.ForLoadedType(clazz);
-            System.out.println("BEFORE HOLDER CREATING");
-            TypeDescription holder = TypeDescriptionTransformer.getOrCreate(typeDescr);
-            System.out.println(" HOLDER CREATED");
+            TypeDescription holder = TypeDescriptionStub.from(typeDescr);
             cl = null;
             // Only one class was loaded using this classloader. The class gets "unloaded"
             // from JVM if the classloader which loaded it gets garbage collected and we ensure this
@@ -36,14 +41,6 @@ public class ByteCodeClassLoader extends ClassLoader{
             return null;
         }
     }
-
-    private ByteCodeClassLoader(byte[] bytes) {
-        this.bytes = bytes;
-    }
-
-    private byte[] bytes;
-
-
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {

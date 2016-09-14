@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.stubs;
 
 /**
  * Created by kuba on 09/09/16.

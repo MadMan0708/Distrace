@@ -1,16 +1,20 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.stubs;
 
 import net.bytebuddy.description.annotation.AnnotationList;
 import net.bytebuddy.description.type.PackageDescription;
 
+import java.io.Serializable;
+
 /**
  * Created by kuba on 08/09/16.
  */
-public class PackageDescriptionHolder extends PackageDescription.AbstractBase {
+public class PackageDescriptionHolder extends PackageDescription.AbstractBase implements Serializable {
 
     public static PackageDescription create(PackageDescription packageDescription){
         PackageDescriptionHolder holder = new PackageDescriptionHolder();
-        holder.setDeclaredAnnotations(packageDescription.getDeclaredAnnotations());
+
+        //TODO: PROPER ANNOtation handling
+        //holder.setDeclaredAnnotations(packageDescription.getDeclaredAnnotations());
         holder.setName(packageDescription.getName());
         return holder;
     }
@@ -19,11 +23,11 @@ public class PackageDescriptionHolder extends PackageDescription.AbstractBase {
     private AnnotationList declaredAnnotations;
 
 
-    void setName(String name) {
+    private void setName(String name) {
         this.name = name;
     }
 
-    void setDeclaredAnnotations(AnnotationList declaredAnnotations) {
+    private void setDeclaredAnnotations(AnnotationList declaredAnnotations) {
         this.declaredAnnotations = declaredAnnotations;
     }
 

@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.stubs;
 
 
 import net.bytebuddy.description.annotation.AnnotationList;
@@ -46,13 +46,29 @@ public class ParameterDescriptionHolder extends ParameterDescription.InDefinedSh
         this.declaredAnnotations = declaredAnnotations;
     }
 
+    private static class ParameterListHolder extends ParameterList.AbstractBase implements Serializable{
+        private ArrayList<InDefinedShape> params;
+
+        public ParameterListHolder(ArrayList<InDefinedShape> params){
+            this.params = params;
+        }
+        @Override
+        public Object get(int index) {
+            return params.get(index);
+        }
+
+        @Override
+        public int size() {
+            return params.size();
+        }
+    }
     public static ParameterList<ParameterDescription.InDefinedShape> convert(ParameterList<InDefinedShape> parameters){
 
         ArrayList<InDefinedShape> parameterList = new ArrayList<>();
         for(InDefinedShape param: parameters){
             parameterList.add(ParameterDescriptionHolder.getOrCreate(param));
         }
-        return new ParameterList.Explicit<>(parameterList);
+        return new ParameterListHolder(parameterList);
     }
 
     private static HashMap<InDefinedShape,InDefinedShape> cache = new HashMap<>();
@@ -73,7 +89,7 @@ public class ParameterDescriptionHolder extends ParameterDescription.InDefinedSh
         holder.setNamed(paramDescription.isNamed());
         holder.setType(TypeDescriptionGeneric.create(paramDescription.getType()));
         // improve annotations handling
-        holder.setDeclaredAnnotations(paramDescription.getDeclaredAnnotations());
+        //holder.setDeclaredAnnotations(paramDescription.getDeclaredAnnotations());
         return holder;
     }
     @Override
