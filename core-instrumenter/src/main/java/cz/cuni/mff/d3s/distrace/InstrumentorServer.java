@@ -61,6 +61,7 @@ public class InstrumentorServer {
         sock = new PairSocket();
         sock.bind(sockAddr);
         transformer = builder.createAgent(new BaseAgentBuilder(typeDescriptions, sock)).makeRaw();
+
         //noinspection InfiniteLoopStatement
         while (true) {
 

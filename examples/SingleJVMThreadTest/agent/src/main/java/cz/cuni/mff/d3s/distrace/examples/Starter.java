@@ -6,6 +6,7 @@ import cz.cuni.mff.d3s.distrace.examples.transformers.StarterTaskTransformer;
 import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
 import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
