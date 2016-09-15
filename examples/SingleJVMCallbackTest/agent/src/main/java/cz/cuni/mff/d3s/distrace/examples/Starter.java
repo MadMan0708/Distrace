@@ -18,10 +18,10 @@ public class Starter {
                     @Override
                     public AgentBuilder createAgent(BaseAgentBuilder builder) {
                         return builder
-                                //.type(named("cz.cuni.mff.d3s.distrace.examples.CallbackCreator"))
-                               // .transform(new CallBackCreatorTransformer())
-                                .type(nameStartsWith("cz.cuni.mff.d3s.distrace.examples.Callback").and(not(isInterface())))
-                                .transform(new CallbackTransformer());
+                                .type(named("cz.cuni.mff.d3s.distrace.examples.CallbackCreator"))
+                                .transform(new CallBackCreatorTransformer());
+                                //.type(nameStartsWith("cz.cuni.mff.d3s.distrace.examples.Callback").and(not(isInterface())))
+                                //.transform(new CallbackTransformer());
 
                     }
                 });

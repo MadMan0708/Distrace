@@ -27,7 +27,7 @@ using namespace Distrace::Logging;
             if(!JavaUtils::isIgnoredClassLoader(loader_name)){
 
                 jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoaderFromNative");
-                jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"typeDescrFor","([BLjava/lang/String;)V");
+                jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"typeDescrFor","([BLjava/lang/String;)[B");
 
                 auto bytes_for_java = env->NewByteArray(class_data_len);
                 env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);

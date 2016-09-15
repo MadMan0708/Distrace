@@ -25,7 +25,7 @@ EXAMPLE_APP_JAR_PATH="$TOPDIR/examples/$EXAMPLE_NAME/app/build/libs/$EXAMPLE_APP
 # For testing purposes we always expect main class to be this one
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
-LOG_LEVEL="info"
+LOG_LEVEL="off"
 COMM_TYPE="ipc"
 
 echo

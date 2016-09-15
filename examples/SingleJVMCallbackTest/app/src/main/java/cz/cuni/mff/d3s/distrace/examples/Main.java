@@ -8,17 +8,21 @@ import java.util.concurrent.Executors;
  */
 public class Main {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         ExecutorService executorService = Executors.newCachedThreadPool();
 
+        System.out.println("CREATING CALLBACKS");
         Callback callbackA = CallbackCreator.createCallback("Callback A");
-        //Callback callbackB = CallbackCreator.createCallback("Callback B");
+        Callback callbackB = CallbackCreator.createCallback("Callback B");
 
-        //Task taskA = new Task(callbackA);
-        //Task taskB = new Task(callbackB);
+        Task taskA = new Task(callbackA);
+        Task taskB = new Task(callbackB);
 
-        //executorService.execute(taskA);
-        //executorService.execute(taskB);
+        executorService.execute(taskA);
+        executorService.execute(taskB);
+
+        executorService.shutdown();
+
 
 
     }

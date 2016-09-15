@@ -16,19 +16,19 @@ import java.lang.reflect.Method;
 public class CallbackCreatorInterceptor {
     @RuntimeType
     public static Object createCallback(@Origin Method method, @AllArguments Object[] arguments){
+        System.out.println("Successfully intstrumentation");
 
+        System.out.println(method);
         // invoke the original method
         // final Object invoke = method.invoke(proxy, arguments);
         Object invoke = null;
         try {
            invoke = method.invoke(null, arguments); // we are instrumenting static method, thus we pass null here
             // set the trace context on this class
-           invoke.getClass().getDeclaredField("traceContext").set(invoke, new TraceContext());
+           //invoke.getClass().getDeclaredField("traceContext").set(invoke, new TraceContext());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
         return invoke;
