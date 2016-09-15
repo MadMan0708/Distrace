@@ -1,23 +1,16 @@
 package cz.cuni.mff.d3s.distrace;
 
 import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.ByteCodeClassLoader;
+import cz.cuni.mff.d3s.distrace.utils.InstrumentorClassLoader;
 import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
-import net.bytebuddy.description.type.TypeDescription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 public class InstrumentorServer {
     private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
@@ -27,7 +20,7 @@ public class InstrumentorServer {
     private String sockAddr;
     private ClassFileTransformer transformer;
     private CustomAgentBuilder builder;
-    ByteCodeClassLoader cl = new ByteCodeClassLoader();
+    InstrumentorClassLoader cl = new InstrumentorClassLoader();
 
     InstrumentorServer(String sockAddr, CustomAgentBuilder builder) {
         this.sockAddr = sockAddr;
@@ -35,22 +28,18 @@ public class InstrumentorServer {
     }
 
     private void handleInstrument() {
-        byte[] name = sock.recvBytes();
+        byte[] classNameSlashes = sock.recvBytes();
 
-        String className = new String(name, StandardCharsets.UTF_8);
-        log.info("RECEIVE CLASS " + className);
+        String classNameDots = new String(classNameSlashes, StandardCharsets.UTF_8).replaceAll("/", ".");
+        log.debug("Received class from native agent: " + classNameDots);
         byte[] bytes = sock.recvBytes();
-        cl.registerByteCode(className.replaceAll("/","."), bytes);
+        cl.registerByteCode(classNameDots, bytes);
+        log.debug("Registered class bytecode into Instrumentor class loader");
+
         try {
-            Class<?> loaded = cl.loadClass(className.replaceAll("/","."));
-            log.info("CLASS REALLY LOADED: "+loaded.getName());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            instrument(className);
+            instrument(classNameDots);
         } catch (IllegalClassFormatException e) {
-            System.out.println("INVALID");
+            log.error("Received invalid btecode for class "+ classNameDots);
             sock.send("ERROR_INVALID_FORMAT");
         }
     }

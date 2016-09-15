@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class ByteCodeClassLoaderFromNative extends ClassLoader {
 
     //private static HashMap<String, byte[]> cache = new HashMap<>();
-    //private static ByteCodeClassLoader loader = new ByteCodeClassLoader();
+    //private static InstrumentorClassLoader loader = new InstrumentorClassLoader();
 
     private byte[] code;
     public ByteCodeClassLoaderFromNative(byte[] code){

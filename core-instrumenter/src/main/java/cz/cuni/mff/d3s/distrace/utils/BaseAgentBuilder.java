@@ -11,8 +11,6 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-
 /**
  * Base agent builder exposing relevant method on ByteBuddy's agent builder
  */
@@ -20,11 +18,11 @@ public class BaseAgentBuilder {
     private static final Logger log = LogManager.getLogger(BaseAgentBuilder.class);
 
 
-    private ByteCodeClassLoader byteCodeClassLoader;
+    private InstrumentorClassLoader instrumentorClassLoader;
     private PairSocket sock;
 
-    public BaseAgentBuilder(PairSocket sock, ByteCodeClassLoader cl) {
-        this.byteCodeClassLoader = cl;
+    public BaseAgentBuilder(PairSocket sock, InstrumentorClassLoader cl) {
+        this.instrumentorClassLoader = cl;
         this.sock = sock;
         agentBuilder = initBuilder();
     }
@@ -36,25 +34,24 @@ public class BaseAgentBuilder {
                     @Override
                     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
                             module, DynamicType dynamicType) {
-                        log.info("Before: Deciding whether to instrument class:  " + typeDescription);
+                        log.info("Following type will be instrumented: " + typeDescription);
                         sock.send("ack_req_int_yes");
                     }
 
                     @Override
                     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-                        log.info("Ignored: " + typeDescription);
+                        log.info("Following type won't be instrumented: " + typeDescription);
                         sock.send("ack_req_int_no");
                     }
 
                     @Override
                     public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
-                        throwable.printStackTrace();
-                        log.error("Error: " + typeName + " " );
+                        log.error("Error whilst instrumenting: " + typeName, throwable);
                     }
 
                     @Override
                     public void onComplete(String typeName, ClassLoader classLoader, JavaModule module) {
-                        log.info("Complete: " + typeName);
+                        log.info("Finished processing of: " + typeName);
                     }
                 })
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
@@ -65,14 +62,13 @@ public class BaseAgentBuilder {
                         return new TypePool() {
                             @Override
                             public Resolution describe(String name) {
-                                log.info("Describing :::::: " + name);
-
                                 try {
-                                    Class<?> clazz = byteCodeClassLoader.loadClass(name);
-                                    log.info("DESCRIBED CLAZZ " + clazz.getName());
-                                    return new Resolution.Simple( new TypeDescription.ForLoadedType(clazz));
+                                    Class<?> clazz = instrumentorClassLoader.loadClass(name);
+                                    TypeDescription typeDescription = new TypeDescription.ForLoadedType(clazz);
+                                    log.info("Created TypeDescription for class " + clazz.getName());
+                                    return new Resolution.Simple(typeDescription);
                                 } catch (ClassNotFoundException e) {
-                                    e.printStackTrace();
+                                    assert false; //
                                     return null;
                                 }
                             }
@@ -84,7 +80,7 @@ public class BaseAgentBuilder {
                         };
                     }
                 })
-                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(byteCodeClassLoader)));
+                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(instrumentorClassLoader)));
 
     }
 
