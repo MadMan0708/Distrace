@@ -27,13 +27,13 @@ using namespace Distrace::Logging;
 
             if(!JavaUtils::isIgnoredClassLoader(loader_name)){
 
-                jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoaderFromNative");
-                jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"typeDescrFor","([BLjava/lang/String;)[B");
+                jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
+                jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"forceLoad","([BLjava/lang/String;)V");
 
                 auto bytes_for_java = env->NewByteArray(class_data_len);
                 env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
                 jstring name_for_java = env->NewStringUTF(name);
-                auto ret = env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
+                env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
 
 
                 if(Agent::globalData->inst_api->should_instrument(name, class_data, class_data_len)){
@@ -52,7 +52,7 @@ using namespace Distrace::Logging;
 
     void JNICALL AgentCallbacks::callbackVMInit(jvmtiEnv *jvmti, JNIEnv *env, jthread thread) {
       // this forces JVM to load this class in the initialization phase
-        env->FindClass("cz/cuni/mff/d3s/distrace/utils/ByteCodeClassLoaderFromNative");
+        env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
       Agent::globalData->vm_started = JNI_TRUE;
       log(LOGGER_AGENT_CALLBACKS)->info("The virtual machine has been initialized!");
     }

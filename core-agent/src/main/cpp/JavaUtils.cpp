@@ -21,7 +21,7 @@ namespace Distrace {
                 // bootstrap classloader, it loads system classes which we usually don't want to instrument
                 "@Bootstrap",
                 // our helper classloader used to create TypeDescriptions for classes
-                "cz.cuni.mff.d3s.distrace.utils.ByteCodeClassLoaderFromNative",
+                "cz.cuni.mff.d3s.distrace.utils.ClassCreator",
                 "sun.reflect.DelegatingClassLoader"
                 // classloader created because if mechanism called "inflatation", it is created synthetically and loads synthetical classes
                 // and we do not want to create type Descrtiptions for these internal java classes
