@@ -11,6 +11,8 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+
 /**
  * Base agent builder exposing relevant method on ByteBuddy's agent builder
  */
@@ -56,19 +58,24 @@ public class BaseAgentBuilder {
                 })
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(AgentBuilder.PoolStrategy.ClassLoading.EXTENDED)
                 .with(new AgentBuilder.PoolStrategy() {
                     @Override
                     public TypePool typePool(ClassFileLocator classFileLocator, final ClassLoader classLoader) {
                         return new TypePool() {
+                            private HashMap<String, TypeDescription> cache = new HashMap<>();
                             @Override
                             public Resolution describe(String name) {
                                 try {
-                                    Class<?> clazz = instrumentorClassLoader.loadClass(name);
-                                    TypeDescription typeDescription = new TypeDescription.ForLoadedType(clazz);
-                                    log.info("Created TypeDescription for class " + clazz.getName());
-                                    return new Resolution.Simple(typeDescription);
+                                    if(!cache.containsKey(name)) {
+                                        Class<?> clazz = instrumentorClassLoader.loadClass(name);
+                                        TypeDescription typeDescription = new TypeDescription.ForLoadedType(clazz);
+                                        cache.put(name, typeDescription);
+                                    }
+                                    log.info("Created TypeDescription for class " + name);
+                                    return new Resolution.Simple(cache.get(name));
                                 } catch (ClassNotFoundException e) {
-                                    assert false; //
+                                    assert false; //can't happen
                                     return null;
                                 }
                             }
