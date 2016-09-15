@@ -89,7 +89,6 @@ public class BaseAgentBuilder {
     }
 
     private AgentBuilder agentBuilder;
-
     public AgentBuilder.Identified.Narrowable type(ElementMatcher<? super TypeDescription> typeMatcher) {
         return agentBuilder.type(typeMatcher);
     }
