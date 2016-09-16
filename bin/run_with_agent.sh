@@ -55,10 +55,10 @@ java -agentpath:"$NATIVE_AGENT_LIB_PATH=instrumentor_server_cp=$INSTRUMETOR_CP;l
 # Stop running instrumentor JVM in case of some kind of failure
 pids=$(jps -l | grep "distrace-examples\|cz.cuni.mff.d3s.distrace.examples.Starter" | cut -d" " -f1)
 
-#for pid in $pids
-#do
-# kill -9 $pid
-#done
+for pid in $pids
+do
+ kill -9 $pid
+done
 
 
 
