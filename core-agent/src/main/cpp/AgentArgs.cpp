@@ -188,5 +188,5 @@ int AgentArgs::parse_args(std::string options, std::string &err_msg) {
 }
 
 bool AgentArgs::is_running_in_local_mode(){
-    return boost::starts_with(get_arg_value(ARG_CONNECTION_STR),"ipc");
+    return boost::starts_with(get_arg_value(ARG_CONNECTION_STR), "ipc");
 }

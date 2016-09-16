@@ -157,14 +157,12 @@ int InstrumentorAPI::instrument(byte **output_buffer) {
 
 void InstrumentorAPI::stop() {
     // in case of local mode ( IPC communication) delete the file used for the communication
-    if(Agent::getArgs()->is_running_in_local_mode()){
-        // remove ipc://, the remaining part represents file ( when running on linux )
-        std::string file = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR).substr(6);
-        boost::filesystem::path file_to_delete(file);
-        boost::filesystem::remove(file_to_delete);
-    }
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Stopping the instrumentor JVM";
+    // remove ipc://, the remaining part represents file ( when running on linux )
+    std::string file = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR).substr(6);
+    boost::filesystem::path file_to_delete(file);
+    boost::filesystem::remove(file_to_delete);
 
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Stopping the Instrumentor JVM";
     send_req_type(REQ_TYPE_STOP);
 }
 

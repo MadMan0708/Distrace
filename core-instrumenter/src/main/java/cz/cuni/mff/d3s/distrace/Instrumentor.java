@@ -23,11 +23,21 @@ public class Instrumentor {
         // - log dir
 
         String socketAddress = args[0];
+
+        // when starting Instrumentor server externally, it make only sense to pass it ip:port as connection string
+        if(!socketAddress.startsWith("tcp") && !socketAddress.startsWith("ipc")){
+            socketAddress = "tcp://"+socketAddress;
+        }
+
         String logLevel = args[1];
         String logDir = args[2];
         ConfigurationFactory.setConfigurationFactory(new InstrumentorConfFactory(logLevel, logDir));
         log = LogManager.getLogger(Instrumentor.class);
-        log.info("Running forked JVM");
+        log.info("Running forked JVM \n" +
+                "   connection string : " + socketAddress + "\n" +
+                "   log level         : " + logLevel + "\n" +
+                "   log dir           : " + logDir + "\n" +
+                "");
 
         new InstrumentorServer(socketAddress, builder)
                 .start();

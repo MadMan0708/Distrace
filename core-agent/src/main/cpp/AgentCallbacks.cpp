@@ -69,8 +69,11 @@ void JNICALL AgentCallbacks::callbackVMInit(jvmtiEnv *jvmti, JNIEnv *env, jthrea
 
 void JNICALL AgentCallbacks::callbackVMDeath(jvmtiEnv *jvmti_env, JNIEnv *jni_env) {
     Agent::globalData->vm_dead = JNI_TRUE;
-    // stop the instrumentor JVM
-    Agent::globalData->inst_api->stop();
+    // stop the instrumentor JVM ( only in local mode )
+    if (Agent::getArgs()->is_running_in_local_mode()) {
+        Agent::globalData->inst_api->stop();
+    }
+
     log(LOGGER_AGENT_CALLBACKS)->info("The virtual machine has been terminated!");
 }
 
