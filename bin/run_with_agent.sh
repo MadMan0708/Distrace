@@ -29,7 +29,7 @@ INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
 LOG_LEVEL="info"
 CONNECTION_STR="ipc"
-INSTRUMETOR_CP=""
+INSTRUMETOR_CP=$EXAMPLE_APP_JAR_PATH
 echo
 echo "Running example: $EXAMPLE_NAME"
 echo

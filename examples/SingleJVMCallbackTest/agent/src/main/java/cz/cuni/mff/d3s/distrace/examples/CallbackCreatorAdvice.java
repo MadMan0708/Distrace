@@ -9,20 +9,17 @@ import java.lang.reflect.Field;
 /**
  * Created by kuba on 15/09/16.
  */
-public class MyAdvice {
+public class CallbackCreatorAdvice {
 
     @OnMethodExit
     public static Object exit(@BoxedReturn Object value) {
-        System.out.println("CALLED");
         try {
             Field f = value.getClass().getDeclaredField("traceContext");
             f.setAccessible(true);
             f.set(value, new TraceContext());
             TraceContext context = (TraceContext) f.get(value);
-            System.out.println("Trace ID = " +context.getTraceId());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
+            System.out.println("Created callback with trace ID = " +context.getTraceId());
+        } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
         return value;

@@ -11,7 +11,6 @@ public class Main {
     public static void main(String[] args) {
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-        System.out.println("CREATING CALLBACKS");
         Callback callbackA = CallbackCreator.createCallback("Callback A");
         Callback callbackB = CallbackCreator.createCallback("Callback B");
 
