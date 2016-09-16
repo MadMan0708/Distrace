@@ -1,5 +1,7 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
+import cz.cuni.mff.d3s.distrace.InstrumentorServer;
+import cz.cuni.mff.d3s.distrace.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,20 +25,31 @@ public class InstrumentorClassLoader extends ClassLoader{
 
     @Override
     public InputStream getResourceAsStream(String name) {
-        // We get as name fully classified name class file name, we need to turn it into
-        // java class fully qualified name
         String nameDots = name.replaceAll("/", ".");
         String nameDotsNoClassExtension = nameDots.substring(0, name.lastIndexOf("."));
-        log.info("Loading byte code for instrumentation of class: " + nameDotsNoClassExtension);
-        byte[] bytes = cache.get(nameDotsNoClassExtension);
-        return new ByteArrayInputStream(bytes);
+        if(InstrumentorServer.classAvailabilityMap.get(nameDotsNoClassExtension)){
+            log.info("Loading byte code for instrumentation of class using parent classloader: " + name);
+            return super.getResourceAsStream(name);
+        }else {
+            // We get as name fully classified name class file name, we need to turn it into
+            // java class fully qualified name
+
+            log.info("Loading byte code for instrumentation of class from local byte cache: " + nameDotsNoClassExtension);
+            byte[] bytes = cache.get(nameDotsNoClassExtension);
+            return new ByteArrayInputStream(bytes);
+        }
     }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        log.info("Finding class: "+ name);
-        byte[] bytes = cache.get(name);
-        assert bytes != null;
-        return defineClass(name, bytes, 0, bytes.length);
+        if(InstrumentorServer.classAvailabilityMap.get(name)){
+            log.info("Finding class using parent classloader: "+ name);
+            return super.findClass(name);
+        }else{
+            log.info("Finding class from local byte cache: "+ name);
+            byte[] bytes = cache.get(name);
+            assert bytes != null;
+            return defineClass(name, bytes, 0, bytes.length);
+        }
     }
 }

@@ -16,9 +16,11 @@ namespace Distrace {
     class AgentArgs {
 
     public:
-        static const std::string ARG_INSTRUMENTOR_JAR;
-        static const std::string ARG_CONNECTION_STR;
+        static const std::string ARG_INSTRUMENTOR_SERVER_JAR;
+        static const std::string ARG_INSTRUMENTOR_SERVER_CP;
+        static const std::string ARG_INSTRUMENTOR_LIB_JAR;
         static const std::string ARG_INSTRUMENTOR_MAIN_CLASS;
+        static const std::string ARG_CONNECTION_STR;
         static const std::string ARG_LOG_LEVEL;
         static const std::string ARG_LOG_DIR;
 
@@ -43,6 +45,10 @@ namespace Distrace {
          */
         int parse_args(std::string options, std::string &err_msg);
 
+        /**
+         * Return true if we run in IPC mode ( local mode ), false otherwise
+         */
+        bool is_running_in_local_mode();
     private:
         /** Internal arguments holder where key = arg name, value = arg value */
         std::map<std::string, std::string> args;
@@ -82,6 +88,8 @@ namespace Distrace {
          * can be further logged out
          */
         int check_for_mandatory_args(std::string &err_msg);
+
+
     };
 
 }

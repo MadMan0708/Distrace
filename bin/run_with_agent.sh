@@ -15,8 +15,10 @@ else
   EXAMPLE_NAME=$DEFAULT_EXAMPLE_NAME
 fi
 
-EXAMPLE_AGENT_JAR_NAME="distrace-examples-$EXAMPLE_NAME-agent-$VERSION-all.jar"
-EXAMPLE_AGENT_JAR_PATH="$TOPDIR/examples/$EXAMPLE_NAME/agent/build/libs/$EXAMPLE_AGENT_JAR_NAME"
+
+EXAMPLE_SERVER_JAR_NAME="distrace-examples-$EXAMPLE_NAME-agent-$VERSION-all.jar"
+EXAMPLE_SERVER_JAR_PATH="$TOPDIR/examples/$EXAMPLE_NAME/agent/build/libs/$EXAMPLE_SERVER_JAR_NAME"
+
 
 EXAMPLE_APP_JAR_NAME="distrace-examples-$EXAMPLE_NAME-app-$VERSION.jar"
 EXAMPLE_APP_JAR_PATH="$TOPDIR/examples/$EXAMPLE_NAME/app/build/libs/$EXAMPLE_APP_JAR_NAME"
@@ -27,7 +29,7 @@ INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
 LOG_LEVEL="info"
 COMM_TYPE="ipc"
-
+INSTRUMETOR_CP=""
 echo
 echo "Running example: $EXAMPLE_NAME"
 echo
@@ -36,18 +38,19 @@ echo
 echo "Using following configuration:"
 echo
 echo "Example JAR file:           $EXAMPLE_APP_JAR_PATH"
-echo "Instrumentor JAR file:      $EXAMPLE_AGENT_JAR_PATH"
+echo "Instrumentor JAR file:      $EXAMPLE_SERVER_JAR_PATH"
 echo "Instrumentor main class:    $INSTRUMENTOR_MAIN_CLASS"
 echo "Socket address:             $COMM_TYPE"
 echo "Log dir:                    $LOG_DIR"
 echo "Log level:                  $LOG_LEVEL"
+echo "Extra server classpath:     $INSTRUMETOR_CP"
 echo
 
 # remove previous logs
 rm -rf $LOG_DIR
 
 # Attach the agent library and start it together with the start of the application
-java -agentpath:"$NATIVE_AGENT_LIB_PATH=log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_jar=$EXAMPLE_AGENT_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;comm_type=$COMM_TYPE" -jar $EXAMPLE_APP_JAR_PATH
+java -agentpath:"$NATIVE_AGENT_LIB_PATH=instrumentor_server_cp=$INSTRUMETOR_CP;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_lib_jar=$EXAMPLE_SERVER_JAR_PATH;instrumentor_server_jar=$EXAMPLE_SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;comm_type=$COMM_TYPE" -jar $EXAMPLE_APP_JAR_PATH
 
 # Stop running instrumentor JVM in case of some kind of failure
 pids=$(jps -l | grep "distrace-examples\|cz.cuni.mff.d3s.distrace.examples.Starter" | cut -d" " -f1)

@@ -11,8 +11,15 @@ This is list of future task on this project:
 
 - add support for instrumenting anonymous classes
 
-- Moznost pouzit Zipkin UI
+- Zipkin UI for GUI ?
 
+- optimilization for future - don't send complete bytecode to 
+  instrumenter - do decision whether a class should be instrumented on
+  app side and send the class code when needed
+
+- Properly implement solution where server can be already running in the network
+    and we just connect to it from native agent
+ 
 [ARCHITECTONICALLY NOT POSSIBLE]
 - add possibility to cancel loading of class and load different first
   - ( more I think about it it won't be possible at the end anyway,

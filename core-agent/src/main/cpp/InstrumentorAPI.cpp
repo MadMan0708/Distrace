@@ -9,7 +9,6 @@
 #include <jni.h>
 #include <nnxx/pair.h>
 #include <boost/filesystem.hpp>
-#include <boost/algorithm/string.hpp>
 #include "InstrumentorAPI.h"
 #include "Utils.h"
 #include "Agent.h"
@@ -21,6 +20,7 @@ using namespace Distrace::Utilities;
 
 byte InstrumentorAPI::REQ_TYPE_INSTRUMENT = 0;
 byte InstrumentorAPI::REQ_TYPE_STOP = 1;
+byte InstrumentorAPI::REQ_TYPE_CHECK_HAS_CLASS = 2;
 std::string InstrumentorAPI::ACK_REQ_MSG = "ack_req_msg";
 std::string InstrumentorAPI::ACK_REQ_INST_YES = "ack_req_int_yes";
 std::string InstrumentorAPI::ACK_REQ_INST_NO = "ack_req_int_no";
@@ -87,7 +87,37 @@ void InstrumentorAPI::send_req_type(byte req_type) {
     assert(reply == ACK_REQ_MSG);
 }
 
-bool InstrumentorAPI::should_instrument(std::string class_name, const byte *type_descr, int type_descr_length) {
+
+bool InstrumentorAPI::should_instrument(std::string class_name) {
+    // critical section. Communication started from different threads would break nanomsg
+    mtx.lock();
+    log(LOGGER_INSTRUMENTOR_API)->debug() << "Asking Instrumentor whether it needs to instrument class \"" <<
+    class_name << "\"";
+    send_req_type(REQ_TYPE_INSTRUMENT);
+
+    // send class name
+    send_string_request(class_name);
+    // send bytecode
+    bool ret_value = false;
+
+    auto reply = receive_string_reply();
+    if (reply == ACK_REQ_INST_YES) {
+        log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
+        "\" will be instrumented.";
+        ret_value = true;
+    } else if (reply == ACK_REQ_INST_NO) {
+        log(LOGGER_INSTRUMENTOR_API)->debug() << "Instrumentor reply: Class \"" << class_name <<
+        "\" won't be instrumented.";
+    } else {
+        // never can be here
+        assert(false);
+    }
+    mtx.unlock();
+    return ret_value;
+
+}
+
+bool InstrumentorAPI::should_instrument(std::string class_name, const byte *class_data, int class_data_len) {
     // critical section. Communication started from different threads would break nanomsg
     mtx.lock();
     log(LOGGER_INSTRUMENTOR_API)->debug() << "Asking Instrumentor whether it needs to instrument class \"" <<
@@ -99,7 +129,7 @@ bool InstrumentorAPI::should_instrument(std::string class_name, const byte *type
     // send bytecode
     bool ret_value = false;
     // send type description to the Instrumentor JVM
-    send_byte_arr_request(type_descr, type_descr_length);
+    send_byte_arr_request(class_data, class_data_len);
     auto reply = receive_string_reply();
     if (reply == ACK_REQ_INST_YES) {
         log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
@@ -126,11 +156,10 @@ int InstrumentorAPI::instrument(byte **output_buffer) {
 }
 
 void InstrumentorAPI::stop() {
-    // in case of IPC communication delete the file used for the communication
-    std::string connection_str = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR);
-    if((boost::starts_with(connection_str,"ipc://"))){
-        std::string file = connection_str.substr(6); // remove ipc://, the remaining part represents file ( when running
-        // on linux)
+    // in case of local mode ( IPC communication) delete the file used for the communication
+    if(Agent::getArgs()->is_running_in_local_mode()){
+        // remove ipc://, the remaining part represents file ( when running on linux )
+        std::string file = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR).substr(6);
         boost::filesystem::path file_to_delete(file);
         boost::filesystem::remove(file_to_delete);
     }
@@ -140,26 +169,24 @@ void InstrumentorAPI::stop() {
 }
 
 int InstrumentorAPI::init() {
-    if (!system(NULL)) {
-        log(LOGGER_INSTRUMENTOR_API)->error() << "Can't fork Instrumentor JVM, shell not available!";
-        return JNI_ERR;
-    }
-
-    // fork instrumentor JVM
-    const std::string path_to_instrumentor_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR);
-    const std::string instrumentor_main_class = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS);
     const std::string connection_str = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR);
-    const std::string log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
-    const std::string log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
 
-    // class path of the monitored application
-    char *class_path;
-    Agent::globalData->jvmti->GetSystemProperty("java.class.path", &class_path );
-    if(boost::starts_with(connection_str,"ipc://")) {
-        // launch Instrumentor JVM only in case of ipc, when tcp is set, the instrumentor JVM should be already running.
+    // launch Instrumentor JVM only in case of ipc, when tcp is set, the instrumentor JVM should be already running.
+    if(Agent::getArgs()->is_running_in_local_mode()){
+        // fork instrumentor JVM
+        if (!system(NULL)) {
+            log(LOGGER_INSTRUMENTOR_API)->error() << "Can't fork Instrumentor JVM, shell not available!";
+            return JNI_ERR;
+        }
+        const std::string instrumentor_server_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_SERVER_JAR);
+        const std::string instrumentor_main_class = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS);
+        const std::string instrumentor_server_cp = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_SERVER_CP);
+        const std::string log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
+        const std::string log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
+
         std::string launch_command =
-                "java -cp " + path_to_instrumentor_jar + " " + instrumentor_main_class + " " + connection_str + " " +
-                log_level + " " + log_dir + " " + class_path + " & ";
+                "java -cp " + instrumentor_server_jar + ":" + instrumentor_server_cp + " " + instrumentor_main_class + " " + connection_str + " " +
+                log_level + " " + log_dir  + " & ";
         log(LOGGER_INSTRUMENTOR_API)->info() << "Starting Instrumentor JVM with the command: " << launch_command;
         int result = system(stringToCharPointer(launch_command));
         if (result < 0) {
@@ -167,6 +194,8 @@ int InstrumentorAPI::init() {
             strerror(errno);
             return JNI_ERR;
         }
+    }{
+        //TODO: check the connection
     }
     // create socket which is used to connect to the Instrumentor JVM
     nnxx::socket socket{nnxx::SP, nnxx::PAIR};
@@ -183,17 +212,25 @@ int InstrumentorAPI::init() {
 
     Agent::globalData->inst_api = new InstrumentorAPI(std::move(socket));
 
-    // add instrumentor jar on the classpath so our jvm can see interceptors defined in the Instrumentor JVM
-    std::string instrumentor_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_JAR);
-    jvmtiError error = Agent::globalData->jvmti->AddToSystemClassLoaderSearch(instrumentor_jar.c_str());
-    error = Agent::globalData->jvmti->AddToBootstrapClassLoaderSearch(instrumentor_jar.c_str());
+    // add instrumentor libraries jar on the classpath so our jvm can see created interceptors
+    const std::string instrumentor_lib_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_LIB_JAR);
+    jvmtiError error = Agent::globalData->jvmti->AddToSystemClassLoaderSearch(instrumentor_lib_jar.c_str());
 
+    auto ret = AgentUtils::check_jvmti_error(Agent::globalData->jvmti, error,
+                                  "Path: " + instrumentor_lib_jar +
+                                  " successfully added on the system's classloader search path",
+                                  "Cannot add path " + instrumentor_lib_jar +
+                                  " on the system's classloader search path");
+    if(ret == JNI_ERR){
+        return JNI_ERR;
+    }
 
+    error = Agent::globalData->jvmti->AddToBootstrapClassLoaderSearch(instrumentor_lib_jar.c_str());
     return AgentUtils::check_jvmti_error(Agent::globalData->jvmti, error,
-                                         "Path: " + instrumentor_jar +
-                                         " successfully added on the system's classloader search path",
-                                         "Cannot add path " + instrumentor_jar +
-                                         " on the system's classloader search path");
+                                         "Path: " + instrumentor_lib_jar +
+                                         " successfully added on the bootstrap's classloader search path",
+                                         "Cannot add path " + instrumentor_lib_jar +
+                                         " on the bootstraps's classloader search path");
 
 }
 
@@ -201,4 +238,8 @@ InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
     this->socket = std::move(socket);
 }
 
+bool InstrumentorAPI::has_class(std::string class_name){
+    send_req_type(REQ_TYPE_CHECK_HAS_CLASS);
 
+    return send_and_receive(class_name) == "yes";
+}

@@ -14,6 +14,17 @@ namespace Distrace {
             return buf;
         }
 
+        void forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len){
+            jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
+            jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"forceLoad","([BLjava/lang/String;)V");
+
+            auto bytes_for_java = env->NewByteArray(class_data_len);
+            env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
+            jstring name_for_java = env->NewStringUTF(name);
+            env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
+
+        }
+
         /**
         *  The list of class loaders for which we don't want to instrument classes loaded by these class loaders
         */

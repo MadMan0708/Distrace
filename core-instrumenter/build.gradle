@@ -11,9 +11,8 @@ dependencies {
     testCompile "junit:junit:4.12"
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6'
-    //compile 'net.bytebuddy:byte-buddy:1.4.22'
-    compile 'net.bytebuddy:byte-buddy:1.4.23-SNAPSHOT'
-    compile 'net.bytebuddy:byte-buddy-agent:1.4.22'
+    compile 'net.bytebuddy:byte-buddy:1.4.24'
+    compile 'net.bytebuddy:byte-buddy-agent:1.4.24'
     compile "jnanomsg:jnanomsg:0.4.3"
 }
 
@@ -27,9 +26,8 @@ test {
 
 shadowJar{
     dependencies {
-        include(dependency("net.bytebuddy:byte-buddy-agent:1.4.22"))
-        //include(dependency("net.bytebuddy:byte-buddy:1.4.22"))
-        include(dependency("net.bytebuddy:byte-buddy:1.4.23-SNAPSHOT"))
+        include(dependency("net.bytebuddy:byte-buddy-agent:1.4.24"))
+        include(dependency("net.bytebuddy:byte-buddy:1.4.24"))
         include(dependency("jnanomsg:jnanomsg:0.4.3"))
         include(dependency("net.java.dev.jna:jna:4.2.1"))
         include(dependency("org.apache.logging.log4j:log4j-api:2.6"))

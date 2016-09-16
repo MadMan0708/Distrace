@@ -15,7 +15,9 @@ using namespace Distrace;
 using namespace Distrace::Logging;
 
 // instantiate argument names
-const std::string AgentArgs::ARG_INSTRUMENTOR_JAR = "instrumentor_jar";
+const std::string AgentArgs::ARG_INSTRUMENTOR_SERVER_JAR = "instrumentor_server_jar";
+const std::string AgentArgs::ARG_INSTRUMENTOR_SERVER_CP = "instrumentor_server_cp";
+const std::string AgentArgs::ARG_INSTRUMENTOR_LIB_JAR = "instrumentor_lib_jar";
 const std::string AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS = "instrumentor_main_class";
 const std::string AgentArgs::ARG_CONNECTION_STR = "connection_str";
 
@@ -105,12 +107,20 @@ int AgentArgs::check_for_mandatory_arg(std::string arg_name, std::string &err_ms
 }
 
 int AgentArgs::check_for_mandatory_args(std::string &err_msg) {
-    if(check_for_mandatory_arg(ARG_INSTRUMENTOR_JAR, err_msg) == JNI_ERR){
+    if(check_for_mandatory_arg(ARG_INSTRUMENTOR_LIB_JAR, err_msg) == JNI_ERR){
         return JNI_ERR;
     }
 
-    if(check_for_mandatory_arg(ARG_INSTRUMENTOR_MAIN_CLASS, err_msg) == JNI_ERR){
-        return JNI_ERR;
+    if(!is_arg_set(ARG_CONNECTION_STR) || (is_arg_set(ARG_CONNECTION_STR) && get_arg_value(ARG_CONNECTION_STR) == "ipc")){
+        if(check_for_mandatory_arg(ARG_INSTRUMENTOR_MAIN_CLASS, err_msg) == JNI_ERR){
+            err_msg = ARG_INSTRUMENTOR_MAIN_CLASS+" is missing, it has to be set when starting in local mode!";
+            return JNI_ERR;
+        }
+
+        if(check_for_mandatory_arg(ARG_INSTRUMENTOR_MAIN_CLASS, err_msg) == JNI_ERR){
+            err_msg = ARG_INSTRUMENTOR_SERVER_JAR+" is missing, it has to be set when starting in local mode!";
+            return JNI_ERR;
+        }
     }
 
     return JNI_OK;
@@ -126,6 +136,9 @@ void AgentArgs::fill_missing_with_defaults(){
         args.insert({ARG_LOG_DIR, full_current_path.string()});
     }
 
+    if(!is_arg_set(ARG_INSTRUMENTOR_SERVER_CP)){
+        args.insert({ARG_INSTRUMENTOR_SERVER_CP, ""});
+    }
 
     if(!is_arg_set(ARG_CONNECTION_STR)){
         args.insert({ARG_CONNECTION_STR, "ipc"});
@@ -174,3 +187,6 @@ int AgentArgs::parse_args(std::string options, std::string &err_msg) {
     return JNI_OK;
 }
 
+bool AgentArgs::is_running_in_local_mode(){
+    return boost::starts_with(get_arg_value(ARG_CONNECTION_STR),"ipc");
+}

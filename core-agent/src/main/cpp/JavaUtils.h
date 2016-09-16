@@ -17,6 +17,8 @@ namespace Distrace{
      */
     namespace JavaUtils {
 
+        void forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len);
+
         /**
          * Converts jbytearray to char*
          */

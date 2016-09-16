@@ -30,7 +30,13 @@ namespace Distrace {
          * This method send request to the instrumentor JVM which decides whether this class should be instrumented
          * or not.
          */
-        bool should_instrument(std::string class_name, const byte *type_descr, int type_descr_length);
+        bool should_instrument(std::string class_name, const byte *class_data, int class_data_len);
+
+        /**
+        * This method send request to the instrumentor JVM which decides whether this class should be instrumented
+        * or not.
+        */
+        bool should_instrument(std::string class_name);
 
         /**
          * This method sent bytecode to the instrumentor JVM and receives back the instrumented bytecode
@@ -42,6 +48,8 @@ namespace Distrace {
          */
         static int init();
 
+        bool has_class(std::string class_name);
+
         /**
          * Inform the instrumentor JVM that the monitored JVM has been stopped
          */
@@ -51,6 +59,9 @@ namespace Distrace {
         static byte REQ_TYPE_INSTRUMENT;
         /** Request type informing the instrumentor JVM that the monitored JVM is being stopped */
         static byte REQ_TYPE_STOP;
+        /** Request representing question to the server whether it has the class loaded or not*/
+        static byte REQ_TYPE_CHECK_HAS_CLASS;
+
         /** Acknowledgement for receiving general message */
         static std::string ACK_REQ_MSG;
         /** Acknowledgement saying that class should be instrumented */
