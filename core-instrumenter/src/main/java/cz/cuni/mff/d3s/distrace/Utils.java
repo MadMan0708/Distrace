@@ -11,8 +11,13 @@ public class Utils {
         return name.replaceAll("/", ".");
     }
 
-    public static void forceLoad(byte[] classBytes, String className) {
+    public static boolean loaded(String className){
         String classNameDots = Utils.convertToJavaName(className);
-        ClassCreator.loadClassWithAllReferences(classBytes, classNameDots);
+        return ClassCreator.contains(classNameDots);
+    }
+
+    public static boolean forceLoad(byte[] classBytes, String className) {
+        String classNameDots = Utils.convertToJavaName(className);
+        return ClassCreator.loadClassWithAllReferences(classBytes, classNameDots);
     }
 }

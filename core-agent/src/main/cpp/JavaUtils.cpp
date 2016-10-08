@@ -14,14 +14,23 @@ namespace Distrace {
             return buf;
         }
 
-        void forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len){
+        bool isAlreadyLoaded(JNIEnv *env, const char *name){
             jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
-            jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"forceLoad","([BLjava/lang/String;)V");
+            jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"loaded","(Ljava/lang/String;)Z");
+            jstring name_for_java = env->NewStringUTF(name);
+            auto should_continue = env->CallStaticBooleanMethod(byteLoader, methodLoadClass, name_for_java);
+            return should_continue;
+        }
+
+        bool forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len){
+            jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
+            jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"forceLoad","([BLjava/lang/String;)Z");
 
             auto bytes_for_java = env->NewByteArray(class_data_len);
             env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
             jstring name_for_java = env->NewStringUTF(name);
-            env->CallStaticObjectMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
+            auto should_continue = env->CallStaticBooleanMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
+            return should_continue;
 
         }
 
@@ -34,8 +43,8 @@ namespace Distrace {
                 // our helper classloader used to create TypeDescriptions for classes
                 "cz.cuni.mff.d3s.distrace.utils.ClassCreator",
                 "sun.reflect.DelegatingClassLoader"
-                // classloader created because if mechanism called "inflatation", it is created synthetically and loads synthetical classes
-                // and we do not want to create type Descrtiptions for these internal java classes
+                // classloader created because of mechanism called "inflatation", it is created synthetically and loads synthetical classes
+                // and we do not want to create type Descriptions for these internal java classes
                 // see http://stackoverflow.com/questions/6505274/what-for-sun-jvm-creates-instances-of-sun-reflect-delegatingclassloader-at-runti
         };
 

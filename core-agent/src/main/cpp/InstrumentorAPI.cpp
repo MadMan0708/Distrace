@@ -21,6 +21,7 @@ using namespace Distrace::Utilities;
 byte InstrumentorAPI::REQ_TYPE_INSTRUMENT = 0;
 byte InstrumentorAPI::REQ_TYPE_STOP = 1;
 byte InstrumentorAPI::REQ_TYPE_CHECK_HAS_CLASS = 2;
+byte InstrumentorAPI::REQ_TYPE_REGISTER_BYTECODE = 3;
 std::string InstrumentorAPI::ACK_REQ_MSG = "ack_req_msg";
 std::string InstrumentorAPI::ACK_REQ_INST_YES = "ack_req_int_yes";
 std::string InstrumentorAPI::ACK_REQ_INST_NO = "ack_req_int_no";
@@ -110,6 +111,7 @@ bool InstrumentorAPI::should_instrument(std::string class_name) {
         "\" won't be instrumented.";
     } else {
         // never can be here
+        log(LOGGER_INSTRUMENTOR_API)->debug() << "Got unexpected reply in should_instrument method : " << reply;
         assert(false);
     }
     mtx.unlock();
@@ -140,11 +142,20 @@ bool InstrumentorAPI::should_instrument(std::string class_name, const byte *clas
         "\" won't be instrumented.";
     } else {
         // never can be here
+        log(LOGGER_INSTRUMENTOR_API)->debug() << "Got unexpected reply in should_instrument method : " << reply;
         assert(false);
     }
     mtx.unlock();
     return ret_value;
 
+}
+
+void InstrumentorAPI::send_byte_code(std::string name, const unsigned char *class_data, int data_len){
+    mtx.lock();
+    send_req_type(REQ_TYPE_REGISTER_BYTECODE);
+    send_string_request(name);
+    send_byte_arr_request(class_data, data_len);
+    mtx.unlock();
 }
 
 int InstrumentorAPI::instrument(byte **output_buffer) {
@@ -237,7 +248,9 @@ InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
 }
 
 bool InstrumentorAPI::has_class(std::string class_name){
+    mtx.lock();
     send_req_type(REQ_TYPE_CHECK_HAS_CLASS);
-
-    return send_and_receive(class_name) == "yes";
+    auto ret = send_and_receive(class_name);
+    mtx.unlock();
+    return  ret == "yes";
 }

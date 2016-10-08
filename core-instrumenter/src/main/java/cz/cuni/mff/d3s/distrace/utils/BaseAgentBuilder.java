@@ -28,7 +28,9 @@ public class BaseAgentBuilder {
         this.sock = sock;
         agentBuilder = initBuilder();
     }
-
+    public AgentBuilder getAgentBuilder(){
+        return agentBuilder;
+    }
     private AgentBuilder initBuilder(){
         return new AgentBuilder.Default()
                 .with(new AgentBuilder.Listener() {

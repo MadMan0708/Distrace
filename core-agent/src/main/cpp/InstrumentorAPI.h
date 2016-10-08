@@ -21,6 +21,7 @@ namespace Distrace {
     class InstrumentorAPI {
     public:
 
+        void send_byte_code(std::string name, const unsigned char *class_data, int data_len);
         /**
          * Constructor which creates instance of this class based on the socket connection to the instrumentor JVM
          */
@@ -61,6 +62,9 @@ namespace Distrace {
         static byte REQ_TYPE_STOP;
         /** Request representing question to the server whether it has the class loaded or not*/
         static byte REQ_TYPE_CHECK_HAS_CLASS;
+        /** Request representing sending bytecode to instrumenter without instrumenting it, the byte code
+         * is just stored in the classlaoder byte cache*/
+        static byte REQ_TYPE_REGISTER_BYTECODE;
 
         /** Acknowledgement for receiving general message */
         static std::string ACK_REQ_MSG;

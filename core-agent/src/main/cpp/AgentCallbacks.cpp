@@ -23,34 +23,58 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
         int attachStatus = AgentUtils::JNI_AttachCurrentThread(env);
         auto loader_name = JavaUtils::getClassLoaderName(env, loader);
 
-        log(LOGGER_AGENT_CALLBACKS)->debug() << "BEFORE LOADING: The class " << name << " is about to be loaded by \""
+        log(LOGGER_AGENT_CALLBACKS)->debug() << "BEFORE LOADING: The class " << name <<
+        " is about to be loaded by \""
         << loader_name << "\" class loader ";
 
-        if (!JavaUtils::isIgnoredClassLoader(loader_name)) {
-            // send class name to instrumentor and check if this class is available. If it is then we send here
-            // instrumented code without sending byte code there. Otherwise we send bytecode there as well.
-            if (Agent::globalData->inst_api->has_class(name)) {
 
-                log(LOGGER_AGENT_CALLBACKS)->info() << "Instrumentor has class " << name;
-                // send instrumentor just name because it already has the class
-                if (Agent::globalData->inst_api->should_instrument(name)) {
-                    // receive reply when we expect the byte code to be instrumented
-                    *new_class_data_len = Agent::globalData->inst_api->instrument(new_class_data);
-                    log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented " <<
-                    loader_name;
+            if (!JavaUtils::isIgnoredClassLoader(loader_name)) {
+                if(!JavaUtils::isAlreadyLoaded(env, name)) {
+
+                // send class name to instrumentor and check if this class is available. If it is then we send here
+                // instrumented code without sending byte code there. Otherwise we send bytecode there as well.
+                if (Agent::globalData->inst_api->has_class(name)) {
+
+                    log(LOGGER_AGENT_CALLBACKS)->info() << "Instrumentor has class " << name;
+                    // send instrumentor just name because it already has the class
+                    if (Agent::globalData->inst_api->should_instrument(name)) {
+                        // receive reply when we expect the byte code to be instrumented
+                        *new_class_data_len = Agent::globalData->inst_api->instrument(new_class_data);
+                        log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented " <<
+                        loader_name;
+                    }
+                } else {
+
+                    log(LOGGER_AGENT_CALLBACKS)->info() << "Instrumentor does not have class " << name;
+                    // load class and all its dependencies
+                    bool should_continue = JavaUtils::forceLoadClass(env, name, class_data, class_data_len);
+                    //  if(should_continue) {
+                    log(LOGGER_AGENT_CALLBACKS)->debug() << "Continue after force load for" << name;
+                    // send instrumentor byte code and class name
+                    if (Agent::globalData->inst_api->should_instrument(name, class_data, class_data_len)) {
+                        // receive reply when we expect the byte code to be instrumented
+                        *new_class_data_len = Agent::globalData->inst_api->instrument(new_class_data);
+                        log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented " <<
+                        loader_name;
+                    }
+                    //  }
                 }
-            } else {
-                log(LOGGER_AGENT_CALLBACKS)->info() << "Instrumentor does not have class " << name;
-                // load class and all its dependencies
-                JavaUtils::forceLoadClass(env, name, class_data, class_data_len);
-                // send instrumentor byte code and class name
-                if (Agent::globalData->inst_api->should_instrument(name, class_data, class_data_len)) {
-                    // receive reply when we expect the byte code to be instrumented
-                    *new_class_data_len = Agent::globalData->inst_api->instrument(new_class_data);
-                    log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented " <<
-                    loader_name;
+            }else{
+                    log(LOGGER_AGENT_CALLBACKS)->debug() << "Ignoring repeated loading of class " << name
+                    << " with classloader " << loader_name;
+                    // send byte code of class to instrumentor, but do not the any instrumentation. This is for the case
+                    // of cyclic dependency ( we can't load the cyclic dependency, but we need to provide byte code for it.
+
+                    // also check if the instrumentor has the class already, since it doesn't make sense to send bytecode
+                    // which is already stored on the instrumenter
+
+                    //TODO: check whether class is alreaady on classlaoder search path
+                    //if(!Agent::globalData->inst_api->has_class(name)){
+                        //send the bytecode
+                        Agent::globalData->inst_api->send_byte_code(name, class_data, class_data_len);
+
+                    //}
                 }
-            }
         }
 
         log(LOGGER_AGENT_CALLBACKS)->debug() << "AFTER LOADING: The class " << name << " has been loaded by \""

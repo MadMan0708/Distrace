@@ -1,0 +1,37 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+description = "Simple application demostrating instrumentation of distrubuted MR task in H2O"
+
+// example application does not need to have any dependency on the instrumentation platform at all
+
+//
+// Configure project properties
+//
+ext {
+    h2oVersion = "3.10.0.7"
+}
+
+
+dependencies {
+    // Define dependency on core of H2O
+    compile "ai.h2o:h2o-core:${h2oVersion}"
+    // Define dependency on H2O algorithm
+    compile "ai.h2o:h2o-algos:${h2oVersion}"
+    // Demands web support
+    compile "ai.h2o:h2o-web:${h2oVersion}"
+    // Contains H2O entry points
+    compile "ai.h2o:h2o-app:${h2oVersion}"
+
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'cz.cuni.mff.d3s.distrace.examples.Main'
+        )
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

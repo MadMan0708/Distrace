@@ -20,7 +20,9 @@ public class InstrumentorClassLoader extends ClassLoader{
     private HashMap<String, byte[]> cache = new HashMap<>();
 
     public void registerByteCode(String className, byte[] bytes){
-        cache.put(className, bytes);
+        if(!cache.containsKey(className)) {
+            cache.put(className, bytes);
+        }
     }
 
     @Override

@@ -15,12 +15,12 @@ public class CodeUtils {
         return builder.defineField(name, clazz, Visibility.PRIVATE);
     }
 
-    public static void injectTraceContext(){
-        injectTraceContextOn(Thread.currentThread());
+    public static TraceContext injectTraceContext(){
+        return injectTraceContextOn(Thread.currentThread());
     }
 
-    public static void injectTraceContextOn(Thread thread){
-        TraceContextManager.getOrCreate(thread, new TraceContext());
+    public static TraceContext injectTraceContextOn(Thread thread){
+        return TraceContextManager.getOrCreate(thread, new TraceContext());
     }
 
     public static void propagateTraceContext(Thread to){
