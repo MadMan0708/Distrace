@@ -106,6 +106,24 @@ int AgentUtils::register_jvmti_events(jvmtiEnv *jvmti) {
     if (result == JNI_ERR) {
         return result;
     }
+
+    error = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_CLASS_PREPARE, (jthread) NULL);
+    result = AgentUtils::check_jvmti_error(jvmti, error,
+                                           "Notifications for even CJVMTI_EVENT_CLASS_PREPARE set!.",
+                                           "Cannot set notification for event JVMTI_EVENT_CLASS_PREPARE");
+    if (result == JNI_ERR) {
+        return result;
+    }
+
+    error = jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_CLASS_LOAD, (jthread) NULL);
+    result = AgentUtils::check_jvmti_error(jvmti, error,
+                                           "Notifications for even CJVMTI_EVENT_CLASS_LOAD set!.",
+                                           "Cannot set notification for event JVMTI_EVENT_CLASS_LOAD");
+    if (result == JNI_ERR) {
+        return result;
+    }
+
+
     log(LOGGER_AGENT)->info() << "All JVMTI notifications successfully set";
     return JNI_OK;
 }

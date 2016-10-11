@@ -40,6 +40,11 @@ namespace Distrace{
          */
         std::string getClassName(JNIEnv* env, jclass klazz);
 
+        /*
+         * Get classloader which was used to load the class in the argument
+         */
+        jobject getClassLoaderForClass(JNIEnv* env, jclass klazz);
+
         /**
          * Get fully qualified class name of object's class
          */

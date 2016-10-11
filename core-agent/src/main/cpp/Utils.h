@@ -11,7 +11,7 @@ namespace Distrace {
     /**
      * This namespace contains various utilities methods
      */
-    namespace Utilities {
+    namespace Utils {
 
         /**
          * Convert std::string to char*
@@ -22,6 +22,9 @@ namespace Distrace {
          * Create directories specified by directories path. Return true in case of success and false otherwise
          */
         bool create_directories(std::string dir_path);
+
+
+        std::string unique_tmp_dir_path();
     }
 }
 

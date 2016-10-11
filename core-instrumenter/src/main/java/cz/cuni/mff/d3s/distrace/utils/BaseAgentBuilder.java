@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base agent builder exposing relevant method on ByteBuddy's agent builder
@@ -34,17 +35,25 @@ public class BaseAgentBuilder {
     private AgentBuilder initBuilder(){
         return new AgentBuilder.Default()
                 .with(new AgentBuilder.Listener() {
-
                     @Override
                     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
                             module, DynamicType dynamicType) {
                         log.info("Following type will be instrumented: " + typeDescription);
+                        for(Map.Entry<TypeDescription, byte[]> entry : dynamicType.getAuxiliaryTypes().entrySet()){
+                            sock.send("auxiliary_types");
+                            log.info("Sending auxiliary class " + entry.getKey());
+                            sock.send(entry.getKey().getName());
+                            sock.send(entry.getValue().length + "");
+                            sock.send(entry.getValue());
+                        }
+                        sock.send("no_more_aux_classes");
                         sock.send("ack_req_int_yes");
                     }
 
                     @Override
                     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
                         log.info("Following type won't be instrumented: " + typeDescription);
+                        sock.send("no_more_aux_classes");
                         sock.send("ack_req_int_no");
                     }
 

@@ -10,6 +10,8 @@
 #include <regex>
 #include "AgentArgs.h"
 #include "Logging.h"
+#include "Utils.h"
+
 
 using namespace Distrace;
 using namespace Distrace::Logging;
@@ -45,7 +47,7 @@ void AgentArgs::connection_str_to_nanomsg_addr(){
     std::string connection_str = get_arg_value(ARG_CONNECTION_STR);
     // this function expects already validated connection_str
     if(connection_str=="ipc"){
-        connection_str = "ipc://"+ boost::filesystem::unique_path().string();
+        connection_str = "ipc://"+ Utils::unique_tmp_dir_path()+boost::filesystem::unique_path().string();
     }else{
         connection_str = "tcp://"+connection_str;
     }

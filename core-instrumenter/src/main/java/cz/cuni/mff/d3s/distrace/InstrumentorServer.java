@@ -1,8 +1,8 @@
 package cz.cuni.mff.d3s.distrace;
 
 import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentorClassLoader;
 import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.utils.InstrumentorClassLoader;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
 import org.apache.logging.log4j.LogManager;

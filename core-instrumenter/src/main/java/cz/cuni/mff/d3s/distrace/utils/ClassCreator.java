@@ -8,7 +8,6 @@ import java.util.HashMap;
  */
 public class ClassCreator extends ClassLoader {
 
-
     private static HashMap<String, byte[]> cache = new HashMap<>();
 
     public static boolean contains(String className){
@@ -18,25 +17,22 @@ public class ClassCreator extends ClassLoader {
      * This method finds the class. It is on purpose that this method does not use parent classloder,
      * otherwise we would cause infinite recursive call during onClassFileLoadHook
      */
-    public static boolean loadClassWithAllReferences(byte[] classBytes, String className){
-        //if(!cache.containsKey(className)) {
+    public static boolean loadClassWithAllReferences(byte[] classBytes, String className) {
+        if (!cache.containsKey(className)) {
             ClassCreator loader = new ClassCreator();
             cache.put(className, classBytes);
-            System.out.println("JUST PUT TO CACHE AND BEFORE LOADING DEPENDENCIES FOR "+ className);
 
             try {
                 Class<?> clazz = loader.findClass(className);
                 Class.forName(clazz.getName(), true, loader);
-                System.out.println("AFTER LOADING DEPENDENCIES FOR "+ className);
 
             } catch (ClassNotFoundException e) {
                 assert false; // this can't happen since we have the class always in the bytecode
             }
             return true; // should continue with rest of onClassFileLoadHook
-        //}else{
-          //  System.out.println("ALREADY IN CACHE"+ className);
-          //  return false; // should not continue with rest of onClassFileLoadHook
-        //}
+        }else {
+              return false; // should not continue with rest of onClassFileLoadHook
+        }
     }
 
     @Override

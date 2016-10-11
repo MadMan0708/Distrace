@@ -31,8 +31,8 @@ namespace Distrace {
             jstring name_for_java = env->NewStringUTF(name);
             auto should_continue = env->CallStaticBooleanMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
             return should_continue;
-
         }
+
 
         /**
         *  The list of class loaders for which we don't want to instrument classes loaded by these class loaders
@@ -61,6 +61,14 @@ namespace Distrace {
             // Now get the c string from the java jstring object
             const char *str = env->GetStringUTFChars(className, NULL);
             return str;
+        }
+
+        jobject getClassLoaderForClass(JNIEnv *env, jclass klazz){
+            // Get the class object's class descriptor (jclass inherits from jobject)
+            jclass clsClazz = env->GetObjectClass(klazz);
+            // Find the getClassLoader() method in the class object
+            jmethodID methodId = env->GetMethodID(clsClazz, "getClassLoader", "()Ljava/lang/ClassLoader;");
+            return (jobject) env->CallObjectMethod(klazz, methodId);
         }
 
         std::string getObjectClassName(JNIEnv *env, jobject instance) {

@@ -9,14 +9,18 @@
 #include <jni.h>
 #include <nnxx/pair.h>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include "InstrumentorAPI.h"
 #include "Utils.h"
 #include "Agent.h"
 #include "AgentUtils.h"
+#include "JavaUtils.h"
+#include <boost/algorithm/string.hpp>
+
 
 using namespace Distrace;
 using namespace Distrace::Logging;
-using namespace Distrace::Utilities;
+using namespace Distrace::Utils;
 
 byte InstrumentorAPI::REQ_TYPE_INSTRUMENT = 0;
 byte InstrumentorAPI::REQ_TYPE_STOP = 1;
@@ -25,7 +29,20 @@ byte InstrumentorAPI::REQ_TYPE_REGISTER_BYTECODE = 3;
 std::string InstrumentorAPI::ACK_REQ_MSG = "ack_req_msg";
 std::string InstrumentorAPI::ACK_REQ_INST_YES = "ack_req_int_yes";
 std::string InstrumentorAPI::ACK_REQ_INST_NO = "ack_req_int_no";
+std::string InstrumentorAPI::ACK_REQ_AUX_CLASSES = "auxiliary_types";
 std::mutex InstrumentorAPI::mtx;           // mutex for critical section
+
+
+void InstrumentorAPI::add_aux_class(std::string name){
+    aux_classes.push_back(name);
+}
+
+bool InstrumentorAPI::is_aux_class(std::string name){
+
+    std::string class_name(name);
+    std::replace(class_name.begin(), class_name.end(), '/', '.');
+    return std::find(aux_classes.begin(), aux_classes.end(), class_name) != aux_classes.end();
+}
 
 void InstrumentorAPI::assert_bytes_sent(int numBytesSent, size_t original_len) {
     if (numBytesSent < 0) {
@@ -89,6 +106,57 @@ void InstrumentorAPI::send_req_type(byte req_type) {
 }
 
 
+void InstrumentorAPI::load_aux_classes(std::string class_name){
+
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Loading auxiliary classes for " << class_name;
+
+    auto reply = receive_string_reply();
+
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Loading auxiliary classes for " << reply;
+    while(reply == ACK_REQ_AUX_CLASSES){
+        // keep loading them
+        auto aux_class_name = receive_string_reply();
+        auto length_as_string = receive_string_reply();
+        auto expected_length = std::atoi(length_as_string.c_str());
+
+        byte* output_buffer = (byte *) malloc(sizeof(byte) * expected_length);
+        receive_byte_arr_reply(&output_buffer, expected_length);
+        log(LOGGER_INSTRUMENTOR_API)->info() << "Receive bytecode for auxiliary class " << aux_class_name;
+
+
+        std::vector<std::string> tokens;
+        boost::split(tokens, aux_class_name, boost::is_any_of("."), boost::token_compress_on);
+        auto class_file_name = tokens.back() + ".class";
+        tokens.pop_back();
+        std::string sep(1, boost::filesystem::path::preferred_separator);
+        auto class_path = boost::algorithm::join(tokens, sep);
+        auto path = path_to_dir_with_aux_classes + class_path + sep;
+
+        log(LOGGER_INSTRUMENTOR_API)->info() << "!!!!!!PATH" + path;
+        auto fully_path = path + class_file_name;
+
+        if(!boost::filesystem::create_directories(path)) {
+           throw "Couldn't create path for auxilirary class" + path;
+        }
+
+
+        log(LOGGER_INSTRUMENTOR_API)->info() << "FULL PATH " << fully_path << " num of elem " << expected_length << " a " << sizeof(byte);
+        FILE* file = fopen(fully_path.c_str(), "wb" );
+        if(file!=NULL){
+            log(LOGGER_INSTRUMENTOR_API)->error() << "Writing to file " + fully_path;
+
+            fwrite(output_buffer, sizeof(output_buffer[0]), expected_length, file);
+            fclose(file);
+        }else{
+            log(LOGGER_INSTRUMENTOR_API)->error() << "Error opening the file " + fully_path;
+        }
+
+        add_aux_class(aux_class_name);
+        reply = receive_string_reply();
+    }
+
+}
+
 bool InstrumentorAPI::should_instrument(std::string class_name) {
     // critical section. Communication started from different threads would break nanomsg
     mtx.lock();
@@ -132,7 +200,8 @@ bool InstrumentorAPI::should_instrument(std::string class_name, const byte *clas
     bool ret_value = false;
     // send type description to the Instrumentor JVM
     send_byte_arr_request(class_data, class_data_len);
-    auto reply = receive_string_reply();
+    load_aux_classes(class_name);
+    std::string reply = receive_string_reply();
     if (reply == ACK_REQ_INST_YES) {
         log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
         "\" will be instrumented.";
@@ -245,6 +314,9 @@ int InstrumentorAPI::init() {
 
 InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
     this->socket = std::move(socket);
+    this->path_to_dir_with_aux_classes = Utils::unique_tmp_dir_path();
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Adding directory for auxiliary classes to classpath " << this->path_to_dir_with_aux_classes;
+    Agent::globalData->jvmti->AddToSystemClassLoaderSearch(this->path_to_dir_with_aux_classes.c_str());
 }
 
 bool InstrumentorAPI::has_class(std::string class_name){
