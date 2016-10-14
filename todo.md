@@ -14,6 +14,8 @@ This is list of future task on this project:
 
 - create outline for thesis text
 
-- add support for LoadedTypeInitializers
+- add support for LoadedTypeInitializers ( given the class is itself serializable )
 
 - add support got loading cyclic dependencies
+
+- rewrite Utils into c++ ( so we don't have to depend on Java class )

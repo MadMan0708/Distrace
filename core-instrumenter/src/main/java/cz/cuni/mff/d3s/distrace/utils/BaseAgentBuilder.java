@@ -5,12 +5,17 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.implementation.LoadedTypeInitializer;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +44,28 @@ public class BaseAgentBuilder {
                     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
                             module, DynamicType dynamicType) {
                         log.info("Following type will be instrumented: " + typeDescription);
+
+                        for(Map.Entry<TypeDescription, LoadedTypeInitializer> entry: dynamicType.getLoadedTypeInitializers().entrySet()){
+                            sock.send("loaded_type_initializers");
+                            log.info("Sending loaded type initializers " + entry.getKey());
+                            sock.send(entry.getKey().getName());
+
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            ObjectOutput out = null;
+                            try{
+                                out = new ObjectOutputStream(bos);
+                                out.writeObject(entry.getValue());
+                                out.flush();
+                                byte [] bytes = bos.toByteArray();
+                                sock.send(bytes.length + "");
+                                sock.send(bytes);
+                            } catch (IOException e){
+
+                            }
+
+                        }
+                        sock.send("mo_more_loaded_type_initializers");
+
                         for(Map.Entry<TypeDescription, byte[]> entry : dynamicType.getAuxiliaryTypes().entrySet()){
                             sock.send("auxiliary_types");
                             log.info("Sending auxiliary class " + entry.getKey());
