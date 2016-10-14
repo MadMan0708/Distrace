@@ -20,3 +20,4 @@ This is list of finished tasks on this project.
       so the first instance will still use the original code, not the instrumented
       one and we don't want that)
       
+- add support for using auxiliarry classes created by bytebuddy ( using files)      

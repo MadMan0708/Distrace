@@ -1,11 +1,8 @@
 This is list of future task on this project:
-  
-- Add support for passing arguments to scripts which starts examples
-
+ 
 - Create nice API for tracing "threads"
 
 [25.8.2016]
-- instrument network communication
 
 - create nice api based on the current examples
 
@@ -16,3 +13,7 @@ This is list of future task on this project:
 - Zipkin UI for GUI
 
 - create outline for thesis text
+
+- add support for LoadedTypeInitializers
+
+- add support got loading cyclic dependencies
