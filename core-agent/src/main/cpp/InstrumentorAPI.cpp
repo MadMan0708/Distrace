@@ -111,8 +111,6 @@ void InstrumentorAPI::load_aux_classes(std::string class_name){
     log(LOGGER_INSTRUMENTOR_API)->info() << "Loading auxiliary classes for " << class_name;
 
     auto reply = receive_string_reply();
-
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Loading auxiliary classes for " << reply;
     while(reply == ACK_REQ_AUX_CLASSES){
         // keep loading them
         auto aux_class_name = receive_string_reply();
@@ -128,19 +126,13 @@ void InstrumentorAPI::load_aux_classes(std::string class_name){
         boost::split(tokens, aux_class_name, boost::is_any_of("."), boost::token_compress_on);
         auto class_file_name = tokens.back() + ".class";
         tokens.pop_back();
+
         std::string sep(1, boost::filesystem::path::preferred_separator);
         auto class_path = boost::algorithm::join(tokens, sep);
         auto path = path_to_dir_with_aux_classes + class_path + sep;
-
-        log(LOGGER_INSTRUMENTOR_API)->info() << "!!!!!!PATH" + path;
         auto fully_path = path + class_file_name;
 
-        if(!boost::filesystem::create_directories(path)) {
-           throw "Couldn't create path for auxilirary class" + path;
-        }
-
-
-        log(LOGGER_INSTRUMENTOR_API)->info() << "FULL PATH " << fully_path << " num of elem " << expected_length << " a " << sizeof(byte);
+        boost::filesystem::create_directories(path);
         FILE* file = fopen(fully_path.c_str(), "wb" );
         if(file!=NULL){
             log(LOGGER_INSTRUMENTOR_API)->error() << "Writing to file " + fully_path;

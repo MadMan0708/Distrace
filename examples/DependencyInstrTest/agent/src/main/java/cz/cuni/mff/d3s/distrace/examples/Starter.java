@@ -18,8 +18,8 @@ public class Starter {
                     @Override
                     public AgentBuilder createAgent(BaseAgentBuilder builder) {
                         return builder
-                                //.type(named("cz.cuni.mff.d3s.distrace.examples.BaseTask"))
-                               // .transform(new BaseTaskTransformer())
+                                .type(named("cz.cuni.mff.d3s.distrace.examples.BaseTask"))
+                                .transform(new BaseTaskTransformer())
                                 .type(named("cz.cuni.mff.d3s.distrace.examples.ExtendedTask"))
                                 .transform(new ExtendedTaskTransformer());
                     }
