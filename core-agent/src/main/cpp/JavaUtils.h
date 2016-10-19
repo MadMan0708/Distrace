@@ -21,6 +21,7 @@ namespace Distrace{
 
         bool forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len);
 
+        std::string toNameWithDots(std::string class_name);
         /**
          * Converts jbytearray to char*
          */

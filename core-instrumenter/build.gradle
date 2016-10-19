@@ -2,11 +2,6 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 description = "Distrace instrumentation library"
 
-repositories{
-    flatDir {
-        dirs 'libs'
-    }
-}
 dependencies {
     testCompile "junit:junit:4.12"
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6'
@@ -14,6 +9,7 @@ dependencies {
     compile 'net.bytebuddy:byte-buddy:1.4.24'
     compile 'net.bytebuddy:byte-buddy-agent:1.4.24'
     compile "jnanomsg:jnanomsg:0.4.3"
+    compile "org.apache.bcel:bcel:6.0"
 }
 
 // Setup test environment
@@ -32,6 +28,8 @@ shadowJar{
         include(dependency("net.java.dev.jna:jna:4.2.1"))
         include(dependency("org.apache.logging.log4j:log4j-api:2.6"))
         include(dependency("org.apache.logging.log4j:log4j-core:2.6"))
+        include(dependency("org.apache.bcel:bcel:6.0"))
+
     }
 }
 

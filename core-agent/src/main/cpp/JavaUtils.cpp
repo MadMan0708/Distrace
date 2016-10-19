@@ -3,9 +3,14 @@
 //
 
 #include "JavaUtils.h"
+#include "ByteReader.h"
+#include "ConstantPool.h"
 
 namespace Distrace {
     namespace JavaUtils {
+
+
+        ConstantPool constant_pool;
 
         unsigned char* as_unsigned_char_array(JNIEnv *env, jbyteArray array) {
             int len = env->GetArrayLength (array);
@@ -15,22 +20,77 @@ namespace Distrace {
         }
 
         bool isAlreadyLoaded(JNIEnv *env, const char *name){
-            jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
-            jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"loaded","(Ljava/lang/String;)Z");
-            jstring name_for_java = env->NewStringUTF(name);
-            auto should_continue = env->CallStaticBooleanMethod(byteLoader, methodLoadClass, name_for_java);
-            return should_continue;
+           // jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
+           // jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"loaded","(Ljava/lang/String;)Z");
+           // jstring name_for_java = env->NewStringUTF(name);
+          //  auto should_continue = env->CallStaticBooleanMethod(byteLoader, methodLoadClass, name_for_java);
+            return false;
         }
 
-        bool forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len){
-            jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
-            jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"forceLoad","([BLjava/lang/String;)Z");
+        std::string toNameWithDots(std::string name){
 
-            auto bytes_for_java = env->NewByteArray(class_data_len);
-            env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
-            jstring name_for_java = env->NewStringUTF(name);
-            auto should_continue = env->CallStaticBooleanMethod(byteLoader, methodLoadClass, bytes_for_java, name_for_java);
-            return should_continue;
+            std::string class_name(name);
+            std::replace(class_name.begin(), class_name.end(), '/', '.');
+            return class_name;
+        }
+
+        void readMagicId(ByteReader &reader){
+            int magicId = reader.readInt();
+            int JVM_CLASSFILE_MAGIC = 0xCAFEBABE;
+            if(JVM_CLASSFILE_MAGIC != magicId){
+                throw "Magic id is not correct";
+            }
+        }
+
+        void readVersions(ByteReader &reader){
+               short minor = reader.readShort();
+               short major = reader.readShort();
+        }
+
+        void readConstantPool(ByteReader &reader){
+           constant_pool = ConstantPool(reader);
+        }
+        bool forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len){
+
+
+            //TODO implement this in C++, so Utils class doesn't have to be loaded
+            ByteReader reader(class_data);
+            readMagicId(reader);
+            readVersions(reader);
+            readConstantPool(reader);
+
+
+           // jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
+            //jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"forceLoad","(Ljava/lang/String;)Z");
+
+
+            //auto bytes_for_java = env->NewByteArray(class_data_len);
+            //env->SetByteArrayRegion(bytes_for_java, 0, class_data_len, (jbyte*) class_data);
+
+
+
+            //std::string nameDots = toNameWithDots(name);
+            //std::cout << nameDots << "  nname;;  ";
+            //jclass definedClazz = env->DefineClass(nameDots.c_str(), loader, (jbyte*)class_data, class_data_len);
+
+
+            //std::cout << "THis was success";
+
+
+
+            //jclass classClazz = env->FindClass("java/lang/Class");
+
+            //jstring name_for_java = env->NewStringUTF(name);
+            //jmethodID forNameMethod = env->GetMethodID(classClazz, "forName", "(Ljava/lang/String;)Ljava/lang/Class;");
+
+            // Load all dependencies for the class
+            //env->CallStaticObjectMethod(classClazz, forNameMethod, name_for_java);
+
+
+
+           // jstring name_for_java = env->NewStringUTF(name);
+           // auto should_continue = env->CallStaticBooleanMethod(byteLoader, methodLoadClass, name_for_java);
+            return true;
         }
 
 

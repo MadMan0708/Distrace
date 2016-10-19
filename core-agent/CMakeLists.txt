@@ -21,7 +21,7 @@ include_directories( ${nanomsg_INCLUDE_DIRS})
 include_directories( ${nanomsgxx_INCLUDE_DIRS})
 
 # specify source files
-set(SOURCE_FILES src/main/cpp/AgentUtils.cpp src/main/cpp/AgentUtils.h src/main/cpp/AgentCallbacks.cpp src/main/cpp/AgentCallbacks.h src/main/cpp/Agent.cpp src/main/cpp/Agent.h src/main/cpp/Logging.cpp src/main/cpp/Logging.h src/main/cpp/Utils.cpp src/main/cpp/Utils.h src/main/cpp/JavaUtils.cpp src/main/cpp/JavaUtils.h src/main/cpp/InstrumentorAPI.cpp src/main/cpp/InstrumentorAPI.h src/main/cpp/AgentArgs.cpp src/main/cpp/AgentArgs.h)
+set(SOURCE_FILES src/main/cpp/AgentUtils.cpp src/main/cpp/AgentUtils.h src/main/cpp/AgentCallbacks.cpp src/main/cpp/AgentCallbacks.h src/main/cpp/Agent.cpp src/main/cpp/Agent.h src/main/cpp/Logging.cpp src/main/cpp/Logging.h src/main/cpp/Utils.cpp src/main/cpp/Utils.h src/main/cpp/JavaUtils.cpp src/main/cpp/JavaUtils.h src/main/cpp/InstrumentorAPI.cpp src/main/cpp/InstrumentorAPI.h src/main/cpp/AgentArgs.cpp src/main/cpp/AgentArgs.h src/main/cpp/ByteReader.cpp src/main/cpp/ByteReader.h src/main/cpp/ConstantPool.cpp src/main/cpp/ConstantPool.h src/main/cpp/Constant.cpp src/main/cpp/Constant.h src/main/cpp/JavaConst.h src/main/cpp/ConstantClass.cpp src/main/cpp/ConstantClass.h src/main/cpp/ConstantFieldref.cpp src/main/cpp/ConstantFieldref.h src/main/cpp/ConstantCP.cpp src/main/cpp/ConstantCP.h src/main/cpp/ConstantMethodref.cpp src/main/cpp/ConstantMethodref.h src/main/cpp/ConstantInterfaceMethodref.cpp src/main/cpp/ConstantInterfaceMethodref.h src/main/cpp/ConstantString.cpp src/main/cpp/ConstantString.h src/main/cpp/ConstantInteger.cpp src/main/cpp/ConstantInteger.h src/main/cpp/ConstantFloat.cpp src/main/cpp/ConstantFloat.h)
 
 
 # create a shared library

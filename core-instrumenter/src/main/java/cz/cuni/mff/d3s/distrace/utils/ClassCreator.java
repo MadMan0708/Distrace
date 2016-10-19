@@ -13,11 +13,13 @@ public class ClassCreator extends ClassLoader {
     public static boolean contains(String className){
         return cache.containsKey(className);
     }
+
     /**
      * This method finds the class. It is on purpose that this method does not use parent classloder,
      * otherwise we would cause infinite recursive call during onClassFileLoadHook
      */
     public static boolean loadClassWithAllReferences(byte[] classBytes, String className) {
+
         if (!cache.containsKey(className)) {
             ClassCreator loader = new ClassCreator();
             cache.put(className, classBytes);
