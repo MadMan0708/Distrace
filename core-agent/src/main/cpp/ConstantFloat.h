@@ -7,7 +7,6 @@
 
 
 #include "Constant.h"
-
 class ConstantFloat: public Constant {
 public:
 

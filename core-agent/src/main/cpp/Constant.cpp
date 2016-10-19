@@ -11,6 +11,10 @@
 #include "ConstantString.h"
 #include "ConstantInteger.h"
 #include "ConstantFloat.h"
+#include "ConstantLong.h"
+#include "ConstantDouble.h"
+#include "ConstantNameAndType.h"
+#include "ConstantUtf8.h"
 
 using namespace Distrace;
 
@@ -37,13 +41,13 @@ Constant Constant::readConstant(ByteReader &reader) {
         case JavaConst::CONSTANT_Float:
             return ConstantFloat(reader);
         case JavaConst::CONSTANT_Long:
-            return ConstantLong(input);
+            return ConstantLong(reader);
         case JavaConst::CONSTANT_Double:
-            return ConstantDouble(input);
+            return ConstantDouble(reader);
         case JavaConst::CONSTANT_NameAndType:
-            return ConstantNameAndType(input);
+            return ConstantNameAndType(reader);
         case JavaConst::CONSTANT_Utf8:
-            return ConstantUtf8.getInstance(input);
+            return ConstantUtf8(reader);
         case JavaConst::CONSTANT_MethodHandle:
             return new ConstantMethodHandle(input);
         case JavaConst::CONSTANT_MethodType:

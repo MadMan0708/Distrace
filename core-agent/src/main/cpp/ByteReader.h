@@ -12,14 +12,19 @@ using namespace Distrace;
 class ByteReader {
 
     public:
-        ByteReader(const unsigned char *class_data);
+        ByteReader(const unsigned char *class_data, int class_data_len);
         int readInt();
         short readShort();
         byte readByte();
         float readFloat();
+        long readLong();
+        double readDouble();
+        std::string readUTF();
+        void readFully(byte buff[], int len);
 
     private:
         const unsigned char *bytes;
+        int bytes_len;
         int nextPos;
 };
 

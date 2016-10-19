@@ -54,7 +54,7 @@ namespace Distrace {
 
 
             //TODO implement this in C++, so Utils class doesn't have to be loaded
-            ByteReader reader(class_data);
+            ByteReader reader(class_data, class_data_len);
             readMagicId(reader);
             readVersions(reader);
             readConstantPool(reader);
