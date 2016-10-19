@@ -81,4 +81,19 @@ const byte CONSTANT_MethodType         = 16;
  * The Constant Pool in The Java Virtual Machine Specification</a> */
 const byte CONSTANT_InvokeDynamic      = 18;
 
+/** One of the access flags for fields, methods, or classes.
+ *  @see #ACC_PUBLIC
+ */
+const short ACC_INTERFACE    = 0x0200;
+
+/** One of the access flags for fields, methods, or classes.
+ *  @see #ACC_PUBLIC
+ */
+const short ACC_ABSTRACT     = 0x0400;
+
+/** One of the access flags for fields, methods, or classes.
+ *  @see #ACC_PUBLIC
+ */
+const short ACC_FINAL        = 0x0010;
+
 }

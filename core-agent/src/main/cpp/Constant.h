@@ -13,9 +13,10 @@ using namespace Distrace;
 class Constant {
 
 public:
-    static Constant readConstant(ByteReader &reader);
+    static Constant* readConstant(ByteReader &reader);
     Constant(byte tag);
     Constant();
+    byte getTag();
 private:
     byte tag;
 

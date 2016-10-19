@@ -5,12 +5,11 @@
 #include "JavaUtils.h"
 #include "ByteReader.h"
 #include "ConstantPool.h"
+#include "JavaConst.h"
 
 namespace Distrace {
     namespace JavaUtils {
 
-
-        ConstantPool constant_pool;
 
         unsigned char* as_unsigned_char_array(JNIEnv *env, jbyteArray array) {
             int len = env->GetArrayLength (array);
@@ -48,7 +47,32 @@ namespace Distrace {
         }
 
         void readConstantPool(ByteReader &reader){
-           constant_pool = ConstantPool(reader);
+            ConstantPool constant_pool(reader);
+        }
+
+        void readClassInfo(ByteReader &reader){
+           int access_flags = reader.readShort();
+            /* Interfaces are implicitely abstract, the flag should be set
+             * according to the JVM specification.
+             */
+            if ((access_flags & JavaConst::ACC_INTERFACE) != 0) {
+                access_flags |= JavaConst::ACC_ABSTRACT;
+            }
+            if (((access_flags & JavaConst::ACC_ABSTRACT) != 0)
+                && ((access_flags & JavaConst::ACC_FINAL) != 0)) {
+                throw "Class can't be both final and abstract";
+            }
+            int class_name_index = reader.readShort();
+            int superclass_name_index = reader.readShort();
+        }
+
+        void readInterfaces(ByteReader &reader){
+             int interfaces_count = reader.readShort();
+            int *interfaces = new int[interfaces_count];
+            for (int i = 0; i < interfaces_count; i++) {
+                interfaces[i] = reader.readShort();
+            }
+            // delete interfaces array
         }
         bool forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len){
 
@@ -58,6 +82,7 @@ namespace Distrace {
             readMagicId(reader);
             readVersions(reader);
             readConstantPool(reader);
+            readClassInfo(reader);
 
 
            // jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");

@@ -10,6 +10,5 @@ ConstantUtf8::ConstantUtf8(ByteReader &reader) : Constant(JavaConst::CONSTANT_Ut
 }
 
 ConstantUtf8::ConstantUtf8(std::string bytes) :  Constant(JavaConst::CONSTANT_Utf8) {
-    assert(bytes != NULL);
     this->bytes = bytes;
 }

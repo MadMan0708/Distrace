@@ -15,6 +15,9 @@
 #include "ConstantDouble.h"
 #include "ConstantNameAndType.h"
 #include "ConstantUtf8.h"
+#include "ConstantMethodHandle.h"
+#include "ConstantMethodType.h"
+#include "ConstantInvokeDynamic.h"
 
 using namespace Distrace;
 
@@ -23,37 +26,41 @@ Constant::Constant(byte tag) {
     this->tag = tag;
 }
 
-Constant Constant::readConstant(ByteReader &reader) {
+byte Constant::getTag() {
+    return tag;
+}
+
+Constant* Constant::readConstant(ByteReader &reader) {
     byte b = reader.readByte(); // Read tag byte
     switch (b) {
         case JavaConst::CONSTANT_Class:
-            return ConstantClass(reader);
+            return new ConstantClass(reader);
         case JavaConst::CONSTANT_Fieldref:
-            return ConstantFieldref(reader);
+            return new ConstantFieldref(reader);
         case JavaConst::CONSTANT_Methodref:
-            return ConstantMethodref(reader);
+            return new ConstantMethodref(reader);
         case JavaConst::CONSTANT_InterfaceMethodref:
-            return ConstantInterfaceMethodref(reader);
+            return new ConstantInterfaceMethodref(reader);
         case JavaConst::CONSTANT_String:
-            return ConstantString(reader);
+            return new ConstantString(reader);
         case JavaConst::CONSTANT_Integer:
-            return ConstantInteger(reader);
+            return new ConstantInteger(reader);
         case JavaConst::CONSTANT_Float:
-            return ConstantFloat(reader);
+            return new ConstantFloat(reader);
         case JavaConst::CONSTANT_Long:
-            return ConstantLong(reader);
+            return new ConstantLong(reader);
         case JavaConst::CONSTANT_Double:
-            return ConstantDouble(reader);
+            return new ConstantDouble(reader);
         case JavaConst::CONSTANT_NameAndType:
-            return ConstantNameAndType(reader);
+            return new ConstantNameAndType(reader);
         case JavaConst::CONSTANT_Utf8:
-            return ConstantUtf8(reader);
+            return new ConstantUtf8(reader);
         case JavaConst::CONSTANT_MethodHandle:
-            return new ConstantMethodHandle(input);
+            return new ConstantMethodHandle(reader);
         case JavaConst::CONSTANT_MethodType:
-            return new ConstantMethodType(input);
+            return new ConstantMethodType(reader);
         case JavaConst::CONSTANT_InvokeDynamic:
-            return new ConstantInvokeDynamic(input);
+            return new ConstantInvokeDynamic(reader);
         default:
             throw "Invalid byte tag in constant pool: " + b;
     }

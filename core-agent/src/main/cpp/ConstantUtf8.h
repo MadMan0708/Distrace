@@ -8,7 +8,7 @@
 
 #include "Constant.h"
 
-class ConstantUtf8: Constant {
+class ConstantUtf8: public Constant {
 public:
 
     ConstantUtf8(ByteReader &reader);

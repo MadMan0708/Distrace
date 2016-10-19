@@ -4,13 +4,13 @@
 
 #include "ConstantPool.h"
 #include "Constant.h"
+#include "JavaConst.h"
 
 using namespace Distrace;
 
-ConstantPool::ConstantPool(ByteReader &reader) {
-    this->reader = reader;
+ConstantPool::ConstantPool(ByteReader &reader) : reader(reader) {
     int constant_pool_count = reader.readShort();
-    constant_pool = new Constant[constant_pool_count];
+    constant_pool = new Constant*[constant_pool_count];
 
 
     byte tag;
@@ -26,8 +26,8 @@ ConstantPool::ConstantPool(ByteReader &reader) {
          *
          * Thus we have to increment the index counter.
          */
-        tag = constant_pool[i].getTag();
-        if ((tag == Const::CONSTANT_Double) || (tag == Const::CONSTANT_Long)) {
+        tag = constant_pool[i]->getTag();
+        if ((tag == JavaConst::CONSTANT_Double) || (tag == JavaConst::CONSTANT_Long)) {
             i++;
         }
     }

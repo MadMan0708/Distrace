@@ -8,6 +8,7 @@
 
 #include "Agent.h"
 #include "ByteReader.h"
+#include "Constant.h"
 
 using namespace Distrace;
 
@@ -16,8 +17,8 @@ public:
     ConstantPool(ByteReader &reader);
 
 private:
-    ByteReader reader = NULL;
-    Constant constant_pool[];
+    ByteReader reader;
+    Constant** constant_pool;
 };
 
 
