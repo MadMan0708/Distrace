@@ -16,7 +16,11 @@ class ConstantPool {
 public:
     ConstantPool(ByteReader &reader);
 
+    Constant* getConstant(int index, byte tag);
+    Constant* getConstant(int index);
+
 private:
+    int constant_pool_count;
     ByteReader reader;
     Constant** constant_pool;
 };

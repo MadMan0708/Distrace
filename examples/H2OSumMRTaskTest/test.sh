@@ -28,7 +28,7 @@ echo
 # For testing purposes we always expect main class to be this one
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
-LOG_LEVEL="debug"
+LOG_LEVEL="off"
 CONNECTION_STR="ipc"
 INSTRUMETOR_CP=""
 

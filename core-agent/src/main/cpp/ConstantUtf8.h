@@ -14,7 +14,7 @@ public:
     ConstantUtf8(ByteReader &reader);
     ConstantUtf8(std::string bytes);
 
-
+    std::string getBytes();
 private:
     std::string bytes;
 };

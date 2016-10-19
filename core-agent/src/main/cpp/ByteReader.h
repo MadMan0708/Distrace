@@ -20,7 +20,7 @@ class ByteReader {
         long readLong();
         double readDouble();
         std::string readUTF();
-        void readFully(byte buff[], int len);
+        void readFully(byte* buff, int len);
 
     private:
         const unsigned char *bytes;

@@ -6,6 +6,7 @@
 #include "ByteReader.h"
 #include "ConstantPool.h"
 #include "JavaConst.h"
+#include "Field.h"
 
 namespace Distrace {
     namespace JavaUtils {
@@ -46,8 +47,9 @@ namespace Distrace {
                short major = reader.readShort();
         }
 
+        ConstantPool* constant_pool;
         void readConstantPool(ByteReader &reader){
-            ConstantPool constant_pool(reader);
+            constant_pool = new ConstantPool(reader);
         }
 
         void readClassInfo(ByteReader &reader){
@@ -67,12 +69,22 @@ namespace Distrace {
         }
 
         void readInterfaces(ByteReader &reader){
-             int interfaces_count = reader.readShort();
+            int interfaces_count = reader.readShort();
             int *interfaces = new int[interfaces_count];
             for (int i = 0; i < interfaces_count; i++) {
                 interfaces[i] = reader.readShort();
             }
             // delete interfaces array
+        }
+
+        void readFields(ByteReader &reader){
+            int fields_count = reader.readShort();
+            Field *fields = new Field[fields_count];
+            for (int i = 0; i < fields_count; i++) {
+                fields[i] = *(new Field(reader, *constant_pool));
+                // use fields[i].getSignature() to read name
+
+            }
         }
         bool forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len){
 
@@ -83,8 +95,8 @@ namespace Distrace {
             readVersions(reader);
             readConstantPool(reader);
             readClassInfo(reader);
-
-
+            readInterfaces(reader);
+            readFields(reader);
            // jclass byteLoader = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
             //jmethodID methodLoadClass = env->GetStaticMethodID(byteLoader,"forceLoad","(Ljava/lang/String;)Z");
 

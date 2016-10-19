@@ -31,7 +31,7 @@ byte Constant::getTag() {
 }
 
 Constant* Constant::readConstant(ByteReader &reader) {
-    byte b = reader.readByte(); // Read tag byte
+    char b = reader.readByte(); // Read tag byte
     switch (b) {
         case JavaConst::CONSTANT_Class:
             return new ConstantClass(reader);

@@ -59,8 +59,7 @@ double ByteReader::readDouble() {
     return bits.converted_double_bits;
 }
 
-void ByteReader::readFully(byte buf[], int len){
-    buf = new byte[len];
+void ByteReader::readFully(byte* buf, int len){
     for(int i=0;i<len;i++){
         buf[i] = readByte();
     }
@@ -68,8 +67,7 @@ void ByteReader::readFully(byte buf[], int len){
 
 std::string ByteReader::readUTF(){
     short utflen = readShort();
-
-    byte bytearr[utflen];
+    byte* bytearr = new byte[utflen];
     char chararr[utflen];
 
 
@@ -78,14 +76,12 @@ std::string ByteReader::readUTF(){
         int chararr_count=0;
 
         readFully(bytearr, utflen);
-
         while (count < utflen) {
             c = (int) bytearr[count] & 0xff;
             if (c > 127) break;
             count++;
             chararr[chararr_count++]=(char)c;
         }
-
         while (count < utflen) {
             c = (int) bytearr[count] & 0xff;
             switch (c >> 4) {
@@ -106,22 +102,31 @@ std::string ByteReader::readUTF(){
                                                     (char2 & 0x3F));
                     break;
                 case 14:
+                std::cout << "processing 14";
                     /* 1110 xxxx  10xx xxxx  10xx xxxx */
                     count += 3;
-                    if (count > utflen)
+                    if (count > utflen) {
                         throw "malformed input: partial character at end";
+                    }
+
                     char2 = (int) bytearr[count-2];
                     char3 = (int) bytearr[count-1];
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw "malformed input around byte " + (count-1);
+
+                    std::cout << "char 2 " << char2 << " char3 " << char3 << " "<< +((char2 & 0xC0) != 0x80) << +((char3 & 0xC0) != 0x80) <<std::endl;
+
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
+                        throw "malformed input around byte " + (count - 1);
+                    }
                     chararr[chararr_count++]=(char)(((c     & 0x0F) << 12) |
                                                     ((char2 & 0x3F) << 6)  |
                                                     ((char3 & 0x3F) << 0));
+                std::cout << "tady po treti";
                     break;
                 default:
                     /* 10xx xxxx,  1111 xxxx */
                     throw "malformed input around byte " + count;
             }
         }
+
     return std::string(chararr, 0, chararr_count);
 }
