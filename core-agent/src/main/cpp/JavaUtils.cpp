@@ -5,11 +5,6 @@
 #include <boost/algorithm/string.hpp>
 #include "JavaUtils.h"
 #include "ByteReader.h"
-#include "bytecode/ConstantPool.h"
-#include "bytecode/JavaConst.h"
-#include "bytecode/Field.h"
-#include "bytecode/Method.h"
-#include "bytecode/ConstantUtf8.h"
 
 using namespace Logging;
 namespace Distrace {

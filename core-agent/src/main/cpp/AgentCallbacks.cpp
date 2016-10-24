@@ -54,6 +54,8 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
 
 void AgentCallbacks::loadDependencies(JNIEnv *env, jobject loader, const char *name, const unsigned char *class_data, jint class_data_len){
     std::vector<std::string> types = ClassParser::parse(name, class_data, class_data_len);
+    log(LOGGER_AGENT_CALLBACKS)->info() << "Parsed bytecode for class : " << name;
+
     for(std::vector<std::string>::iterator it=types.begin() ; it <types.end(); it++) {
         // load all dependencies for class
         std::string className = *it;
@@ -74,8 +76,6 @@ void AgentCallbacks::instrument(const char *name, unsigned char **new_class_data
 }
 
 void JNICALL AgentCallbacks::callbackVMInit(jvmtiEnv *jvmti, JNIEnv *env, jthread thread) {
-    // this forces JVM to load this class in the initialization phase
-    env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
     Agent::globalData->vm_started = JNI_TRUE;
     log(LOGGER_AGENT_CALLBACKS)->info("The virtual machine has been initialized!");
 }
@@ -95,11 +95,11 @@ void JNICALL AgentCallbacks::cbVMStart(jvmtiEnv *jvmti, JNIEnv *env) {
 }
 
 void JNICALL AgentCallbacks::cbClassLoad(jvmtiEnv *jvmti_env, JNIEnv *jni_env, jthread thread, jclass klass) {
-    log(LOGGER_AGENT_CALLBACKS)->info() << "Class: \"" << JavaUtils::getClassName(jni_env, klass) << "\" loaded";
+    log(LOGGER_AGENT_CALLBACKS)->debug() << "Class: \"" << JavaUtils::getClassName(jni_env, klass) << "\" loaded";
 }
 
 void JNICALL AgentCallbacks::cbClassPrepare(jvmtiEnv *jvmti_env, JNIEnv *jni_env, jthread thread, jclass klass) {
-    log(LOGGER_AGENT_CALLBACKS)->info() << "Class: \"" << JavaUtils::getClassName(jni_env, klass) << "\" prepared";
+    log(LOGGER_AGENT_CALLBACKS)->debug() << "Class: \"" << JavaUtils::getClassName(jni_env, klass) << "\" prepared";
 
 
 }

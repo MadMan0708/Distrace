@@ -80,6 +80,7 @@ void ClassParser::saveUniqueClass(std::string className){
 
 void ClassParser::readFields(){
     numFields = reader.readShort();
+
     fields = new Field[numFields];
     for (int i = 0; i < numFields; i++) {
         fields[i] = *(new Field(reader, *constantPool));
@@ -97,20 +98,25 @@ std::string ClassParser::returnValueFromSignature(std::string methodSignature){
 
 void ClassParser::parseAndSaveArguments(std::string ref){
     std::string arguments = ref.substr(1, ref.find(")")-1);
-
-    while(arguments.length() > 0){
+    while(arguments.find("L") != std::string::npos){
         unsigned long start = arguments.find("L");
+
         std::string trimmedStart = arguments.substr(start);
+
         unsigned long end = (trimmedStart.find(";") + 1);
+
         std::string argSignature = trimmedStart.substr(0, end);
+
         std::string className = classNameFromSignature(argSignature);
         saveUniqueClass(className);
         arguments = trimmedStart.substr(end);
+
     }
 }
 
 void ClassParser::readMethods(){
     numMethods = reader.readShort();
+
     methods = new Method[numMethods];
     for (int i = 0; i < numMethods; i++) {
         methods[i] = (*new Method(reader, *constantPool));
@@ -136,7 +142,6 @@ std::string ClassParser::saveSuperClassName(){
 }
 
 void ClassParser::parse(std::string className) {
-
     readMagicId();
     readVersions();
     readConstantPool();
