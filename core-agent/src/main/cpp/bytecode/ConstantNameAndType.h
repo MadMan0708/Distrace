@@ -6,7 +6,7 @@
 #define DISTRACE_AGENT_CORE_CONSTANTNAMEANDTYPE_H
 
 
-#include "Agent.h"
+#include "../Agent.h"
 #include "Constant.h"
 
 using namespace Distrace;

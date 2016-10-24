@@ -5,7 +5,7 @@
 #ifndef DISTRACE_AGENT_CORE_CONSTANTCP_H
 #define DISTRACE_AGENT_CORE_CONSTANTCP_H
 
-#include "Agent.h"
+#include "../Agent.h"
 #include "Constant.h"
 
 using namespace Distrace;

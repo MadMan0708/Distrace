@@ -21,6 +21,7 @@ class ByteReader {
         double readDouble();
         std::string readUTF();
         void readFully(byte* buff, int len);
+        void skip(int howMany);
 
     private:
         const unsigned char *bytes;

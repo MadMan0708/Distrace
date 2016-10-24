@@ -29,7 +29,8 @@ namespace Distrace {
         std::vector<std::string> loggers_to_initialize = {
                 LOGGER_AGENT,
                 LOGGER_INSTRUMENTOR_API,
-                LOGGER_AGENT_CALLBACKS
+                LOGGER_AGENT_CALLBACKS,
+                LOGGER_BYTECODE
         };
 
         namespace {

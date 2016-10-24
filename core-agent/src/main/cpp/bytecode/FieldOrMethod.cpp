@@ -3,7 +3,6 @@
 //
 
 #include "FieldOrMethod.h"
-#include "AccessFlags.h"
 #include "JavaConst.h"
 #include "ConstantUtf8.h"
 
@@ -15,10 +14,10 @@ FieldOrMethod::FieldOrMethod(ByteReader &reader, ConstantPool &constant_pool) : 
     this->constant_pool = &constant_pool;
 
     attributes = new Attribute[attributes_count];
-    //TODO: Attribute handling
-    //for (int i = 0; i < attributes_count; i++) {
-    //    attributes[i] = Attribute.readAttribute(reader, constant_pool);
-   // }
+    for (int i = 0; i < attributes_count; i++) {
+        //attributes[i] = *Attribute::readAttribute(reader, constant_pool);
+        Attribute::readAttribute(reader, constant_pool);
+    }
 }
 
 

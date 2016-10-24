@@ -13,7 +13,7 @@ class Attribute {
 public:
      Attribute();
      Attribute(byte tag, int name_index, int length, ConstantPool &constant_pool);
-
+     static void readAttribute(ByteReader &reader, ConstantPool &constant_pool);
 private:
     int name_index; // Points to attribute name in constant pool
     int length; // Content length of attribute field

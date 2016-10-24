@@ -27,7 +27,7 @@ echo
 
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
-LOG_LEVEL="info"
+LOG_LEVEL="off"
 CONNECTION_STR="ipc"
 INSTRUMETOR_CP=""
 

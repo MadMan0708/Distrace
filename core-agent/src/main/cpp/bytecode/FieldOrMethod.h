@@ -6,10 +6,10 @@
 #define DISTRACE_AGENT_CORE_FIELDORMETHOD_H
 
 
-#include "ByteReader.h"
+#include "../ByteReader.h"
 #include "ConstantPool.h"
 #include "Attribute.h"
-#include "AccessFlags.h"
+#include "../AccessFlags.h"
 
 class FieldOrMethod: public AccessFlags {
 

@@ -12,3 +12,8 @@ ConstantClass::ConstantClass(ByteReader &reader) : ConstantClass(reader.readShor
 ConstantClass::ConstantClass(short name_index) : Constant(JavaConst::CONSTANT_Class) {
     this->name_index = name_index;
 }
+
+int ConstantClass::getNameIndex() {
+    return this->name_index;
+}
+

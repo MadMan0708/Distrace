@@ -11,3 +11,9 @@ ConstantString::ConstantString(ByteReader &reader): ConstantString(reader.readSh
 ConstantString::ConstantString(int string_index) :Constant(JavaConst::CONSTANT_String){
     this->string_index = string_index;
 }
+
+int ConstantString::getStringIndex() {
+    return this->string_index;
+}
+
+

@@ -27,15 +27,13 @@ public class InstrumentorClassLoader extends ClassLoader{
 
     @Override
     public InputStream getResourceAsStream(String name) {
-        String nameDots = name.replaceAll("/", ".");
-        String nameDotsNoClassExtension = nameDots.substring(0, name.lastIndexOf("."));
-        if(InstrumentorServer.classAvailabilityMap.get(nameDotsNoClassExtension)){
+        InputStream resourceAsStream = super.getResourceAsStream(name);
+        if(resourceAsStream != null){
             log.info("Loading byte code for instrumentation of class using parent classloader: " + name);
-            return super.getResourceAsStream(name);
-        }else {
-            // We get as name fully classified name class file name, we need to turn it into
-            // java class fully qualified name
-
+            return resourceAsStream;
+        }else{
+            String nameDots = name.replaceAll("/", ".");
+            String nameDotsNoClassExtension = nameDots.substring(0, name.lastIndexOf("."));
             log.info("Loading byte code for instrumentation of class from local byte cache: " + nameDotsNoClassExtension);
             byte[] bytes = cache.get(nameDotsNoClassExtension);
             return new ByteArrayInputStream(bytes);
@@ -44,10 +42,10 @@ public class InstrumentorClassLoader extends ClassLoader{
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if(InstrumentorServer.classAvailabilityMap.get(name)){
+        try{
             log.info("Finding class using parent classloader: "+ name);
             return super.findClass(name);
-        }else{
+        }catch (ClassNotFoundException e){
             log.info("Finding class from local byte cache: "+ name);
             byte[] bytes = cache.get(name);
             assert bytes != null;

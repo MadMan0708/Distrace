@@ -21,22 +21,19 @@ namespace Distrace {
     class InstrumentorAPI {
     public:
 
-        void add_aux_class(std::string);
+        void add_sent_class(std::string name);
+        bool was_sent(std::string name);
 
-        bool is_aux_class(std::string);
+        void add_aux_class(std::string name);
+
+        bool is_aux_class(std::string name);
 
         void send_byte_code(std::string name, const unsigned char *class_data, int data_len);
         /**
          * Constructor which creates instance of this class based on the socket connection to the instrumentor JVM
          */
         InstrumentorAPI(nnxx::socket socket);
-
-        /**
-         * This method send request to the instrumentor JVM which decides whether this class should be instrumented
-         * or not.
-         */
-        bool should_instrument(std::string class_name, const byte *class_data, int class_data_len);
-
+        
         /**
         * This method send request to the instrumentor JVM which decides whether this class should be instrumented
         * or not.
@@ -85,6 +82,8 @@ namespace Distrace {
 
         /** List of auxiliarry classes, auxiliarry classes should not be instrumented */
         std::vector<std::string> aux_classes;
+        /** List of sent classes ( bytecode has been sent to instrumentor JVM */
+        std::vector<std::string> sent;
         /** Mutes which is used to lock pieces of code which communicates with the instrumentor JAR. The
          * communication is using nanomsg framework and communication originating from different thread can cause
          * problems */

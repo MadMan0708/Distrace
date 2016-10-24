@@ -5,8 +5,8 @@
 #ifndef DISTRACE_AGENT_CORE_CONSTANT_H
 #define DISTRACE_AGENT_CORE_CONSTANT_H
 
-#include "Agent.h"
-#include "ByteReader.h"
+#include "../Agent.h"
+#include "../ByteReader.h"
 
 using namespace Distrace;
 

@@ -15,7 +15,6 @@ import java.util.HashMap;
 
 public class InstrumentorServer {
     private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
-    public static HashMap<String, Boolean> classAvailabilityMap = new HashMap<>();
     private static final HashMap<String, byte[]> byteCodeCache = new HashMap<>();
     private static final byte REQ_TYPE_INSTRUMENT = 0;
     private static final byte REQ_TYPE_STOP = 1;
@@ -37,10 +36,11 @@ public class InstrumentorServer {
         byte[] classNameSlashes = sock.recvBytes();
         String classNameDots = Utils.convertToJavaName(new String(classNameSlashes, StandardCharsets.UTF_8));
 
-       // byte[] byteCode = sock.recvBytes();
+        byte[] byteCode = sock.recvBytes();
         log.info("Registering bytecode for class " + classNameDots );
-        //instLoader.registerByteCode(classNameDots, byteCode);
+        instLoader.registerByteCode(classNameDots, byteCode);
     }
+
     private void handleHasClassCheck() {
         byte[] classNameSlashes = sock.recvBytes();
         String classNameDots = Utils.convertToJavaName(new String(classNameSlashes, StandardCharsets.UTF_8));
@@ -59,11 +59,9 @@ public class InstrumentorServer {
                 // would cause unwanted behaviour and other necessary checks (
                 this.getClass().getClassLoader().loadClass(classNameDots);
                 log.info("Instrumentor contains class " + classNameDots);
-                classAvailabilityMap.put(classNameDots, true);
                 sock.send("yes");
             } catch (ClassNotFoundException e) {
                 log.info("Instrumentor does not contain class " + classNameDots);
-                classAvailabilityMap.put(classNameDots, false);
                 sock.send("no");
             }
         }
@@ -76,24 +74,14 @@ public class InstrumentorServer {
         // first look into cache and send the instrumented bytecode to the native agent
         if(byteCodeCache.containsKey(classNameDots)){
             sendByteCodeToAgent(byteCodeCache.get(classNameDots));
-        // if the bytecode is not in the case try to load it locally without need to send the original bytecode
-        // from native agent
-        }else if(classAvailabilityMap.get(classNameDots)){
-            byte[] transformed = instrument(classNameDots);
-            // save the instrumented bytecode
-            byteCodeCache.put(classNameDots, transformed);
-            sendByteCodeToAgent(transformed);
-        // class is not available, we need to get bytecode from native agent
+        // instrumented class is not available, instrument it
         }else {
-            byte[] bytes = sock.recvBytes();
-            log.debug("Received class code from native agent: " + classNameDots);
-            instLoader.registerByteCode(classNameDots, bytes);
-            log.debug("Registered class bytecode into Instrumentor class loader");
             byte[] transformed = instrument(classNameDots);
             // save the instrumented bytecode
             byteCodeCache.put(classNameDots, transformed);
             sendByteCodeToAgent(transformed);
         }
+
     }
 
     private void sendByteCodeToAgent(byte[] transformed){

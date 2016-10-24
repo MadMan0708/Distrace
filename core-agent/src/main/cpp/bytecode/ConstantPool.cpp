@@ -5,6 +5,9 @@
 #include "ConstantPool.h"
 #include "Constant.h"
 #include "JavaConst.h"
+#include "ConstantClass.h"
+#include "ConstantUtf8.h"
+#include "ConstantString.h"
 
 using namespace Distrace;
 
@@ -51,3 +54,34 @@ Constant* ConstantPool::getConstant(int index) {
     }
     return constant_pool[index];
 }
+
+std::string ConstantPool::getConstantString(int index, byte tag) {
+
+
+
+    Constant* c = getConstant(index, tag);
+
+    /* This switch() is not that elegant, since the two classes have the
+     * same contents, they just differ in the name of the index
+     * field variable.
+     * But we want to stick to the JVM naming conventions closely though
+     * we could have solved these more elegantly by using the same
+     * variable name or by subclassing.
+     */
+    int    i;
+    switch(tag) {
+        case JavaConst::CONSTANT_Class:
+            i = ((ConstantClass*)c)->getNameIndex();
+            break;
+        case JavaConst::CONSTANT_String:
+            i = ((ConstantString*)c)->getStringIndex();
+            break;
+        default:
+            throw "getConstantString called with illegal tag " + tag;
+    }
+
+    // Finally get the string from the constant pool
+    c = getConstant(i, JavaConst::CONSTANT_Utf8);
+    return ((ConstantUtf8*)c)->getBytes();
+}
+

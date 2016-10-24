@@ -33,6 +33,13 @@ std::string InstrumentorAPI::ACK_REQ_AUX_CLASSES = "auxiliary_types";
 std::mutex InstrumentorAPI::mtx;           // mutex for critical section
 
 
+void InstrumentorAPI::add_sent_class(std::string name){
+    sent.push_back(name);
+}
+
+bool InstrumentorAPI::was_sent(std::string name){
+    return std::find(sent.begin(), sent.end(), name) != sent.end();
+}
 void InstrumentorAPI::add_aux_class(std::string name){
     aux_classes.push_back(name);
 }
@@ -152,7 +159,7 @@ void InstrumentorAPI::load_aux_classes(std::string class_name){
 bool InstrumentorAPI::should_instrument(std::string class_name) {
     // critical section. Communication started from different threads would break nanomsg
     mtx.lock();
-    log(LOGGER_INSTRUMENTOR_API)->debug() << "Asking Instrumentor whether it needs to instrument class \"" <<
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Asking Instrumentor whether it needs to instrument class \"" <<
     class_name << "\"";
     send_req_type(REQ_TYPE_INSTRUMENT);
 
@@ -160,50 +167,18 @@ bool InstrumentorAPI::should_instrument(std::string class_name) {
     send_string_request(class_name);
     // send bytecode
     bool ret_value = false;
-
+    load_aux_classes(class_name);
     auto reply = receive_string_reply();
     if (reply == ACK_REQ_INST_YES) {
         log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
         "\" will be instrumented.";
         ret_value = true;
     } else if (reply == ACK_REQ_INST_NO) {
-        log(LOGGER_INSTRUMENTOR_API)->debug() << "Instrumentor reply: Class \"" << class_name <<
-        "\" won't be instrumented.";
-    } else {
-        // never can be here
-        log(LOGGER_INSTRUMENTOR_API)->debug() << "Got unexpected reply in should_instrument method : " << reply;
-        assert(false);
-    }
-    mtx.unlock();
-    return ret_value;
-
-}
-
-bool InstrumentorAPI::should_instrument(std::string class_name, const byte *class_data, int class_data_len) {
-    // critical section. Communication started from different threads would break nanomsg
-    mtx.lock();
-    log(LOGGER_INSTRUMENTOR_API)->debug() << "Asking Instrumentor whether it needs to instrument class \"" <<
-    class_name << "\"";
-    send_req_type(REQ_TYPE_INSTRUMENT);
-
-    // send class name
-    send_string_request(class_name);
-    // send bytecode
-    bool ret_value = false;
-    // send type description to the Instrumentor JVM
-    send_byte_arr_request(class_data, class_data_len);
-    load_aux_classes(class_name);
-    std::string reply = receive_string_reply();
-    if (reply == ACK_REQ_INST_YES) {
         log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
-        "\" will be instrumented.";
-        ret_value = true;
-    } else if (reply == ACK_REQ_INST_NO) {
-        log(LOGGER_INSTRUMENTOR_API)->debug() << "Instrumentor reply: Class \"" << class_name <<
         "\" won't be instrumented.";
     } else {
         // never can be here
-        log(LOGGER_INSTRUMENTOR_API)->debug() << "Got unexpected reply in should_instrument method : " << reply;
+        log(LOGGER_INSTRUMENTOR_API)->info() << "Got unexpected reply in should_instrument method : " << reply;
         assert(false);
     }
     mtx.unlock();

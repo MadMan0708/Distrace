@@ -6,7 +6,7 @@
 #define DISTRACE_AGENT_CORE_CONSTANTCLASS_H
 
 
-#include "Agent.h"
+#include "../Agent.h"
 #include "Constant.h"
 
 using namespace Distrace;
@@ -16,6 +16,7 @@ class ConstantClass : public Constant {
 public:
     ConstantClass(short name_index);
     ConstantClass(ByteReader &reader);
+    int getNameIndex();
 
 private:
     int name_index;

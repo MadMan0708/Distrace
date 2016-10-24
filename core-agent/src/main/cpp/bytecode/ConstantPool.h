@@ -6,8 +6,8 @@
 #define DISTRACE_AGENT_CORE_CONSTANTPOOL_H
 
 
-#include "Agent.h"
-#include "ByteReader.h"
+#include "../Agent.h"
+#include "../ByteReader.h"
 #include "Constant.h"
 
 using namespace Distrace;
@@ -18,7 +18,7 @@ public:
 
     Constant* getConstant(int index, byte tag);
     Constant* getConstant(int index);
-
+    std::string getConstantString(int index, byte tag);
 private:
     int constant_pool_count;
     ByteReader reader;

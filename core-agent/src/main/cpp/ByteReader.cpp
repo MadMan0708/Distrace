@@ -130,3 +130,8 @@ std::string ByteReader::readUTF(){
 
     return std::string(chararr, 0, chararr_count);
 }
+
+void ByteReader::skip(int howMany) {
+    nextPos+=howMany;
+}
+

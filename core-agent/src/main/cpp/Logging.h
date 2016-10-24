@@ -19,6 +19,7 @@ namespace Distrace {
         const std::string LOGGER_AGENT = "Agent";
         const std::string LOGGER_INSTRUMENTOR_API = "InstrumentorAPI";
         const std::string LOGGER_AGENT_CALLBACKS = "AgentCallbacks";
+        const std::string LOGGER_BYTECODE = "ByteCodeProcessing";
 
         /**
          * Register the loggers. The loggers can be obtained using log method. This method has to be called after

@@ -19,7 +19,7 @@ namespace Distrace{
 
         bool isAlreadyLoaded(JNIEnv *env, const char *name);
 
-        bool forceLoadClass(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len);
+        std::vector<std::string> getRefToDep(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len);
 
         std::string toNameWithDots(std::string class_name);
         /**
@@ -32,6 +32,7 @@ namespace Distrace{
          */
         extern std::vector<std::string> ignoredLoaders;
 
+        void loadClass(JNIEnv *env, jobject loader, const char *className);
         /**
          * Check whether the classloader on the input is ignored classloader
          */

@@ -5,7 +5,7 @@
 #ifndef DISTRACE_AGENT_CORE_CONSTANTSTRING_H
 #define DISTRACE_AGENT_CORE_CONSTANTSTRING_H
 
-#include "Agent.h"
+#include "../Agent.h"
 #include "Constant.h"
 
 
@@ -16,6 +16,7 @@ class ConstantString : public Constant{
 public:
     ConstantString(ByteReader &reader);
     ConstantString(int string_index);
+    int getStringIndex();
 
 private:
     int string_index;
