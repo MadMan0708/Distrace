@@ -8,6 +8,7 @@
 #include <nnxx/socket.h>
 #include "Logging.h"
 #include <string>
+#include <queue>
 
 namespace Distrace {
     /**
@@ -21,6 +22,13 @@ namespace Distrace {
     class InstrumentorAPI {
     public:
 
+        //TODO: refactor the following 3 methods
+
+        void set_root_name(std::string name);
+        bool is_root_name(std::string name);
+        bool isQueueEmpty();
+        std::string getFirstDep();
+        void putToQueue(std::string name);
         void add_sent_class(std::string name);
         bool was_sent(std::string name);
 
@@ -80,6 +88,9 @@ namespace Distrace {
         /** Auxiliary types */
         static std::string ACK_REQ_AUX_CLASSES;
 
+        std::string root_name;
+        /** Queue for dependencies */
+        std::queue<std::string> DEP_QUEUE;
         /** List of auxiliarry classes, auxiliarry classes should not be instrumented */
         std::vector<std::string> aux_classes;
         /** List of sent classes ( bytecode has been sent to instrumentor JVM */

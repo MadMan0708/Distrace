@@ -25,6 +25,10 @@ public class InstrumentorClassLoader extends ClassLoader{
         }
     }
 
+    public boolean contains(String className){
+        return cache.containsKey(className);
+    }
+
     @Override
     public InputStream getResourceAsStream(String name) {
         InputStream resourceAsStream = super.getResourceAsStream(name);
@@ -48,7 +52,9 @@ public class InstrumentorClassLoader extends ClassLoader{
         }catch (ClassNotFoundException e){
             log.info("Finding class from local byte cache: "+ name);
             byte[] bytes = cache.get(name);
-            assert bytes != null;
+            if(bytes == null) {
+                throw new RuntimeException("Bytes are not in the instrumentor cache for the class: " + name);
+            }
             return defineClass(name, bytes, 0, bytes.length);
         }
     }

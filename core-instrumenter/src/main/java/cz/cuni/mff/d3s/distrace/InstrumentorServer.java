@@ -48,12 +48,16 @@ public class InstrumentorServer {
 
         log.info("Checking whether class is available " + classNameDots);
 
-        // first look into cache
+        // first look into cache if the instrumented bytecode is available
         if(byteCodeCache.containsKey(classNameDots)){
             log.info("Instrumentor contains instrumented bytecode in cache for class " + classNameDots);
             sock.send("yes");
-        }else {
-            // if the instrumented class is not in the cache, look if we can load it
+        }else if (instLoader.contains(classNameDots)) {
+            // if the instrumented class is not in the cache, look if we can load the original one or
+            // if we have the original in the instrumentor loader
+            log.info("Instrumentor contains cached bytecode ( not instrumented yet) in cache for class " + classNameDots);
+            sock.send("yes");
+        } else {
             try {
                 // use current classloader for this check, not InstrumentorClassLoader since that
                 // would cause unwanted behaviour and other necessary checks (

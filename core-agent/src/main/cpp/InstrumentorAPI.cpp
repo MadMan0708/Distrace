@@ -34,11 +34,16 @@ std::mutex InstrumentorAPI::mtx;           // mutex for critical section
 
 
 void InstrumentorAPI::add_sent_class(std::string name){
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Add sent class: " << name;
     sent.push_back(name);
 }
 
 bool InstrumentorAPI::was_sent(std::string name){
-    return std::find(sent.begin(), sent.end(), name) != sent.end();
+    std::string withSlashes(name);
+    std::replace(withSlashes.begin(), withSlashes.end(),'.','/');
+    log(LOGGER_INSTRUMENTOR_API)->info() << "Checking if class was sent: " << withSlashes << " " << (std::find(sent.begin(), sent.end(), withSlashes) != sent.end());
+
+    return std::find(sent.begin(), sent.end(), withSlashes) != sent.end();
 }
 void InstrumentorAPI::add_aux_class(std::string name){
     aux_classes.push_back(name);
@@ -293,3 +298,42 @@ bool InstrumentorAPI::has_class(std::string class_name){
     mtx.unlock();
     return  ret == "yes";
 }
+
+std::string InstrumentorAPI::getFirstDep() {
+    std::string ret = DEP_QUEUE.front();
+    DEP_QUEUE.pop();
+    return ret;
+}
+
+void InstrumentorAPI::putToQueue(std::string name) {
+    DEP_QUEUE.push(name);
+}
+
+bool InstrumentorAPI::isQueueEmpty() {
+    return DEP_QUEUE.empty();
+}
+
+bool InstrumentorAPI::is_root_name(std::string name) {
+    name == root_name;
+}
+
+void InstrumentorAPI::set_root_name(std::string name) {
+    if(root_name.empty()){
+        log(LOGGER_INSTRUMENTOR_API)->info() << "Setting root name: " << name;
+
+        root_name = name;
+    }
+    DEP_QUEUE.push(name);
+
+}
+
+
+
+
+
+
+
+
+
+
+
