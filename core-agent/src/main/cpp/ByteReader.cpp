@@ -3,7 +3,6 @@
 //
 
 #include "ByteReader.h"
-#include "Agent.h"
 
 using namespace Distrace;
 
@@ -102,7 +101,6 @@ std::string ByteReader::readUTF(){
                                                     (char2 & 0x3F));
                     break;
                 case 14:
-                std::cout << "processing 14";
                     /* 1110 xxxx  10xx xxxx  10xx xxxx */
                     count += 3;
                     if (count > utflen) {
@@ -120,7 +118,6 @@ std::string ByteReader::readUTF(){
                     chararr[chararr_count++]=(char)(((c     & 0x0F) << 12) |
                                                     ((char2 & 0x3F) << 6)  |
                                                     ((char3 & 0x3F) << 0));
-                std::cout << "tady po treti";
                     break;
                 default:
                     /* 10xx xxxx,  1111 xxxx */

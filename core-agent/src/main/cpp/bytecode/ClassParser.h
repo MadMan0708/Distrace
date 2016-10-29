@@ -6,7 +6,6 @@
 #define DISTRACE_AGENT_CORE_CLASSPARSER_H
 
 
-#include "../Agent.h"
 #include "../ByteReader.h"
 #include "ConstantPool.h"
 #include "Field.h"
@@ -19,8 +18,8 @@ class ClassParser {
 
 public:
     ClassParser(ByteReader &reader);
-    void parse(std::string className);
-    static std::vector<std::string> parse(std::string className, const unsigned char *class_data, jint class_data_len);
+    void parse();
+    static std::vector<std::string> parse(const unsigned char *class_data, jint class_data_len);
     void readMagicId();
     void readVersions();
     void readConstantPool();
@@ -28,7 +27,6 @@ public:
     void readInterfaces();
     void readFields();
     void readMethods();
-
     /**
      * Returns class name if typeSignature represents reference and empty string otherwise
      */
@@ -39,7 +37,7 @@ public:
      * Save class name. If class name is empty or class is in java package then the class is not saved
      */
     void saveUniqueClass(std::string className);
-    std::string saveSuperClassName();
+    void saveSuperClassName();
 
 private:
     ConstantPool* constantPool;

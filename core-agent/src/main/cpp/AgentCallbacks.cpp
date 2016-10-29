@@ -41,8 +41,7 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
                 Agent::globalData->inst_api->send_byte_code(name, class_data, class_data_len);
             }
 
-            Agent::globalData->inst_api->set_root_name(name);
-            Agent::globalData->inst_api->add_sent_class(name);
+            //Agent::globalData->inst_api->add_sent_class(name);
             log(LOGGER_AGENT_CALLBACKS)->info() << "Send bytecode for all the dependencies for class: " << name;
 
             // load dependencies currently can't work since it works in deep-first search, but should be breadth first search
@@ -64,9 +63,9 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
             // ? Should the instrumentation be done only for the origin class ?
             // once we have all the dependencies in the instrumentor JVM, instrument the class
 
-            if( Agent::globalData->inst_api->is_root_name(name)){
+            //if( Agent::globalData->inst_api->is_root_name(name)){
                 instrument(name, new_class_data, new_class_data_len, loader_name);
-            }
+            //}
         }
 
         log(LOGGER_AGENT_CALLBACKS)->info() << "AFTER LOADING: The class " << name << " has been loaded by \""
@@ -76,48 +75,47 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
 }
 
 void AgentCallbacks::loadDependencies(JNIEnv *env, jobject loader, const char *name, const unsigned char *class_data, jint class_data_len){
-    std::string name_to_process = Agent::globalData->inst_api->getFirstDep();
+    //std::string name_to_process = Agent::globalData->inst_api->getClassToLoad();
     // queue current class
     // deque class, do class parsing and put all the the dependencies into queue
 
-    std::vector<std::string> types = ClassParser::parse(name_to_process, class_data, class_data_len);
-    log(LOGGER_AGENT_CALLBACKS)->info() << "Parsed bytecode for class : " << name_to_process;
+    std::vector<std::string> parsedTypes = ClassParser::parse(class_data, class_data_len);
+    std::vector<std::string> filteredTypes = InstrumentorAPI::filterTypes(name, parsedTypes);
 
+    // log obtained classes
+    log(LOGGER_BYTECODE)->info() << "Parsing: " << name;
+    for(std::vector<std::string>::iterator it=filteredTypes.begin() ; it <filteredTypes.end(); it++) {
+        log(LOGGER_BYTECODE)->info() << "Found -> " << *it;
+    }
     // load first class in the queue, then when a new class is about to be loaded( using on clas file load hook), load all its dependencies,
     // and dequeue it and put at the end of the queue
 
-    for(std::vector<std::string>::iterator it=types.begin() ; it < types.end(); it++) {
+    for(std::vector<std::string>::iterator it=filteredTypes.begin() ; it < filteredTypes.end(); it++) {
         // load all dependencies for class
         std::string className = *it;
         className = JavaUtils::toNameWithDots(className);
         // check if this class has been already loaded
         // and if it was, don't send it again
-
-
-        log(LOGGER_AGENT_CALLBACKS)->info() << "BEFORE CHECK WAS SENT: " << className;
-
         if(!Agent::globalData->inst_api->was_sent(className)) {
-            Agent::globalData->inst_api->putToQueue(className);
+            Agent::globalData->inst_api->storeClassForLaterLoad(className);
             log(LOGGER_AGENT_CALLBACKS)->info() << "Adding type to a queue: " << className;
         }else{
             log(LOGGER_AGENT_CALLBACKS)->info() << "Skipping type: " << className << " for it was already in the cache";
 
         }
-        // put each element at the end of the queue
-
-   //     if(!Agent::globalData->inst_api->was_sent(className)){
-   //         JavaUtils::loadClass(env, loader, className.c_str());
-   //     }
     }
 
-   if(!Agent::globalData->inst_api->isQueueEmpty()){
-       std::string classToLoad = Agent::globalData->inst_api->getFirstDep();
+   if(!Agent::globalData->inst_api->noClassToBeLoaded()){
+       std::string classToLoad = Agent::globalData->inst_api->getClassToLoad();
        std::string toLoadWithDots = JavaUtils::toNameWithDots(classToLoad);
 
        log(LOGGER_AGENT_CALLBACKS)->info() << "Loading type: " << toLoadWithDots;
        JavaUtils::loadClass(env, loader, toLoadWithDots.c_str());
+   }else{
+       log(LOGGER_AGENT_CALLBACKS)->info() << "No more classes to be loaded, starting with the instrumenting back to the"
+                                                      "original class";
+
    }
-    // get the first element and load it ( unless queue is empty, then we have nothing to load )
 
 }
 

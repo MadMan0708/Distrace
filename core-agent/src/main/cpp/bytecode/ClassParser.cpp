@@ -5,6 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include "ClassParser.h"
 #include "JavaConst.h"
+#include "../JavaUtils.h"
 
 
 using namespace Logging;
@@ -34,7 +35,7 @@ void ClassParser::readConstantPool(){
 
 void ClassParser::readClassInfo(){
     int access_flags = reader.readShort();
-    /* Interfaces are implicitely abstract, the flag should be set
+    /* Interfaces are implicitly abstract, the flag should be set
      * according to the JVM specification.
      */
     if ((access_flags & JavaConst::ACC_INTERFACE) != 0) {
@@ -53,6 +54,8 @@ void ClassParser::readInterfaces(){
     interfaces = new int[numInterfaces];
     for (int i = 0; i < numInterfaces; i++) {
         interfaces[i] = reader.readShort();
+        std::string interfaceName = constantPool->getConstantString(interfaces[i], JavaConst::CONSTANT_Class);
+        saveUniqueClass(interfaceName);
     }
 }
 
@@ -69,7 +72,7 @@ std::string ClassParser::classNameFromSignature(std::string typeSignature){
 void ClassParser::saveUniqueClass(std::string className){
     // we are only interested in references which does not belong to java package
 
-    if(!(className.empty() || boost::starts_with(className, "java"))){
+    if(!(className.empty())){
         if (std::find(uniqueTypes.begin(), uniqueTypes.end(), className) == uniqueTypes.end()) {
             // put the ref to the list of unique refs to be loaded
             uniqueTypes.push_back(className);
@@ -128,20 +131,21 @@ void ClassParser::readMethods(){
     }
 }
 
-std::string ClassParser::saveSuperClassName(){
+void ClassParser::saveSuperClassName(){
     std::string superclass_name;
     if(superClassNameIndex > 0) { // May be zero -> class is java.lang.Object
         superclass_name = constantPool->getConstantString(superClassNameIndex,
                                                            JavaConst::CONSTANT_Class);
     }
     else {
+        // classes which don't have super class have actually java.lang.Object as super class
         superclass_name = "java/lang/Object";
     }
     saveUniqueClass(superclass_name);
-    return superclass_name;
 }
 
-void ClassParser::parse(std::string className) {
+
+void ClassParser::parse() {
     readMagicId();
     readVersions();
     readConstantPool();
@@ -150,25 +154,12 @@ void ClassParser::parse(std::string className) {
     readFields();
     readMethods();
     saveSuperClassName();
-    // TODO: Save interfaces
-
-    // log obtained classes
-    std::vector<std::string>::iterator it;
-    for(it=uniqueTypes.begin() ; it <uniqueTypes.end(); it++) {
-        log(LOGGER_BYTECODE)->info() << "Parsed class: " << *it;
-    }
-
-    // remove references to class currently being loaded ( it could be obtained in case the class is using itself as
-    // a field/ method argument/ return type
-    uniqueTypes.erase(std::remove(uniqueTypes.begin(), uniqueTypes.end(), className), uniqueTypes.end());
 }
 
 
-std::vector<std::string> ClassParser::parse(std::string className, const unsigned char *class_data, jint class_data_len){
+std::vector<std::string> ClassParser::parse(const unsigned char *class_data, jint class_data_len){
     ByteReader reader(class_data, class_data_len);
     ClassParser* parser = new ClassParser(reader);
-    parser->parse(className);
+    parser->parse();
     return parser->uniqueTypes;
 }
-
-

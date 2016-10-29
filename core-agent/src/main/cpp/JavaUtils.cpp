@@ -58,7 +58,6 @@ namespace Distrace {
             // Find the getName() method in the class object
             jmethodID methodId = env->GetMethodID(clsClazz, "getName", "()Ljava/lang/String;");
             jstring className = (jstring) env->CallObjectMethod(klazz, methodId);
-            log(LOGGER_AGENT_CALLBACKS)->info() << "get NAME in UTILS: " << className;
             // Now get the c string from the java jstring object
             const char *str = env->GetStringUTFChars(className, NULL);
             return str;

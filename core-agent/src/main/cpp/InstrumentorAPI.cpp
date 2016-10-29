@@ -32,6 +32,10 @@ std::string InstrumentorAPI::ACK_REQ_INST_NO = "ack_req_int_no";
 std::string InstrumentorAPI::ACK_REQ_AUX_CLASSES = "auxiliary_types";
 std::mutex InstrumentorAPI::mtx;           // mutex for critical section
 
+std::vector<std::string> InstrumentorAPI::ignoredPackages = {
+        "java/",
+        "sun/"
+};
 
 void InstrumentorAPI::add_sent_class(std::string name){
     log(LOGGER_INSTRUMENTOR_API)->info() << "Add sent class: " << name;
@@ -299,38 +303,41 @@ bool InstrumentorAPI::has_class(std::string class_name){
     return  ret == "yes";
 }
 
-std::string InstrumentorAPI::getFirstDep() {
-    std::string ret = DEP_QUEUE.front();
-    DEP_QUEUE.pop();
-    return ret;
+std::string InstrumentorAPI::getClassToLoad() {
+    // assumes it's not empty
+    auto it = TO_BE_LOADED_SET.begin();
+    std::string className = *it;
+    TO_BE_LOADED_SET.erase(className);
+    return className;
 }
 
-void InstrumentorAPI::putToQueue(std::string name) {
-    DEP_QUEUE.push(name);
+void InstrumentorAPI::storeClassForLaterLoad(std::string name) {
+    TO_BE_LOADED_SET.insert(name);
 }
 
-bool InstrumentorAPI::isQueueEmpty() {
-    return DEP_QUEUE.empty();
+bool InstrumentorAPI::noClassToBeLoaded() {
+    return TO_BE_LOADED_SET.empty();
 }
 
-bool InstrumentorAPI::is_root_name(std::string name) {
-    name == root_name;
+std::vector<std::string> InstrumentorAPI::filterTypes(std::string name, std::vector<std::string> types) {
+    // remove classes in ignored package
+    auto toRemove = std::remove_if(types.begin(), types.end(),[](const std::string className) { return inIgnoredPackage(className);});
+    types.erase(toRemove, types.end());
+    // remove this class
+    types.erase(std::remove(types.begin(), types.end(), name), types.end());
+
+    return types;
 }
 
-void InstrumentorAPI::set_root_name(std::string name) {
-    if(root_name.empty()){
-        log(LOGGER_INSTRUMENTOR_API)->info() << "Setting root name: " << name;
 
-        root_name = name;
+bool InstrumentorAPI::inIgnoredPackage(std::string className) {
+    for(std::vector<std::string>::iterator it = ignoredPackages.begin(); it != ignoredPackages.end(); ++it) {
+        if(boost::starts_with(className, *it)){
+            return true;
+        }
     }
-    DEP_QUEUE.push(name);
-
+    return false;
 }
-
-
-
-
-
 
 
 

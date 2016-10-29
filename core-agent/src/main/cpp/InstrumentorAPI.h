@@ -8,7 +8,7 @@
 #include <nnxx/socket.h>
 #include "Logging.h"
 #include <string>
-#include <queue>
+#include <set>
 
 namespace Distrace {
     /**
@@ -22,13 +22,13 @@ namespace Distrace {
     class InstrumentorAPI {
     public:
 
-        //TODO: refactor the following 3 methods
+        static std::vector<std::string> filterTypes(std::string name, std::vector<std::string> vector);
+        static bool inIgnoredPackage(std::string className);
 
-        void set_root_name(std::string name);
-        bool is_root_name(std::string name);
-        bool isQueueEmpty();
-        std::string getFirstDep();
-        void putToQueue(std::string name);
+        //TODO: refactor the following 3 methods
+        bool noClassToBeLoaded();
+        std::string getClassToLoad();
+        void storeClassForLaterLoad(std::string name);
         void add_sent_class(std::string name);
         bool was_sent(std::string name);
 
@@ -69,6 +69,7 @@ namespace Distrace {
          */
         void stop();
     private:
+        static std::vector<std::string> ignoredPackages;
         /** Request type for class instrumentation */
         static byte REQ_TYPE_INSTRUMENT;
         /** Request type informing the instrumentor JVM that the monitored JVM is being stopped */
@@ -88,9 +89,8 @@ namespace Distrace {
         /** Auxiliary types */
         static std::string ACK_REQ_AUX_CLASSES;
 
-        std::string root_name;
-        /** Queue for dependencies */
-        std::queue<std::string> DEP_QUEUE;
+        /** Set for dependencies. We are using sets so we don't put there classes which haven't been sent multiple times*/
+        std::set<std::string> TO_BE_LOADED_SET;
         /** List of auxiliarry classes, auxiliarry classes should not be instrumented */
         std::vector<std::string> aux_classes;
         /** List of sent classes ( bytecode has been sent to instrumentor JVM */
