@@ -166,7 +166,7 @@ int AgentUtils::JNI_AttachCurrentThread(JNIEnv *env) {
             log(LOGGER_AGENT)->debug() << "Obtaining JNI Env: Current thread is already attached to the JVM!";
             return JNI_ALREADY_ATTACHED;
         default:
-            log(LOGGER_AGENT)->info() << "Obtaining JNI Env: Unknown error " << result << ". Terminating!";
+            log(LOGGER_AGENT)->error() << "Obtaining JNI Env: Unknown error " << result << ". Terminating!";
             exit(result);
     }
 }

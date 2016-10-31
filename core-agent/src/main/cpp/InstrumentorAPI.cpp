@@ -307,12 +307,15 @@ std::string InstrumentorAPI::getClassToLoad() {
     // assumes it's not empty
     auto it = TO_BE_LOADED_SET.begin();
     std::string className = *it;
-    TO_BE_LOADED_SET.erase(className);
+    TO_BE_LOADED_SET.erase(std::remove(TO_BE_LOADED_SET.begin(), TO_BE_LOADED_SET.end(), className), TO_BE_LOADED_SET.end());
     return className;
 }
 
 void InstrumentorAPI::storeClassForLaterLoad(std::string name) {
-    TO_BE_LOADED_SET.insert(name);
+    if(std::find(TO_BE_LOADED_SET.begin(), TO_BE_LOADED_SET.end(), name) == TO_BE_LOADED_SET.end()){
+        // insert only if the class is not already in the list
+        TO_BE_LOADED_SET.push_back(name);
+    }
 }
 
 bool InstrumentorAPI::noClassToBeLoaded() {

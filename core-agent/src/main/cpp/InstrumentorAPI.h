@@ -68,6 +68,9 @@ namespace Distrace {
          * Inform the instrumentor JVM that the monitored JVM has been stopped
          */
         void stop();
+
+        /** Set for dependencies. We are using sets so we don't put there classes which haven't been sent multiple times*/
+        std::vector<std::string> TO_BE_LOADED_SET;
     private:
         static std::vector<std::string> ignoredPackages;
         /** Request type for class instrumentation */
@@ -89,8 +92,7 @@ namespace Distrace {
         /** Auxiliary types */
         static std::string ACK_REQ_AUX_CLASSES;
 
-        /** Set for dependencies. We are using sets so we don't put there classes which haven't been sent multiple times*/
-        std::set<std::string> TO_BE_LOADED_SET;
+
         /** List of auxiliarry classes, auxiliarry classes should not be instrumented */
         std::vector<std::string> aux_classes;
         /** List of sent classes ( bytecode has been sent to instrumentor JVM */

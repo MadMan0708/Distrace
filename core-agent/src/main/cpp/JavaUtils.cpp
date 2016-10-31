@@ -57,10 +57,15 @@ namespace Distrace {
             jclass clsClazz = env->GetObjectClass(klazz);
             // Find the getName() method in the class object
             jmethodID methodId = env->GetMethodID(clsClazz, "getName", "()Ljava/lang/String;");
+
             jstring className = (jstring) env->CallObjectMethod(klazz, methodId);
+            
             // Now get the c string from the java jstring object
             const char *str = env->GetStringUTFChars(className, NULL);
-            return str;
+            std::string classNameCStr(str);
+            env->ReleaseStringUTFChars(className, str);
+            log(LOGGER_AGENT_CALLBACKS)->info() << "STR " << classNameCStr;
+            return classNameCStr;
         }
 
         jobject getClassLoaderForClass(JNIEnv *env, jclass klazz){

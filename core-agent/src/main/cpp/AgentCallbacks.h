@@ -52,7 +52,7 @@ namespace Distrace {
          */
         static void JNICALL cbClassPrepare(jvmtiEnv *jvmti_env, JNIEnv *jni_env, jthread thread, jclass klass);
 
-        static void instrument(const char *name, unsigned char **new_class_data, jint *new_class_data_len, std::string loader_name);
+        static void instrument(const char *name, unsigned char **new_class_data, jint *new_class_data_len);
 
         static void loadDependencies(JNIEnv *env, jobject loader, const char *name, const unsigned char *class_data, jint class_data_len);
     };

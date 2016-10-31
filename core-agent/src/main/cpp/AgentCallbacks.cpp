@@ -28,6 +28,7 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
         " is about to be loaded by \""
         << loader_name << "\" class loader ";
 
+        // what if another onClassFileLoadHook appear here ? then we are screwed
 
         if (!(JavaUtils::isIgnoredClassLoader(loader_name) || Agent::globalData->inst_api->is_aux_class(name))) {
 
@@ -41,7 +42,7 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
                 Agent::globalData->inst_api->send_byte_code(name, class_data, class_data_len);
             }
 
-            //Agent::globalData->inst_api->add_sent_class(name);
+            Agent::globalData->inst_api->add_sent_class(name);
             log(LOGGER_AGENT_CALLBACKS)->info() << "Send bytecode for all the dependencies for class: " << name;
 
             // load dependencies currently can't work since it works in deep-first search, but should be breadth first search
@@ -54,17 +55,14 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
 
             // create a queue in the instrumentor map if it doesn't exist and enqueue current class
 
-            // print value of the queue
-
-
             loadDependencies(env, loader, name, class_data, class_data_len);
-
 
             // ? Should the instrumentation be done only for the origin class ?
             // once we have all the dependencies in the instrumentor JVM, instrument the class
 
-            //if( Agent::globalData->inst_api->is_root_name(name)){
-                instrument(name, new_class_data, new_class_data_len, loader_name);
+            std::string nameN(name);
+            //if(nameN == "water/H2O") { // instrument only root name
+              //  instrument(name, new_class_data, new_class_data_len);
             //}
         }
 
@@ -75,9 +73,6 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
 }
 
 void AgentCallbacks::loadDependencies(JNIEnv *env, jobject loader, const char *name, const unsigned char *class_data, jint class_data_len){
-    //std::string name_to_process = Agent::globalData->inst_api->getClassToLoad();
-    // queue current class
-    // deque class, do class parsing and put all the the dependencies into queue
 
     std::vector<std::string> parsedTypes = ClassParser::parse(class_data, class_data_len);
     std::vector<std::string> filteredTypes = InstrumentorAPI::filterTypes(name, parsedTypes);
@@ -91,7 +86,7 @@ void AgentCallbacks::loadDependencies(JNIEnv *env, jobject loader, const char *n
     // and dequeue it and put at the end of the queue
 
     for(std::vector<std::string>::iterator it=filteredTypes.begin() ; it < filteredTypes.end(); it++) {
-        // load all dependencies for class
+        // save all dependencies for class
         std::string className = *it;
         className = JavaUtils::toNameWithDots(className);
         // check if this class has been already loaded
@@ -104,6 +99,11 @@ void AgentCallbacks::loadDependencies(JNIEnv *env, jobject loader, const char *n
 
         }
     }
+    // print the content of dependency set
+    auto depSet = Agent::globalData->inst_api->TO_BE_LOADED_SET;
+    for(auto dep : depSet) {
+        log(LOGGER_BYTECODE)->info() << "DEP SET CONTAINS: -> " << dep;
+    }
 
    if(!Agent::globalData->inst_api->noClassToBeLoaded()){
        std::string classToLoad = Agent::globalData->inst_api->getClassToLoad();
@@ -114,18 +114,17 @@ void AgentCallbacks::loadDependencies(JNIEnv *env, jobject loader, const char *n
    }else{
        log(LOGGER_AGENT_CALLBACKS)->info() << "No more classes to be loaded, starting with the instrumenting back to the"
                                                       "original class";
-
    }
 
 }
 
-void AgentCallbacks::instrument(const char *name, unsigned char **new_class_data, jint *new_class_data_len, std::string loader_name){
+void AgentCallbacks::instrument(const char *name, unsigned char **new_class_data, jint *new_class_data_len){
     log(LOGGER_AGENT_CALLBACKS)->info() << " About to instrument class: " << name;
     // send instrumentor just name because it already has the class
     if (Agent::globalData->inst_api->should_instrument(name)) {
         // receive reply when we expect the byte code to be instrumented
         *new_class_data_len = Agent::globalData->inst_api->instrument(new_class_data);
-        log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented " << loader_name;
+        log(LOGGER_AGENT_CALLBACKS)->info() << "The class " << name << " has been instrumented ";
     }
 }
 
