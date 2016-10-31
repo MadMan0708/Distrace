@@ -43,13 +43,13 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
 
     // now print the result of parsing
     if (res == JNI_ERR) {
-        log(LOGGER_AGENT)->error() << err_msg;
+        log(LOGGER_AGENT)->error("{}", err_msg);
         // stop the agent in case arguments are wrong
         return JNI_ERR;
     } else {
         // print all parsed arguments
         for (auto pair : Agent::getArgs()->getArgsMap()) {
-            log(LOGGER_AGENT)->info() << "Argument passed to the agent: " << pair.first << "=" << pair.second;
+            log(LOGGER_AGENT)->info("Argument passed to the agent: {} = {}", pair.first, pair.second);
         }
     }
 
@@ -72,13 +72,13 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) 
 
     // now print the result of parsing
     if (res == JNI_ERR) {
-        log(LOGGER_AGENT)->error() << err_msg;
+        log(LOGGER_AGENT)->error("{}", err_msg);
         // stop the agent in case arguments are wrong
         return JNI_ERR;
     } else {
         // print all parsed arguments
         for (auto pair : Agent::getArgs()->getArgsMap()) {
-            log(LOGGER_AGENT)->info() << "Argument passed to the agent: " << pair.first << "=" << pair.second;
+            log(LOGGER_AGENT)->info("Argument passed to the agent: {} = {}", pair.first, pair.second);
         }
     }
     

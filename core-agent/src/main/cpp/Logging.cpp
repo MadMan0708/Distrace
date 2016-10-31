@@ -88,7 +88,7 @@ namespace Distrace {
 
             auto log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
             set_log_level(log_level);
-            log(LOGGER_AGENT)->info() << "Log level successfully set to: " << log_level;
+            log(LOGGER_AGENT)->info("Log level successfully set to: {}.", log_level);
 
         }
     }

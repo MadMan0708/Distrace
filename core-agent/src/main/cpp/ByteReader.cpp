@@ -110,8 +110,6 @@ std::string ByteReader::readUTF(){
                     char2 = (int) bytearr[count-2];
                     char3 = (int) bytearr[count-1];
 
-                    std::cout << "char 2 " << char2 << " char3 " << char3 << " "<< +((char2 & 0xC0) != 0x80) << +((char3 & 0xC0) != 0x80) <<std::endl;
-
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
                         throw "malformed input around byte " + (count - 1);
                     }

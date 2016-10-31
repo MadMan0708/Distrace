@@ -5,7 +5,7 @@
 #ifndef DISTRACE_AGENT_CORE_ACCESSFLAGS_H
 #define DISTRACE_AGENT_CORE_ACCESSFLAGS_H
 
-#include "Agent.h"
+#include "../Agent.h"
 
 using namespace Distrace;
 class AccessFlags {

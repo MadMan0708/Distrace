@@ -9,8 +9,6 @@
 #include <jvmti.h>
 #include "AgentUtils.h"
 #include "AgentCallbacks.h"
-#include "Logging.h"
-#include "Agent.h"
 
 using namespace Distrace;
 using namespace Distrace::Logging;
@@ -22,13 +20,14 @@ int AgentUtils::check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::s
         char *error_name = NULL;
         env->GetErrorName(error_number, &error_name);
 
-        log(LOGGER_AGENT)->error() << "JVMTI ERROR " << error_number << " - "
-        << (error_name == NULL ? "Unknown" : error_name)
-        << ": " << (error_description.empty() ? "" : error_description);
+        log(LOGGER_AGENT)->error("JVMTI ERROR {} - {} : ",
+                                 error_number,
+                                 (error_name == NULL ? "Unknown" : error_name),
+                                 (error_description.empty() ? "" : error_description));
         return JNI_ERR;
     }
     if (!ok_description.empty()) {
-        log(LOGGER_AGENT)->info() << ok_description;
+        log(LOGGER_AGENT)->info(ok_description);
     }
     return JNI_OK;
 }
@@ -124,7 +123,7 @@ int AgentUtils::register_jvmti_events(jvmtiEnv *jvmti) {
     }
 
 
-    log(LOGGER_AGENT)->info() << "All JVMTI notifications successfully set";
+    log(LOGGER_AGENT)->info("All JVMTI notifications successfully set");
     return JNI_OK;
 }
 
@@ -132,15 +131,15 @@ int AgentUtils::create_JVMTI_env(JavaVM *jvm, jvmtiEnv *jvmti) {
     jint result = jvm->GetEnv((void **) &jvmti, JVMTI_VERSION_1_2);
     switch (result) {
         case JNI_EVERSION:
-            log(LOGGER_AGENT)->error() << "Obtaining JVMTI Env: JVMTI version " << JVMTI_VERSION_1_2 <<
-            " not supported. Is your J2SE a 1.5 or newer version?";
+            log(LOGGER_AGENT)->error("Obtaining JVMTI Env: JVMTI version {} not supported. Is your J2SE a 1.5 or newer version?",
+                                     JVMTI_VERSION_1_2);
             return JNI_ERR;
         case JNI_OK:
             Agent::globalData->jvmti = jvmti;
-            log(LOGGER_AGENT)->info() << "Obtaining JVMTI Env: JVMTI Env obtained successfully!";
+            log(LOGGER_AGENT)->info("Obtaining JVMTI Env: JVMTI Env obtained successfully!");
             return JNI_OK;
         default:
-            log(LOGGER_AGENT)->info() << "Obtaining JVMTI Env: Unknown error " << result << ".";
+            log(LOGGER_AGENT)->info("Obtaining JVMTI Env: Unknown error {}.",result );
             return JNI_ERR;
     }
 }
@@ -149,24 +148,22 @@ int AgentUtils::JNI_AttachCurrentThread(JNIEnv *env) {
     jint result = Agent::globalData->jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
     switch (result) {
         case JNI_EDETACHED:
-            log(LOGGER_AGENT)->info() << "Obtaining JNI Env: Current thread not attached to JVM, trying to attach.";
+            log(LOGGER_AGENT)->info("Obtaining JNI Env: Current thread not attached to JVM, trying to attach.");
             if (AgentUtils::attach_JNI_to_current_thread(Agent::globalData->jvm, env) == JNI_ERR) {
-                log(LOGGER_AGENT)->error() <<
-                "Obtaining JNI Env: Failed to attach current thread to JVM. Terminating the agent!";
+                log(LOGGER_AGENT)->error("Obtaining JNI Env: Failed to attach current thread to JVM. Terminating the agent!");
                 exit(JNI_ERR);
             } else {
-                log(LOGGER_AGENT)->info() << "Obtaining JNI Env: Successfully attached current thread to JVM";
+                log(LOGGER_AGENT)->info("Obtaining JNI Env: Successfully attached current thread to JVM");
                 return JNI_ATTACHED_NOW;
             }
         case JNI_EVERSION:
-            log(LOGGER_AGENT)->error() << "Obtaining JNI Env: JNI version " << JNI_VERSION_1_6 <<
-            " not supported. Terminating the agent!";
+            log(LOGGER_AGENT)->error("Obtaining JNI Env: JNI version {} not supported. Terminating the agent!", JNI_VERSION_1_6);
             exit(JNI_ERR);
         case JNI_OK:
-            log(LOGGER_AGENT)->debug() << "Obtaining JNI Env: Current thread is already attached to the JVM!";
+            log(LOGGER_AGENT)->debug("Obtaining JNI Env: Current thread is already attached to the JVM!");
             return JNI_ALREADY_ATTACHED;
         default:
-            log(LOGGER_AGENT)->error() << "Obtaining JNI Env: Unknown error " << result << ". Terminating!";
+            log(LOGGER_AGENT)->error("Obtaining JNI Env: Unknown error {}. Terminating!", result);
             exit(result);
     }
 }
@@ -208,6 +205,6 @@ int AgentUtils::init_agent() {
         return JNI_ERR;
     }
 
-    log(LOGGER_AGENT)->info() << "Agent successfully initialized";
+    log(LOGGER_AGENT)->info("Agent successfully initialized");
     return JNI_OK;
 }

@@ -29,9 +29,13 @@ namespace Distrace {
             jclass cls = env->GetObjectClass(loader);
             // get load method
             jstring jstrBuf = env->NewStringUTF(className);
+            // find class
+            std::string name(className);
+            std::replace(name.begin(), name.end(), '.','/');
             jmethodID method = env->GetMethodID(cls, "loadClass","(Ljava/lang/String;Z)Ljava/lang/Class;");
 
             jobject klazz = env->CallObjectMethod(loader, method, jstrBuf, true);
+
         }
 
         /**
@@ -59,12 +63,11 @@ namespace Distrace {
             jmethodID methodId = env->GetMethodID(clsClazz, "getName", "()Ljava/lang/String;");
 
             jstring className = (jstring) env->CallObjectMethod(klazz, methodId);
-            
+
             // Now get the c string from the java jstring object
             const char *str = env->GetStringUTFChars(className, NULL);
             std::string classNameCStr(str);
             env->ReleaseStringUTFChars(className, str);
-            log(LOGGER_AGENT_CALLBACKS)->info() << "STR " << classNameCStr;
             return classNameCStr;
         }
 

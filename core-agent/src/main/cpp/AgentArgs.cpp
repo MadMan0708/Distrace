@@ -34,7 +34,7 @@ std::string AgentArgs::get_arg_value(std::string arg_name) {
     if(is_arg_set(arg_name)){
         return args.find(arg_name)->second;
     }else{
-        log(LOGGER_AGENT)->error() << "Argument \"" << arg_name << "\" is not set. Before getting the value check if it's set using the is_arg_set method";
+        log(LOGGER_AGENT)->error("Argument \"{}\" is not set. Before getting the value check if it's set using the is_arg_set method",arg_name);
         assert(false);
     }
 }
