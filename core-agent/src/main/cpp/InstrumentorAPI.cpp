@@ -38,14 +38,14 @@ std::vector<std::string> InstrumentorAPI::ignoredPackages = {
 };
 
 void InstrumentorAPI::add_sent_class(std::string name){
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Add sent class: " << name;
+    log(LOGGER_INSTRUMENTOR_API)->info("Add sent class: {}", name);
     sent.push_back(name);
 }
 
 bool InstrumentorAPI::was_sent(std::string name){
     std::string withSlashes(name);
     std::replace(withSlashes.begin(), withSlashes.end(),'.','/');
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Checking if class was sent: " << withSlashes << " " << (std::find(sent.begin(), sent.end(), withSlashes) != sent.end());
+    log(LOGGER_INSTRUMENTOR_API)->info("Checking if class was sent: {}", withSlashes);
 
     return std::find(sent.begin(), sent.end(), withSlashes) != sent.end();
 }
@@ -62,7 +62,7 @@ bool InstrumentorAPI::is_aux_class(std::string name){
 
 void InstrumentorAPI::assert_bytes_sent(int numBytesSent, size_t original_len) {
     if (numBytesSent < 0) {
-        log(LOGGER_INSTRUMENTOR_API)->error() << "Bytes couldn't be send, error:" << strerror(errno);
+        log(LOGGER_INSTRUMENTOR_API)->error("Bytes couldn't be send, error: {}", strerror(errno));
     }
     assert(numBytesSent == original_len);
 }
@@ -124,7 +124,7 @@ void InstrumentorAPI::send_req_type(byte req_type) {
 
 void InstrumentorAPI::load_aux_classes(std::string class_name){
 
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Loading auxiliary classes for " << class_name;
+    log(LOGGER_INSTRUMENTOR_API)->info("Loading auxiliary classes for {}", class_name);
 
     auto reply = receive_string_reply();
     while(reply == ACK_REQ_AUX_CLASSES){
@@ -135,7 +135,7 @@ void InstrumentorAPI::load_aux_classes(std::string class_name){
 
         byte* output_buffer = (byte *) malloc(sizeof(byte) * expected_length);
         receive_byte_arr_reply(&output_buffer, expected_length);
-        log(LOGGER_INSTRUMENTOR_API)->info() << "Receive bytecode for auxiliary class " << aux_class_name;
+        log(LOGGER_INSTRUMENTOR_API)->info("Receive bytecode for auxiliary class {}", aux_class_name);
 
 
         std::vector<std::string> tokens;
@@ -151,12 +151,12 @@ void InstrumentorAPI::load_aux_classes(std::string class_name){
         boost::filesystem::create_directories(path);
         FILE* file = fopen(fully_path.c_str(), "wb" );
         if(file!=NULL){
-            log(LOGGER_INSTRUMENTOR_API)->error() << "Writing to file " + fully_path;
+            log(LOGGER_INSTRUMENTOR_API)->error("Writing to file {}", fully_path);
 
             fwrite(output_buffer, sizeof(output_buffer[0]), expected_length, file);
             fclose(file);
         }else{
-            log(LOGGER_INSTRUMENTOR_API)->error() << "Error opening the file " + fully_path;
+            log(LOGGER_INSTRUMENTOR_API)->error("Error opening the file {}", fully_path);
         }
 
         add_aux_class(aux_class_name);
@@ -168,8 +168,7 @@ void InstrumentorAPI::load_aux_classes(std::string class_name){
 bool InstrumentorAPI::should_instrument(std::string class_name) {
     // critical section. Communication started from different threads would break nanomsg
     mtx.lock();
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Asking Instrumentor whether it needs to instrument class \"" <<
-    class_name << "\"";
+    log(LOGGER_INSTRUMENTOR_API)->info("Asking Instrumentor whether it needs to instrument class {}", class_name);
     send_req_type(REQ_TYPE_INSTRUMENT);
 
     // send class name
@@ -179,15 +178,13 @@ bool InstrumentorAPI::should_instrument(std::string class_name) {
     load_aux_classes(class_name);
     auto reply = receive_string_reply();
     if (reply == ACK_REQ_INST_YES) {
-        log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
-        "\" will be instrumented.";
+        log(LOGGER_INSTRUMENTOR_API)->info("Instrumentor reply: Class {} will be instrumented.", class_name);
         ret_value = true;
     } else if (reply == ACK_REQ_INST_NO) {
-        log(LOGGER_INSTRUMENTOR_API)->info() << "Instrumentor reply: Class \"" << class_name <<
-        "\" won't be instrumented.";
+        log(LOGGER_INSTRUMENTOR_API)->info("Instrumentor reply: Class {} will NOT be instrumented.", class_name);
     } else {
         // never can be here
-        log(LOGGER_INSTRUMENTOR_API)->info() << "Got unexpected reply in should_instrument method : " << reply;
+        log(LOGGER_INSTRUMENTOR_API)->info("Got unexpected reply in should_instrument method : {}", reply);
         assert(false);
     }
     mtx.unlock();
@@ -201,6 +198,8 @@ void InstrumentorAPI::send_byte_code(std::string name, const unsigned char *clas
     send_string_request(name);
     send_byte_arr_request(class_data, data_len);
     mtx.unlock();
+    Agent::globalData->inst_api->add_sent_class(name);
+
 }
 
 int InstrumentorAPI::instrument(byte **output_buffer) {
@@ -213,7 +212,7 @@ int InstrumentorAPI::instrument(byte **output_buffer) {
 
 void InstrumentorAPI::stop() {
     // in case of local mode ( IPC communication) delete the file used for the communication
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Stopping the instrumentor JVM";
+    log(LOGGER_INSTRUMENTOR_API)->info("Stopping the instrumentor JVM");
     // remove ipc://, the remaining part represents file ( when running on linux )
     std::string file = Agent::getArgs()->get_arg_value(AgentArgs::ARG_CONNECTION_STR).substr(6);
     boost::filesystem::path file_to_delete(file);
@@ -229,7 +228,7 @@ int InstrumentorAPI::init() {
     if(Agent::getArgs()->is_running_in_local_mode()){
         // fork instrumentor JVM
         if (!system(NULL)) {
-            log(LOGGER_INSTRUMENTOR_API)->error() << "Can't fork Instrumentor JVM, shell not available!";
+            log(LOGGER_INSTRUMENTOR_API)->error("Can't fork Instrumentor JVM, shell not available!");
             return JNI_ERR;
         }
         const std::string instrumentor_server_jar = Agent::getArgs()->get_arg_value(AgentArgs::ARG_INSTRUMENTOR_SERVER_JAR);
@@ -241,11 +240,10 @@ int InstrumentorAPI::init() {
         std::string launch_command =
                 "java -cp " + instrumentor_server_jar + ":" + instrumentor_server_cp + " " + instrumentor_main_class + " " + connection_str + " " +
                 log_level + " " + log_dir  + " & ";
-        log(LOGGER_INSTRUMENTOR_API)->info() << "Starting Instrumentor JVM with the command: " << launch_command;
+        log(LOGGER_INSTRUMENTOR_API)->info("Starting Instrumentor JVM with the command: {}",launch_command);
         int result = system(stringToCharPointer(launch_command));
         if (result < 0) {
-            log(LOGGER_INSTRUMENTOR_API)->error() << "Instrumentor JVM couldn't be forked because of error:" <<
-            strerror(errno);
+            log(LOGGER_INSTRUMENTOR_API)->error("Instrumentor JVM couldn't be forked because of error: {}", strerror(errno));
             return JNI_ERR;
         }
     }{
@@ -256,12 +254,11 @@ int InstrumentorAPI::init() {
 
     int endpoint = socket.connect(connection_str);
     if (endpoint < 0) {
-        log(LOGGER_INSTRUMENTOR_API)->error() << "Returned error code " << errno <<
-        ". Connection to the instrumentor JVM can't be established! Is instrumentor JVM running ?";
+        log(LOGGER_INSTRUMENTOR_API)->error("Returned error code {}. Connection to the instrumentor JVM can't be established! Is instrumentor JVM running ?",
+                                            errno);
         return JNI_ERR;
     } else {
-        log(LOGGER_INSTRUMENTOR_API)->info() <<
-        "Connection to the instrumentor JVM established via IPC. Assigned endpoint ID is " << endpoint;
+        log(LOGGER_INSTRUMENTOR_API)->info("Connection to the instrumentor JVM established via IPC. Assigned endpoint ID is = {}", endpoint);
     }
 
     Agent::globalData->inst_api = new InstrumentorAPI(std::move(socket));
@@ -291,36 +288,26 @@ int InstrumentorAPI::init() {
 InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
     this->socket = std::move(socket);
     this->path_to_dir_with_aux_classes = Utils::unique_tmp_dir_path();
-    log(LOGGER_INSTRUMENTOR_API)->info() << "Adding directory for auxiliary classes to classpath " << this->path_to_dir_with_aux_classes;
+    log(LOGGER_INSTRUMENTOR_API)->info("Adding directory for auxiliary classes to classpath : {}", this->path_to_dir_with_aux_classes);
     Agent::globalData->jvmti->AddToSystemClassLoaderSearch(this->path_to_dir_with_aux_classes.c_str());
 }
 
 bool InstrumentorAPI::has_class(std::string class_name){
-    mtx.lock();
-    send_req_type(REQ_TYPE_CHECK_HAS_CLASS);
-    auto ret = send_and_receive(class_name);
-    mtx.unlock();
-    return  ret == "yes";
-}
-
-std::string InstrumentorAPI::getClassToLoad() {
-    // assumes it's not empty
-    auto it = TO_BE_LOADED_SET.begin();
-    std::string className = *it;
-    TO_BE_LOADED_SET.erase(std::remove(TO_BE_LOADED_SET.begin(), TO_BE_LOADED_SET.end(), className), TO_BE_LOADED_SET.end());
-    return className;
-}
-
-void InstrumentorAPI::storeClassForLaterLoad(std::string name) {
-    if(std::find(TO_BE_LOADED_SET.begin(), TO_BE_LOADED_SET.end(), name) == TO_BE_LOADED_SET.end()){
-        // insert only if the class is not already in the list
-        TO_BE_LOADED_SET.push_back(name);
+    if(Agent::globalData->inst_api->was_sent(class_name)){
+        return true;
+    }else{
+        mtx.lock();
+        send_req_type(REQ_TYPE_CHECK_HAS_CLASS);
+        auto ret = send_and_receive(class_name);
+        mtx.unlock();
+        return  ret == "yes";
     }
 }
 
-bool InstrumentorAPI::noClassToBeLoaded() {
-    return TO_BE_LOADED_SET.empty();
+bool InstrumentorAPI::isGoodType(std::string currentClass, std::string referencedClass) {
+    return !(inIgnoredPackage(referencedClass) && referencedClass != currentClass);
 }
+
 
 std::vector<std::string> InstrumentorAPI::filterTypes(std::string name, std::vector<std::string> types) {
     // remove classes in ignored package
@@ -341,6 +328,29 @@ bool InstrumentorAPI::inIgnoredPackage(std::string className) {
     }
     return false;
 }
+
+int InstrumentorAPI::sendReferencedClass(JNIEnv *env, std::string className, jobject loader, unsigned char **bytes){
+    // Sent this class only if it hasn't been sent already loaded
+    if(!Agent::globalData->inst_api->has_class(className)) {
+        // find the class using the current class loader
+        log(LOGGER_BYTECODE)->info("Findings byte for: {}", className);
+        int bytes_len = JavaUtils::getBytesForClass(env, className, loader, bytes);
+        log(LOGGER_BYTECODE)->info("Findings byte for: {} successful ", className);
+        Agent::globalData->inst_api->send_byte_code(className, *bytes, bytes_len);
+        return bytes_len;
+    }else{
+        log(LOGGER_AGENT_CALLBACKS)->info("Skipping type: {} for it was already in the cache.", className);
+        return 0;
+    }
+}
+
+int InstrumentorAPI::sendReferencedClass(JNIEnv *env, std::string className, jobject loader) {
+    unsigned char *bytes_buff;
+    return sendReferencedClass(env, className, loader, &bytes_buff);
+}
+
+
+
 
 
 

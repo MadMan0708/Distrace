@@ -86,7 +86,7 @@ public class BaseAgentBuilder {
                                     log.info("Created TypeDescription for class " + name);
                                     return new Resolution.Simple(cache.get(name));
                                 } catch (ClassNotFoundException e) {
-                                    assert false; //can't happen
+                                        assert false; //can't happen
                                     return null;
                                 }
                             }

@@ -24,6 +24,8 @@ namespace Distrace {
         jboolean vm_dead;
         InstrumentorAPI *inst_api;
         AgentArgs *agent_args; // key = arg name, value = arg value
+        /* Data access Lock */
+        jrawMonitorID  lock;
     } GlobalAgentData;
 
     /**

@@ -15,6 +15,12 @@ namespace Distrace {
     class AgentUtils {
     public:
 
+        /* Enter a critical section by doing a JVMTI Raw Monitor Enter */
+        static void enter_critical_section(jvmtiEnv *jvmti);
+
+        /* Exit a critical section by doing a JVMTI Raw Monitor Exit */
+        static void exit_critical_section(jvmtiEnv *jvmti);
+
         /**
          * Check for error after a JVMTI method was called. If there was no error then content of ok_description
          * is logged out
@@ -51,6 +57,11 @@ namespace Distrace {
          * Creates JNI environment with the desired JNI version
          */
         static int JNI_AttachCurrentThread(JNIEnv *jni);
+
+        /**
+         * Creates JVMTI lock
+         */
+        static int create_JVMTI_lock(jvmtiEnv *jvmti);
 
         /**
          * Initialize the agent

@@ -17,11 +17,12 @@ namespace Distrace{
      */
     namespace JavaUtils {
 
-        bool isAlreadyLoaded(JNIEnv *env, const char *name);
+        jstring asJavaString(JNIEnv *env, std::string str);
 
-        std::vector<std::string> getRefToDep(JNIEnv *env, const char *name, const unsigned char *class_data, jint class_data_len);
+        int getBytesForClass(JNIEnv *env, std::string className, jobject loader, unsigned char **buf);
 
         std::string toNameWithDots(std::string class_name);
+
         /**
          * Converts jbytearray to char*
          */
@@ -32,7 +33,6 @@ namespace Distrace{
          */
         extern std::vector<std::string> ignoredLoaders;
 
-        void loadClass(JNIEnv *env, jobject loader, const char *className);
         /**
          * Check whether the classloader on the input is ignored classloader
          */

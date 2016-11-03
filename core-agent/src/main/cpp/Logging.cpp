@@ -81,8 +81,8 @@ namespace Distrace {
         void register_loggers() {
             auto sinks = create_sinks();
 
-            for (auto logger_name : loggers_to_initialize) {
-                auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
+            for (auto &logger_name : loggers_to_initialize) {
+                auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
                 spdlog::register_logger(logger);
             }
 

@@ -1,7 +1,5 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
-import cz.cuni.mff.d3s.distrace.InstrumentorServer;
-import cz.cuni.mff.d3s.distrace.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

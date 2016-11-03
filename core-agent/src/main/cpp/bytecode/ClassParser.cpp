@@ -52,10 +52,12 @@ void ClassParser::readClassInfo(){
 void ClassParser::readInterfaces(){
     numInterfaces = reader.readShort();
     interfaces = new int[numInterfaces];
+    // there can't be duplicate interfaces in a class, se we can store them without looking if the interface is
+    // already stored
     for (int i = 0; i < numInterfaces; i++) {
         interfaces[i] = reader.readShort();
         std::string interfaceName = constantPool->getConstantString(interfaces[i], JavaConst::CONSTANT_Class);
-        saveUniqueClass(interfaceName);
+        interfacesRefs.push_back(interfaceName);
     }
 }
 
@@ -69,13 +71,12 @@ std::string ClassParser::classNameFromSignature(std::string typeSignature){
     }
 }
 
-void ClassParser::saveUniqueClass(std::string className){
+void ClassParser::saveRefUniquely(std::string ref, std::vector<std::string> &where){
     // we are only interested in references which does not belong to java package
-
-    if(!(className.empty())){
-        if (std::find(uniqueTypes.begin(), uniqueTypes.end(), className) == uniqueTypes.end()) {
+    if(!ref.empty()){
+        if (std::find(where.begin(), where.end(), ref) == where.end()) {
             // put the ref to the list of unique refs to be loaded
-            uniqueTypes.push_back(className);
+            where.push_back(ref);
         }
     }
 }
@@ -88,8 +89,8 @@ void ClassParser::readFields(){
     for (int i = 0; i < numFields; i++) {
         fields[i] = *(new Field(reader, *constantPool));
         std::string signature = fields[i].getSignature();
-        std::string className = classNameFromSignature(signature);
-        saveUniqueClass(className);
+        std::string ref = classNameFromSignature(signature);
+        saveRefUniquely(ref, fieldRefs);
     }
 }
 
@@ -110,8 +111,8 @@ void ClassParser::parseAndSaveArguments(std::string ref){
 
         std::string argSignature = trimmedStart.substr(0, end);
 
-        std::string className = classNameFromSignature(argSignature);
-        saveUniqueClass(className);
+        std::string parsedRef = classNameFromSignature(argSignature);
+        saveRefUniquely(parsedRef, methodRefs);
         arguments = trimmedStart.substr(end);
 
     }
@@ -125,23 +126,30 @@ void ClassParser::readMethods(){
         methods[i] = (*new Method(reader, *constantPool));
         std::string methodSignature = methods[i].getSignature();
 
-        std::string className = returnValueFromSignature(methodSignature);
-        saveUniqueClass(className);
+        std::string parsedRef = returnValueFromSignature(methodSignature);
+        saveRefUniquely(parsedRef, methodRefs);
         parseAndSaveArguments(methodSignature);
     }
 }
 
 void ClassParser::saveSuperClassName(){
-    std::string superclass_name;
     if(superClassNameIndex > 0) { // May be zero -> class is java.lang.Object
-        superclass_name = constantPool->getConstantString(superClassNameIndex,
+        superClassName = constantPool->getConstantString(superClassNameIndex,
                                                            JavaConst::CONSTANT_Class);
     }
     else {
         // classes which don't have super class have actually java.lang.Object as super class
-        superclass_name = "java/lang/Object";
+        superClassName = "java/lang/Object";
     }
-    saveUniqueClass(superclass_name);
+}
+
+void ClassParser::saveToAllRefs(std::vector<std::string> &from) {
+    for(auto &ref: from){
+        if (std::find(allRefs.begin(), allRefs.end(), ref) == allRefs.end()) {
+            allRefs.push_back(ref);
+        }
+    }
+
 }
 
 
@@ -154,12 +162,51 @@ void ClassParser::parse() {
     readFields();
     readMethods();
     saveSuperClassName();
+
+
+    allRefs.push_back(superClassName);
+    saveToAllRefs(interfacesRefs);
+    saveToAllRefs(fieldRefs);
+    saveToAllRefs(methodRefs);
 }
 
 
-std::vector<std::string> ClassParser::parse(const unsigned char *class_data, jint class_data_len){
+ClassParser* ClassParser::parse(const unsigned char *class_data, jint class_data_len){
     ByteReader reader(class_data, class_data_len);
     ClassParser* parser = new ClassParser(reader);
     parser->parse();
-    return parser->uniqueTypes;
+
+    return parser;
 }
+
+std::string ClassParser::getSuperClassRef() {
+    return superClassName;
+}
+
+std::vector<std::string> ClassParser::getInterfacesRefs() {
+    return interfacesRefs;
+}
+
+std::vector<std::string> ClassParser::getFieldRefs() {
+    return fieldRefs;
+}
+
+std::vector<std::string> ClassParser::getMethodRefs() {
+    return methodRefs;
+}
+
+std::vector<std::string> ClassParser::getAllRefs() {
+    return allRefs;
+}
+
+
+
+
+
+
+
+
+
+
+
+

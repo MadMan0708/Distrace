@@ -10,6 +10,22 @@ using namespace Logging;
 namespace Distrace {
     namespace JavaUtils {
 
+        jstring asJavaString(JNIEnv *env, std::string str){
+            return env->NewStringUTF(str.c_str());
+        }
+
+        int getBytesForClass(JNIEnv *env, std::string className, jobject loader, unsigned char **buf){
+            jclass utils = env->FindClass("cz/cuni/mff/d3s/distrace/Utils");
+            jmethodID  getBytesMethod = env->GetStaticMethodID(utils,"getBytesFromClassFile","(Ljava/lang/String;Ljava/lang/ClassLoader;)[B");
+            jstring jClassName = asJavaString(env, className);
+            jbyteArray  arr = (jbyteArray) env->CallStaticObjectMethod(utils, getBytesMethod, jClassName, loader);
+            int len = env->GetArrayLength (arr);
+
+            unsigned char* buffer = new unsigned char[len];
+            env->GetByteArrayRegion (arr, 0, len, reinterpret_cast<jbyte*>(buffer));
+            *buf = buffer;
+            return len;
+        }
 
         unsigned char* as_unsigned_char_array(JNIEnv *env, jbyteArray array) {
             int len = env->GetArrayLength (array);
@@ -24,28 +40,12 @@ namespace Distrace {
             return class_name;
         }
 
-        void loadClass(JNIEnv *env, jobject loader, const char *className){
-            // get classloader class
-            jclass cls = env->GetObjectClass(loader);
-            // get load method
-            jstring jstrBuf = env->NewStringUTF(className);
-            // find class
-            std::string name(className);
-            std::replace(name.begin(), name.end(), '.','/');
-            jmethodID method = env->GetMethodID(cls, "loadClass","(Ljava/lang/String;Z)Ljava/lang/Class;");
-
-            jobject klazz = env->CallObjectMethod(loader, method, jstrBuf, true);
-
-        }
-
         /**
         *  The list of class loaders for which we don't want to instrument classes loaded by these class loaders
         */
         std::vector<std::string> ignoredLoaders =  {
                 // bootstrap classloader, it loads system classes which we usually don't want to instrument
                 "@Bootstrap",
-                // our helper classloader used to create TypeDescriptions for classes
-                "cz.cuni.mff.d3s.distrace.utils.ClassCreator",
                 "sun.reflect.DelegatingClassLoader"
                 // classloader created because of mechanism called "inflatation", it is created synthetically and loads synthetical classes
                 // and we do not want to create type Descriptions for these internal java classes

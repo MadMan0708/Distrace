@@ -9,9 +9,24 @@
 #include <jvmti.h>
 #include "AgentUtils.h"
 #include "AgentCallbacks.h"
+#include "Agent.h"
 
 using namespace Distrace;
 using namespace Distrace::Logging;
+
+void AgentUtils::enter_critical_section(jvmtiEnv *jvmti) {
+    jvmtiError error;
+
+    error = jvmti->RawMonitorEnter(Agent::globalData->lock);
+    check_jvmti_error(jvmti, error, "Cannot enter with raw monitor");
+}
+
+void AgentUtils::exit_critical_section(jvmtiEnv *jvmti) {
+    jvmtiError error;
+
+    error = jvmti->RawMonitorExit(Agent::globalData->lock);
+    check_jvmti_error(jvmti, error, "Cannot enter with raw monitor");
+}
 
 
 int AgentUtils::check_jvmti_error(jvmtiEnv *env, jvmtiError error_number, std::string ok_description,
@@ -182,21 +197,31 @@ int AgentUtils::attach_JNI_to_current_thread(JavaVM *jvm, JNIEnv *jni) {
     return jvm->AttachCurrentThread((void **) &jni, &args);
 }
 
+int AgentUtils::create_JVMTI_lock(jvmtiEnv *jvmti){
+    // Here we create a raw monitor for our use in this agent to protect critical sections of code.
+    jvmtiError error = jvmti->CreateRawMonitor("agent data", &(Agent::globalData->lock));
+    return check_jvmti_error(jvmti, error, "Cannot create raw monitor");
+}
+
 int AgentUtils::init_agent() {
 
-    if (AgentUtils::create_JVMTI_env(Agent::globalData->jvm, Agent::globalData->jvmti) == JNI_ERR) {
+    if (create_JVMTI_env(Agent::globalData->jvm, Agent::globalData->jvmti) == JNI_ERR) {
         return JNI_ERR;
     }
 
-    if (AgentUtils::register_jvmti_capabilities(Agent::globalData->jvmti) == JNI_ERR) {
+    if (register_jvmti_capabilities(Agent::globalData->jvmti) == JNI_ERR) {
         return JNI_ERR;
     }
 
-    if (AgentUtils::register_jvmti_callbacks(Agent::globalData->jvmti) == JNI_ERR) {
+    if (register_jvmti_callbacks(Agent::globalData->jvmti) == JNI_ERR) {
         return JNI_ERR;
     }
 
-    if (AgentUtils::register_jvmti_events(Agent::globalData->jvmti) == JNI_ERR) {
+    if (register_jvmti_events(Agent::globalData->jvmti) == JNI_ERR) {
+        return JNI_ERR;
+    }
+
+    if( create_JVMTI_lock(Agent::globalData->jvmti) == JNI_ERR){
         return JNI_ERR;
     }
 

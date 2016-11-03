@@ -22,13 +22,10 @@ namespace Distrace {
     class InstrumentorAPI {
     public:
 
+        static bool isGoodType(std::string currentClass, std::string referencedClass);
         static std::vector<std::string> filterTypes(std::string name, std::vector<std::string> vector);
         static bool inIgnoredPackage(std::string className);
 
-        //TODO: refactor the following 3 methods
-        bool noClassToBeLoaded();
-        std::string getClassToLoad();
-        void storeClassForLaterLoad(std::string name);
         void add_sent_class(std::string name);
         bool was_sent(std::string name);
 
@@ -41,7 +38,7 @@ namespace Distrace {
          * Constructor which creates instance of this class based on the socket connection to the instrumentor JVM
          */
         InstrumentorAPI(nnxx::socket socket);
-        
+
         /**
         * This method send request to the instrumentor JVM which decides whether this class should be instrumented
         * or not.
@@ -64,14 +61,20 @@ namespace Distrace {
 
         bool has_class(std::string class_name);
 
+        int sendReferencedClass(JNIEnv *env, std::string className, jobject loader, unsigned char **bytes);
+        int sendReferencedClass(JNIEnv *env, std::string className, jobject loader);
         /**
          * Inform the instrumentor JVM that the monitored JVM has been stopped
          */
         void stop();
 
-        /** Set for dependencies. We are using sets so we don't put there classes which haven't been sent multiple times*/
-        std::vector<std::string> TO_BE_LOADED_SET;
+
+        /**
+ * Receive message in form of string
+ */
+        std::string receive_string_reply();
     private:
+
         static std::vector<std::string> ignoredPackages;
         /** Request type for class instrumentation */
         static byte REQ_TYPE_INSTRUMENT;
@@ -127,10 +130,7 @@ namespace Distrace {
          */
         int send_byte_arr_request(const byte *data, int data_len);
 
-        /**
-         * Receive message in form of string
-         */
-        std::string receive_string_reply();
+
 
         /**
          * Receive message in a form of byte array.
