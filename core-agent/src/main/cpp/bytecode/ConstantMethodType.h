@@ -6,7 +6,7 @@
 #define DISTRACE_AGENT_CORE_CONSTANTMETHODTYPE_H
 
 #include "../Agent.h"
-#include "../ByteReader.h"
+#include "../utils/ByteReader.h"
 #include "Constant.h"
 
 using namespace Distrace;

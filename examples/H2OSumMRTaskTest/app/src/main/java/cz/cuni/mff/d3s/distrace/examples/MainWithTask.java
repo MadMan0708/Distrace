@@ -19,7 +19,7 @@ public class MainWithTask {
         // Start h2o node
         H2OApp.main(args);
         // Wait for rest of the cloud
-        H2O.waitForCloudSize(3,10000);
+        H2O.waitForCloudSize(2,10000);
 
         // Create frame with numbers we want to count
         Vec numVec = Vec.makeSeq(1,100000);

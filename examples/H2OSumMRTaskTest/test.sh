@@ -28,7 +28,7 @@ echo
 # For testing purposes we always expect main class to be this one
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
-LOG_LEVEL="info"
+LOG_LEVEL="off"
 CONNECTION_STR="ipc"
 INSTRUMETOR_CP=""
 
@@ -45,7 +45,6 @@ echo
 
 AGENT_ARGS="$NATIVE_AGENT_LIB_PATH=instrumentor_server_cp=$INSTRUMETOR_CP;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_lib_jar=$SERVER_JAR_PATH;instrumentor_server_jar=$SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;connection_str=$CONNECTION_STR"
 # First start h2o nodes with agents attached to them
-java -agentpath:$AGENT_ARGS -jar $APP_JAR_PATH -name kuba_cluster &
 java -agentpath:$AGENT_ARGS -jar $APP_JAR_PATH -name kuba_cluster &
 
 # Start h2o node which starts the MRTask

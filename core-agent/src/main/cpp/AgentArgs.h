@@ -24,18 +24,20 @@ namespace Distrace {
         static const std::string ARG_LOG_LEVEL;
         static const std::string ARG_LOG_DIR;
 
-        /** get the internal arguments map */
+        /**
+         * Get the internal arguments map
+         */
         std::map<std::string, std::string> getArgsMap();
 
         /**
          * Get argument value and fail if the argument value is not set.
          */
-        std::string get_arg_value(std::string arg_name);
+        std::string getArgValue(std::string argName);
 
         /**
          * Check if the arguments is set
          */
-        bool is_arg_set(std::string arg_name);
+        bool isArgSet(std::string argName);
 
         /**
          * Parse the arguments and store the parsed result in this class' internal map
@@ -43,53 +45,54 @@ namespace Distrace {
          * This method takes two arguments -  options string to be parsed and err_msg which is filled
          * with the error message in case of problem during the parsing
          */
-        int parse_args(std::string options, std::string &err_msg);
+        int parse_args(std::string options, std::string &errorMsg);
 
         /**
          * Return true if we run in IPC mode ( local mode ), false otherwise
          */
-        bool is_running_in_local_mode();
+        bool isRunningInLocalMode();
+
     private:
-        /** Internal arguments holder where key = arg name, value = arg value */
+        /**
+         * Internal arguments holder where key = arg name, value = arg value
+         */
         std::map<std::string, std::string> args;
 
         /**
          * Fill missing arguments with missing values
          */
-        void fill_missing_with_defaults();
+        void fillMissingWithDefaults();
 
         /**
          * Validate the arguments
          */
-        int validate_args(std::string &err_msg);
+        int validateArgs(std::string &err_msg);
 
         /**
-         * Validates conenction_str argument in case it is set
+         * Validates connection_str argument in case it is set
          */
-        int validate_connection_str(std::string &err_msg);
+        int validateConnectionStr(std::string &err_msg);
 
         /**
          * Validates log_level argument in case it is set
          */
-        int validate_log_level(std::string &err_msg);
+        int validateLogLevel(std::string &err_msg);
 
         /**
          * Check for single mandatory argument
          */
-        int check_for_mandatory_arg(std::string arg_name, std::string &err_msg);
+        int checkForMandatoryArg(std::string arg_name, std::string &err_msg);
 
         /**
          * Replace Distrace connection string in arguments by nanomsg address in the arguments
          */
-        void connection_str_to_nanomsg_addr();
+        void connectionStrToNanomsgAddr();
 
         /**
          * Check for mandatory arguments and in case of error fills err_msg with the error message which
          * can be further logged out
          */
-        int check_for_mandatory_args(std::string &err_msg);
-
-
+        int checkForMandatoryArgs(std::string &err_msg);
     };
 
 }

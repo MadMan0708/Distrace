@@ -62,6 +62,6 @@ Constant* Constant::readConstant(ByteReader &reader) {
         case JavaConst::CONSTANT_InvokeDynamic:
             return new ConstantInvokeDynamic(reader);
         default:
-            throw "Invalid byte tag in constant pool: " + b;
+            throw std::runtime_error("Invalid byte tag in constant pool: " + std::to_string(b));
     }
 }

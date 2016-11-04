@@ -7,13 +7,13 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
 #include "Logging.h"
-#include "AgentArgs.h"
-#include "Agent.h"
+#include "../AgentArgs.h"
+#include "../Agent.h"
 
 namespace Distrace {
     namespace Logging {
 
-        // Map containing mapping from string to log level. This list of log levels corresponds to log leves
+        // Map containing mapping from string to log level. This list of log levels corresponds to log levels
         // used in the instrumentor ( log4j )
         std::map<std::string, spdlog::level::level_enum> log_levels_map = {
                 {"trace",    spdlog::level::level_enum::trace},
@@ -47,7 +47,7 @@ namespace Distrace {
                 sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
 
                 // sink to print logs to the file
-                std::string  log_dir = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_DIR);
+                std::string  log_dir = Agent::getArgs()->getArgValue(AgentArgs::ARG_LOG_DIR);
                 boost::filesystem::path full_current_path(log_dir);
                 boost::filesystem::create_directories(full_current_path);
 
@@ -73,10 +73,9 @@ namespace Distrace {
             if(is_valid_log_level(log_level)){
                 spdlog::set_level(log_levels_map.at(log_level));
             }else{
-                assert(false);
+                throw std::runtime_error("Invalid log level: "+ log_level);
             }
         }
-
 
         void register_loggers() {
             auto sinks = create_sinks();
@@ -86,10 +85,9 @@ namespace Distrace {
                 spdlog::register_logger(logger);
             }
 
-            auto log_level = Agent::getArgs()->get_arg_value(AgentArgs::ARG_LOG_LEVEL);
+            auto log_level = Agent::getArgs()->getArgValue(AgentArgs::ARG_LOG_LEVEL);
             set_log_level(log_level);
             log(LOGGER_AGENT)->info("Log level successfully set to: {}.", log_level);
-
         }
     }
 }

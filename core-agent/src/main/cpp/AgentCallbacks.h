@@ -18,43 +18,46 @@ namespace Distrace {
     class AgentCallbacks {
     public:
         /**
-         * Callback we get when the JVM starts up, but before its initialized.
-         * Sets up the JNI calls.
+         * Callback we get when loading a new class
+         * This callback is also responsible for instrumentation of desired classes
+         *
+         * It does so by sending the class bytes and class bytes of all dependencies to the instrumentor JVM which
+         * provides the instrumentation if required and sends back the new byte code.
          */
-        static void JNICALL cbVMStart(jvmtiEnv *jvmti, JNIEnv *env);
-
-        /**
-         * Callback we receive when the JVM terminates - no more functions can be called after this
-         */
-        static void JNICALL callbackVMDeath(jvmtiEnv *jvmti_env, JNIEnv *jni_env);
+        static void JNICALL cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *jni,
+                                                jclass classBeingRedefined, jobject loader,
+                                                const char *name, jobject protectionDomain,
+                                                jint classDataLen, const unsigned char *class_data,
+                                                jint *newClassDataLen, unsigned char **newClassData);
 
         /**
          * Callback we get when the JVM is initialized.
          */
-        static void JNICALL callbackVMInit(jvmtiEnv *jvmti, JNIEnv *env, jthread thread);
+        static void JNICALL callbackVMInit(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread);
 
         /**
-         * Callback when loading new class
+         * Callback we receive when the JVM terminates.
+         * JNI/JVMTI functions can not be called after callback.
          */
-        static void JNICALL cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *env,
-                                                jclass class_being_redefined, jobject loader,
-                                                const char *name, jobject protection_domain,
-                                                jint class_data_len, const unsigned char *class_data,
-                                                jint *new_class_data_len, unsigned char **new_class_data);
+        static void JNICALL callbackVMDeath(jvmtiEnv *jvmti, JNIEnv *jni);
 
         /**
-         * Callback which is called when class is loaded
+         * Callback we receive when the JVM starts up, but before it's initialized.
+         * It sets up the JNI calls.
          */
-        static void JNICALL cbClassLoad(jvmtiEnv *jvmti_env, JNIEnv *jni_env, jthread thread, jclass klass);
+        static void JNICALL cbVMStart(jvmtiEnv *jvmti, JNIEnv *jni);
 
         /**
-         * Callback which is called when class is prepared
+         * Callback we get when a class is loaded
          */
-        static void JNICALL cbClassPrepare(jvmtiEnv *jvmti_env, JNIEnv *jni_env, jthread thread, jclass klass);
+        static void JNICALL cbClassLoad(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread, jclass clazz);
 
-        static void instrument(const char *name, unsigned char **new_class_data, jint *new_class_data_len);
+        /**
+         * Callback we get when a when class is prepared
+         */
+        static void JNICALL cbClassPrepare(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread, jclass clazz);
 
-        static void loadDependencies(JNIEnv *env, jobject loader, const char *name, const unsigned char *class_data, jint class_data_len);
+
     };
 }
 

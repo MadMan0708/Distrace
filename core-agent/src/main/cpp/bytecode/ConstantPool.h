@@ -7,7 +7,7 @@
 
 
 #include "../Agent.h"
-#include "../ByteReader.h"
+#include "../utils/ByteReader.h"
 #include "Constant.h"
 
 using namespace Distrace;

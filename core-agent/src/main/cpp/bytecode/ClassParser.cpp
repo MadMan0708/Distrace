@@ -5,14 +5,15 @@
 #include <boost/algorithm/string.hpp>
 #include "ClassParser.h"
 #include "JavaConst.h"
-#include "../JavaUtils.h"
+#include "../utils/JavaUtils.h"
 
 
 using namespace Logging;
 
+const std::string ClassParser::NOT_A_REF = "";
+
 ClassParser::ClassParser(ByteReader &reader) : reader(reader) {
 }
-
 
 void ClassParser::readMagicId(){
     int magicId = reader.readInt();
@@ -45,8 +46,19 @@ void ClassParser::readClassInfo(){
         && ((access_flags & JavaConst::ACC_FINAL) != 0)) {
         throw "Class can't be both final and abstract";
     }
+    // read and save class name
     classNameIndex = reader.readShort();
+    className = constantPool->getConstantString(classNameIndex, JavaConst::CONSTANT_Class);
+
+    // read and save super class name
     superClassNameIndex = reader.readShort();
+    if(superClassNameIndex > 0) { // May be zero -> class is java.lang.Object
+        superClassName = constantPool->getConstantString(superClassNameIndex, JavaConst::CONSTANT_Class);
+    }
+    else {
+        // classes which don't have super class have actually java.lang.Object as super class
+        superClassName = "java/lang/Object";
+    }
 }
 
 void ClassParser::readInterfaces(){
@@ -57,7 +69,7 @@ void ClassParser::readInterfaces(){
     for (int i = 0; i < numInterfaces; i++) {
         interfaces[i] = reader.readShort();
         std::string interfaceName = constantPool->getConstantString(interfaces[i], JavaConst::CONSTANT_Class);
-        interfacesRefs.push_back(interfaceName);
+        interfacesRefs.insert(interfaceName);
     }
 }
 
@@ -71,13 +83,10 @@ std::string ClassParser::classNameFromSignature(std::string typeSignature){
     }
 }
 
-void ClassParser::saveRefUniquely(std::string ref, std::vector<std::string> &where){
-    // we are only interested in references which does not belong to java package
-    if(!ref.empty()){
-        if (std::find(where.begin(), where.end(), ref) == where.end()) {
-            // put the ref to the list of unique refs to be loaded
-            where.push_back(ref);
-        }
+void ClassParser::saveRefUniquely(std::string ref, std::set<std::string> &where){
+    // we are only interested in references
+    if(ref != NOT_A_REF){
+        where.insert(ref);
     }
 }
 
@@ -94,14 +103,7 @@ void ClassParser::readFields(){
     }
 }
 
-std::string ClassParser::returnValueFromSignature(std::string methodSignature){
-    // process return value
-    std::string typeSignature = methodSignature.substr(methodSignature.find(")")+1);
-    return classNameFromSignature(typeSignature);
-}
-
-void ClassParser::parseAndSaveArguments(std::string ref){
-    std::string arguments = ref.substr(1, ref.find(")")-1);
+void ClassParser::parseAndSaveArguments(std::string arguments){
     while(arguments.find("L") != std::string::npos){
         unsigned long start = arguments.find("L");
 
@@ -124,32 +126,24 @@ void ClassParser::readMethods(){
     methods = new Method[numMethods];
     for (int i = 0; i < numMethods; i++) {
         methods[i] = (*new Method(reader, *constantPool));
-        std::string methodSignature = methods[i].getSignature();
 
-        std::string parsedRef = returnValueFromSignature(methodSignature);
-        saveRefUniquely(parsedRef, methodRefs);
-        parseAndSaveArguments(methodSignature);
+        std::string signature = methods[i].getSignature();
+        // splits[0] is empty string  - we cut off first parentheses
+        // splits[1] are arguments type signatures
+        // splits[2] is return type signature
+        std::vector<std::string> splits;
+        boost::split(splits, signature, boost::is_any_of("()"));
+
+        parseAndSaveArguments(splits[1]);
+        std::string ref = classNameFromSignature(splits[2]);
+        saveRefUniquely(ref, methodRefs);
     }
 }
 
-void ClassParser::saveSuperClassName(){
-    if(superClassNameIndex > 0) { // May be zero -> class is java.lang.Object
-        superClassName = constantPool->getConstantString(superClassNameIndex,
-                                                           JavaConst::CONSTANT_Class);
-    }
-    else {
-        // classes which don't have super class have actually java.lang.Object as super class
-        superClassName = "java/lang/Object";
-    }
-}
-
-void ClassParser::saveToAllRefs(std::vector<std::string> &from) {
+void ClassParser::saveToAllRefs(std::set<std::string> &from) {
     for(auto &ref: from){
-        if (std::find(allRefs.begin(), allRefs.end(), ref) == allRefs.end()) {
-            allRefs.push_back(ref);
-        }
+        allRefs.insert(ref);
     }
-
 }
 
 
@@ -161,43 +155,58 @@ void ClassParser::parse() {
     readInterfaces();
     readFields();
     readMethods();
-    saveSuperClassName();
 
-
-    allRefs.push_back(superClassName);
+    allRefs.insert(superClassName);
     saveToAllRefs(interfacesRefs);
     saveToAllRefs(fieldRefs);
     saveToAllRefs(methodRefs);
 }
 
 
-ClassParser* ClassParser::parse(const unsigned char *class_data, jint class_data_len){
-    ByteReader reader(class_data, class_data_len);
+ClassParser* ClassParser::parse(const unsigned char *classData, jint classDataLen){
+    ByteReader reader(classData, classDataLen);
     ClassParser* parser = new ClassParser(reader);
     parser->parse();
 
     return parser;
 }
 
+std::string ClassParser::parseJustName(const unsigned char *classData, jint classDataLen) {
+    ByteReader reader(classData, classDataLen);
+    ClassParser* parser = new ClassParser(reader);
+    parser->readMagicId();
+    parser->readVersions();
+    parser->readConstantPool();
+    parser->readClassInfo();
+    std::string className = parser->getClassName();
+    delete parser;
+    return className;
+}
+
+std::string ClassParser::getClassName(){
+    return className;
+}
+
 std::string ClassParser::getSuperClassRef() {
     return superClassName;
 }
 
-std::vector<std::string> ClassParser::getInterfacesRefs() {
+std::set<std::string> ClassParser::getInterfacesRefs() {
     return interfacesRefs;
 }
 
-std::vector<std::string> ClassParser::getFieldRefs() {
+std::set<std::string> ClassParser::getFieldRefs() {
     return fieldRefs;
 }
 
-std::vector<std::string> ClassParser::getMethodRefs() {
+std::set<std::string> ClassParser::getMethodRefs() {
     return methodRefs;
 }
 
-std::vector<std::string> ClassParser::getAllRefs() {
+std::set<std::string> ClassParser::getAllRefs() {
     return allRefs;
 }
+
 
 
 

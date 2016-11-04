@@ -14,14 +14,15 @@ public class Utils {
     }
 
 
-    public static InputStream openClassfile(String classname, ClassLoader cl) {
+    private static InputStream openClassfile(String classname, ClassLoader cl) {
         String cname = classname.replace('.', '/') + ".class";
         if (cl == null)
-            return null;        // not found
+            return null;
         else
             return cl.getResourceAsStream(cname);
     }
 
+    @SuppressWarnings("unused")
     public static byte[] getBytesFromClassFile(String classname, ClassLoader cl) {
         try {
             InputStream inputStream = openClassfile(classname, cl);

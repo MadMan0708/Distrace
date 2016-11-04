@@ -6,7 +6,7 @@
 #define DISTRACE_AGENT_CORE_CONSTANTFIELDREF_H
 
 #include "../Agent.h"
-#include "../ByteReader.h"
+#include "../utils/ByteReader.h"
 #include "ConstantCP.h"
 
 using namespace Distrace;

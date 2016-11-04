@@ -8,7 +8,7 @@ using namespace Distrace;
 
 ByteReader::ByteReader(const unsigned char *class_data, int data_len) {
     bytes = class_data;
-    bytes_len = data_len;
+    bytesLen = data_len;
     nextPos = 0;
 }
 
@@ -16,7 +16,6 @@ int ByteReader::readInt() {
     int ret = (bytes[nextPos] << 24) | (bytes[nextPos+1] << 16) | (bytes[nextPos+2] << 8) | bytes[nextPos+3];
     nextPos = nextPos + 4;
     return ret;
-
 }
 
 short ByteReader::readShort() {
@@ -32,13 +31,14 @@ byte ByteReader::readByte() {
 }
 
 long ByteReader::readLong() {
-    int ret = (bytes[nextPos] << 56) | (bytes[nextPos+1] << 48) | (bytes[nextPos+2] << 40) | (bytes[nextPos+3] << 32) |
-              (bytes[nextPos+4] << 24) | (bytes[nextPos+5] << 16) | (bytes[nextPos+6] << 8) | bytes[nextPos+7];
+    long ret = ((long)bytes[nextPos] << 56) | ((long)bytes[nextPos+1] << 48) | ((long)bytes[nextPos+2] << 40) |
+               ((long)bytes[nextPos+3] << 32) | ((long)bytes[nextPos+4] << 24) | ((long)bytes[nextPos+5] << 16) |
+               ((long)bytes[nextPos+6] << 8) | (long)bytes[nextPos+7];
     nextPos = nextPos + 8;
     return ret;
 }
 
-// Same as Float.intBitsToFloat
+// Same trick as Float.intBitsToFloat in Java
 float ByteReader::readFloat() {
     union  {
         int integer_bits;
@@ -58,7 +58,7 @@ double ByteReader::readDouble() {
     return bits.converted_double_bits;
 }
 
-void ByteReader::readFully(byte* buf, int len){
+void ByteReader::readFully(byte *buf, int len){
     for(int i=0;i<len;i++){
         buf[i] = readByte();
     }
@@ -96,7 +96,7 @@ std::string ByteReader::readUTF(){
                         throw "malformed input: partial character at end";
                     char2 = (int) bytearr[count-1];
                     if ((char2 & 0xC0) != 0x80)
-                        throw "malformed input around byte " + count;
+                        throw "malformed input around byte " + std::to_string(count);
                     chararr[chararr_count++]=(char)(((c & 0x1F) << 6) |
                                                     (char2 & 0x3F));
                     break;
@@ -111,7 +111,7 @@ std::string ByteReader::readUTF(){
                     char3 = (int) bytearr[count-1];
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
-                        throw "malformed input around byte " + (count - 1);
+                        throw "malformed input around byte " + std::to_string(count - 1);
                     }
                     chararr[chararr_count++]=(char)(((c     & 0x0F) << 12) |
                                                     ((char2 & 0x3F) << 6)  |
@@ -119,7 +119,7 @@ std::string ByteReader::readUTF(){
                     break;
                 default:
                     /* 10xx xxxx,  1111 xxxx */
-                    throw "malformed input around byte " + count;
+                    throw "malformed input around byte " + std::to_string(count);
             }
         }
 

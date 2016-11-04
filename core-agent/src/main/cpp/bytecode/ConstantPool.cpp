@@ -40,17 +40,18 @@ Constant* ConstantPool::getConstant(int index, byte tag) {
 
     Constant *c = getConstant(index);
     if (c == NULL) {
-        throw "Constant pool at index " + std::to_string(index) + " is null.";
+        throw std::runtime_error("Constant pool at index " + std::to_string(index) + " is null.");
     }
     if (c->getTag() != tag) {
-        throw "Expected class `" + JavaConst::getConstantName(tag) + "'";
+        throw std::runtime_error("Expected class `" + JavaConst::getConstantName(tag) + "'");
     }
     return c;
 }
 
 Constant* ConstantPool::getConstant(int index) {
     if (index >= constant_pool_count || index < 0) {
-        throw "Invalid constant pool reference: " + std::to_string(index)+ ". Constant pool size is: " + std::to_string(constant_pool_count)   ;
+        throw std::runtime_error("Invalid constant pool reference: " + std::to_string(index)+
+                                         ". Constant pool size is: " + std::to_string(constant_pool_count));
     }
     return constant_pool[index];
 }
@@ -77,7 +78,7 @@ std::string ConstantPool::getConstantString(int index, byte tag) {
             i = ((ConstantString*)c)->getStringIndex();
             break;
         default:
-            throw "getConstantString called with illegal tag " + tag;
+            throw std::runtime_error("getConstantString called with illegal tag " + std::to_string(tag));
     }
 
     // Finally get the string from the constant pool

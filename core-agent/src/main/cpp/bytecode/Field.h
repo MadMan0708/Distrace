@@ -6,7 +6,7 @@
 #define DISTRACE_AGENT_CORE_FIELD_H
 
 #include "../Agent.h"
-#include "../ByteReader.h"
+#include "../utils/ByteReader.h"
 #include "ConstantPool.h"
 #include "Attribute.h"
 #include "FieldOrMethod.h"

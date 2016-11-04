@@ -20,34 +20,38 @@ namespace Distrace {
         /* JVMTI Environment */
         jvmtiEnv *jvmti;
         JavaVM *jvm;
-        jboolean vm_started;
-        jboolean vm_dead;
-        InstrumentorAPI *inst_api;
-        AgentArgs *agent_args; // key = arg name, value = arg value
+        jboolean vmStarted;
+        jboolean vmDead;
+        InstrumentorAPI *instApi;
+        AgentArgs *args; // key = arg name, value = arg value
         /* Data access Lock */
         jrawMonitorID  lock;
     } GlobalAgentData;
 
     /**
-     * This class represent main entry point to the agent.
+     * This class represents main entry point to the agent.
      */
     class Agent {
     public:
 
         /**
-         * Get the AgentArgs from global data
+         * Get instrumentor api from the global data
+         */
+        static InstrumentorAPI *getInstApi();
+        /**
+         * Get arguments passed to the agent from global data
          */
         static AgentArgs *getArgs();
 
         /**
-         * Globally available data in the whole native agent
+         * Get globally available data in the whole native agent
          */
         static GlobalAgentData *globalData;
 
         /**
          * Initialize global data with default values
          */
-        static void init_global_data();
+        static void initGlobalData();
     };
 }
 

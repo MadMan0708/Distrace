@@ -5,8 +5,8 @@
 #include <jvmti.h>
 
 #include "Agent.h"
-#include "AgentUtils.h"
-#include "Utils.h"
+#include "utils/AgentUtils.h"
+#include "utils/Utils.h"
 #include <boost/algorithm/string.hpp>
 
 using namespace Distrace;
@@ -16,26 +16,30 @@ using namespace Distrace::Logging;
 GlobalAgentData *Agent::globalData;
 
 
-void Agent::init_global_data() {
+void Agent::initGlobalData() {
     static GlobalAgentData data;
     data.jvmti = NULL;
     data.jvm = NULL;
-    data.vm_dead = (jboolean) false;
-    data.vm_started = (jboolean) false;
-    data.agent_args = new AgentArgs();
+    data.vmDead = (jboolean) false;
+    data.vmStarted = (jboolean) false;
+    data.args = new AgentArgs();
     Agent::globalData = &data;
 }
 
+InstrumentorAPI *Agent::getInstApi() {
+    return Agent::globalData->instApi;
+}
+
 AgentArgs *Agent::getArgs() {
-    return Agent::globalData->agent_args;
+    return Agent::globalData->args;
 }
 
 JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved) {
-    Agent::init_global_data();
+    Agent::initGlobalData();
 
     // parse the arguments before we do other work since other methods depends on valid arguments
     std::string err_msg;
-    int res = Agent::globalData->agent_args->parse_args(options, err_msg);
+    int res = Agent::globalData->args->parse_args(options, err_msg);
 
     // loggers has to be registered after the arguments has been parsed
     register_loggers();
@@ -60,11 +64,11 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) {
-    Agent::init_global_data();
+    Agent::initGlobalData();
 
     // parse the arguments before we do other work since other methods depends on valid arguments
     std::string err_msg;
-    int res = Agent::globalData->agent_args->parse_args(options, err_msg);
+    int res = Agent::globalData->args->parse_args(options, err_msg);
 
     // loggers has to be registered after the arguments has been parsed
     register_loggers();
@@ -83,5 +87,5 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) 
     }
     
     Agent::globalData->jvm = jvm;
-    return AgentUtils::init_agent();
+    return AgentUtils::initAgent();
 }

@@ -14,17 +14,19 @@ namespace Distrace {
     namespace Utils {
 
         /**
-         * Convert std::string to char*
+         * Converts std::string to char*
          */
         char *stringToCharPointer(std::string input);
 
         /**
-         * Create directories specified by directories path. Return true in case of success and false otherwise
+         * Create directories specified by directories path. Returns true in case of success and false otherwise.
          */
-        bool create_directories(std::string dir_path);
+        bool createDirectories(std::string dirPath);
 
-
-        std::string unique_tmp_dir_path();
+        /**
+         * Creates unique temp dir and returns path to it.
+         */
+        std::string createUniqueTempDir();
     }
 }
 
