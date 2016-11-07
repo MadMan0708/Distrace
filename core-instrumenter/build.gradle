@@ -10,6 +10,7 @@ dependencies {
     compile 'net.bytebuddy:byte-buddy-agent:1.4.24'
     compile "jnanomsg:jnanomsg:0.4.3"
     compile "org.apache.bcel:bcel:6.0"
+    compile "uk.com.robust-it:cloning:1.9.3"
 }
 
 // Setup test environment
@@ -22,6 +23,8 @@ test {
 
 shadowJar{
     dependencies {
+        include(dependency("org.objenesis:objenesis:2.1"))
+        include(dependency("uk.com.robust-it:cloning:1.9.3"))
         include(dependency("net.bytebuddy:byte-buddy-agent:1.4.24"))
         include(dependency("net.bytebuddy:byte-buddy:1.4.24"))
         include(dependency("jnanomsg:jnanomsg:0.4.3"))

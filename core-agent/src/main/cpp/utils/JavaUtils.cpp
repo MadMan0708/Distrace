@@ -15,12 +15,23 @@ namespace Distrace {
             return env->NewStringUTF(str.c_str());
         }
 
+        void triggerLoadingWithSpecificLoader(JNIEnv *jni, std::string className, jobject loader){
+            jclass utils = jni->FindClass("cz/cuni/mff/d3s/distrace/Utils");
+            jmethodID getClass = jni->GetStaticMethodID(utils, "triggerLoading","(Ljava/lang/String;Ljava/lang/ClassLoader;)V");
+            jstring jClassName = asJavaString(jni, className);
+            jni->CallStaticVoidMethod(utils, getClass, jClassName, loader);
+        }
+
         int getBytesForClass(JNIEnv *jni, std::string className, jobject loader, const unsigned char **buf){
             jclass utils = jni->FindClass("cz/cuni/mff/d3s/distrace/Utils");
-            jmethodID  getBytesMethod = jni->GetStaticMethodID(utils,"getBytesFromClassFile","(Ljava/lang/String;Ljava/lang/ClassLoader;)[B");
+            jmethodID  getBytesMethod = jni->GetStaticMethodID(utils, "getBytesFromClassFile", "(Ljava/lang/String;Ljava/lang/ClassLoader;)[B");
             jstring jClassName = asJavaString(jni, className);
             jbyteArray array = (jbyteArray) jni->CallStaticObjectMethod(utils, getBytesMethod, jClassName, loader);
-            return asUnsignedCharArray(jni, array, buf);
+            if(array == NULL){
+                return 0;
+            }else{
+                return asUnsignedCharArray(jni, array, buf);
+            }
         }
 
         int asUnsignedCharArray(JNIEnv *env, jbyteArray input, const unsigned char **output) {

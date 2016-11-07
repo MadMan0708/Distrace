@@ -22,6 +22,11 @@ namespace Distrace{
         jstring asJavaString(JNIEnv *jni, std::string str);
 
         /**
+         * Trigger class loading of specified class using the provided class loader
+         */
+        void triggerLoadingWithSpecificLoader(JNIEnv *jni, std::string className, jobject loader);
+
+        /**
          * Obtains byte array containing bytecode for class className
          */
         int getBytesForClass(JNIEnv *jni, std::string className, jobject loader, const unsigned char **buf);

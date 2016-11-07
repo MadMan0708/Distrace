@@ -3,11 +3,9 @@ package cz.cuni.mff.d3s.distrace.examples;
 import water.H2O;
 import water.H2OApp;
 import water.H2ONode;
-import water.fvec.Chunk;
 import water.fvec.Frame;
 import water.fvec.Vec;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -19,10 +17,10 @@ public class MainWithTask {
         // Start h2o node
         H2OApp.main(args);
         // Wait for rest of the cloud
-        H2O.waitForCloudSize(2,10000);
+        H2O.waitForCloudSize(3, 10000);
 
         // Create frame with numbers we want to count
-        Vec numVec = Vec.makeSeq(1,100000);
+        Vec numVec = Vec.makeSeq(1, 100000);
         Frame frame = new Frame(numVec);
         System.out.println("Number of chunks on frame: " + frame.anyVec().nChunks());
         System.out.println("Frame distributed on nodes:");

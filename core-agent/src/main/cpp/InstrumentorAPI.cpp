@@ -53,7 +53,7 @@ InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
     Agent::globalData->jvmti->AddToSystemClassLoaderSearch(this->pathToDirWithAuxClasses.c_str());
 }
 
-void InstrumentorAPI::loadDependencies(JNIEnv *jni, const char *className, jobject loader, const unsigned char *classData,
+void InstrumentorAPI::loadDependencies(JNIEnv *jni, std::string className, jobject loader, const unsigned char *classData,
                                        jint classDataLen) {
 
     log(LOGGER_BYTECODE)->info("Parsing: {}", className);
@@ -63,17 +63,21 @@ void InstrumentorAPI::loadDependencies(JNIEnv *jni, const char *className, jobje
         log(LOGGER_BYTECODE)->info("Found -> {}", ref);
         if (!isInIgnoredPackage(ref)) {
             const unsigned char *classBytes;
-            int classBytesLen = sendReferencedClass(jni, ref, loader, &classBytes);
-            if (classBytesLen != 0) {
-                // if class bytes for the previous class hasn't been sent, proceed with recursion
-                loadDependencies(jni, ref.c_str(), loader, classBytes, classBytesLen);
+            if(!Agent::getInstApi()->isClassOnInstrumentor(ref)){
+                int classBytesLen = sendReferencedClass(jni, ref, loader, &classBytes);
+
+                // skip the case when class data couldn't be obtained using the input stream method
+                if (classBytesLen != 0){
+                    // if class bytes for the previous class hasn't been sent, proceed with recursion
+                    loadDependencies(jni, ref.c_str(), loader, classBytes, classBytesLen);
+                }
             }
         }
     }
     delete parser;
 }
 
-void InstrumentorAPI::instrument(const char *className, unsigned char **newClassData, jint *newClassDataLen) {
+void InstrumentorAPI::instrument(std::string className, unsigned char **newClassData, jint *newClassDataLen) {
     log(LOGGER_INSTRUMENTOR_API)->info("About to instrument class: {}", className);
     // send instrumentor just name because it already has the class
     if (shouldInstrument(className)) {
@@ -241,25 +245,29 @@ bool InstrumentorAPI::shouldContinue(std::string className, std::string loaderNa
     return !(isIgnoredClassLoader(loaderName) || isInAuxClassCache(className));
 }
 
-bool InstrumentorAPI::sendClass(std::string className, const unsigned char *classData, int classDataLen){
-    // Send class name to the instrumentor and check if this class is available.
-    // Don't send the original bytecode if it's already available.
-    if (isClassOnInstrumentor(className)) {
-        log(LOGGER_INSTRUMENTOR_API)->debug("Instrumentor already contains: {}", className);
-        return false;
-    } else {
-        log(LOGGER_INSTRUMENTOR_API)->info("Sending original bytecode to the instrumentor: {}", className);
-        // send bytecode for current class
-        sendClassData(className, classData, classDataLen);
-        return true;
-    }
+int InstrumentorAPI::sendClassData(std::string className, const unsigned char *classData, int classDataLen){
+    log(LOGGER_INSTRUMENTOR_API)->info("Sending original bytecode to the instrumentor: {}", className);
+    // send bytecode for current class
+    mtx.lock();
+    sendRequestAndAssertReply(REQ_TYPE_REGISTER_BYTECODE);
+    sendStringRequest(className);
+    sendByteArrayRequest(classData, classDataLen);
+    mtx.unlock();
+    Agent::globalData->instApi->putToInstrumentorClassesCache(className);
+    return classDataLen;
 }
 
 int InstrumentorAPI::sendReferencedClass(JNIEnv *jni, std::string className, jobject loader, const unsigned char **classData){
-    log(LOGGER_BYTECODE)->debug("Finding byte for: {}", className);
+    log(LOGGER_BYTECODE)->debug("Finding bytes for: {}", className);
     // find the class bytes using the specified class loader
     int classDataLen = JavaUtils::getBytesForClass(jni, className, loader, classData);
-    return sendClass(className, *classData, classDataLen);
+    if(classDataLen == 0){
+        log(LOGGER_BYTECODE)->info("Class: {} wasn't found using the input stream method", className);
+        JavaUtils::triggerLoadingWithSpecificLoader(jni, className, loader);
+        return 0;
+    }else{
+        return sendClassData(className, *classData, classDataLen);
+    }
 }
 
 bool InstrumentorAPI::isClassOnInstrumentor(std::string className){
@@ -281,7 +289,7 @@ bool InstrumentorAPI::isClassOnInstrumentor(std::string className){
 
 bool InstrumentorAPI::isInInstrumentorClassesCache(std::string className){
     std::string withSlashes = JavaUtils::toNameWithSlashes(className);
-    log(LOGGER_INSTRUMENTOR_API)->info("Checking if class: {} is on the instrumentor", withSlashes);
+    log(LOGGER_INSTRUMENTOR_API)->info("Checking if class: {} is in the cache of classes on the instrumentor", withSlashes);
     return std::find(instrumentorClassesCache.begin(), instrumentorClassesCache.end(), withSlashes) != instrumentorClassesCache.end();
 }
 
@@ -300,16 +308,6 @@ bool InstrumentorAPI::isInAuxClassCache(std::string className){
 
 void InstrumentorAPI::putToAuxClassCache(std::string className){
     auxClassesCache.insert(className);
-}
-
-void InstrumentorAPI::sendClassData(std::string className, const unsigned char *classData, int classDataLen){
-    mtx.lock();
-    sendRequestAndAssertReply(REQ_TYPE_REGISTER_BYTECODE);
-    sendStringRequest(className);
-    sendByteArrayRequest(classData, classDataLen);
-    mtx.unlock();
-    Agent::globalData->instApi->putToInstrumentorClassesCache(className);
-
 }
 
 bool InstrumentorAPI::isInIgnoredPackage(std::string className) {

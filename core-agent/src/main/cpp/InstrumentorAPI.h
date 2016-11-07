@@ -28,16 +28,21 @@ namespace Distrace {
         InstrumentorAPI(nnxx::socket socket);
 
         /**
-         * Sends class to the instrumentor JVM only if the instrumentor JVM already doesn't contain the bytecode for
-         * this class. Returns true if the class has been sent and false otherwise. When the class is not sent it means
-         * that it's already available on the remote instrumentor JVM
+         * Sends class data to the instrumentor JVM. The caller might check if the instrumentor already contains the class
+         * data in order to prevent extra sending. This method returns number of sent bytes.
          */
-        bool sendClass(std::string className, const unsigned char *classData, int classDataLen);
+        int sendClassData(std::string className, const unsigned char *classData, int classDataLen);
 
         /**
          * Load dependencies for the class stored in class_data using the specified class loader
          */
-        void loadDependencies(JNIEnv *jni, const char *className, jobject loader, const unsigned char *classData, jint classDataLen);
+        void loadDependencies(JNIEnv *jni, std::string className, jobject loader, const unsigned char *classData, jint classDataLen);
+
+        /**
+         * Checks whether the class is available on the instrumentor. First the local cache is queried and if the
+         * class hasn't been found in the local cache of processed classes, the instrumentor JVM is queried
+         */
+        bool isClassOnInstrumentor(std::string className);
 
         /**
          * This method sends bytecode to the instrumentor JVM and receives back the instrumented bytecode
@@ -46,7 +51,7 @@ namespace Distrace {
         /**
          * Instrument class and set the output class_data and class_data_len pointers
          */
-        void instrument(const char *name, unsigned char **newClassData, jint *newClassDataLen);
+        void instrument(std::string name, unsigned char **newClassData, jint *newClassDataLen);
 
         /**
          * This method initializes the instrumentor JVM and return JNI_OK in case of success and JNI_ERR otherwise
@@ -149,12 +154,6 @@ namespace Distrace {
         int sendReferencedClass(JNIEnv *jni, std::string className, jobject loader, const unsigned char **classData);
 
         /**
-         * Checks whether the class is available on the instrumentor. First the local cache is queried and if the
-         * class hasn't been found in the local cache of processed classes, the instrumentor JVM is queried
-         */
-        bool isClassOnInstrumentor(std::string className);
-
-        /**
          * Checks whether the the class is in local cache saying whether the class is available on the instrumentor or
          * not
          */
@@ -176,11 +175,6 @@ namespace Distrace {
          * instrumented.
          */
         void putToAuxClassCache(std::string className);
-
-        /**
-         * Send class data to the instrumentor.
-         */
-        void sendClassData(std::string className, const unsigned char *classData, int classDataLen);
 
         /**
          * Check whether this class is located in a package from which we don't need to send classes to the instrumentor

@@ -22,20 +22,22 @@ void JNICALL AgentCallbacks::cbClassFileLoadHook(jvmtiEnv *jvmti, JNIEnv *jni,
     if (Agent::globalData->vmStarted) {
         int attachStatus = AgentUtils::JNIAttachCurrentThread(jni);
         auto loaderName = JavaUtils::getClassLoaderName(jni, loader);
-        // parse the name since name passes to onClassFileLoadHook can be NULL
+        // parse the name since name passed to onClassFileLoadHook can be NULL
         auto className = ClassParser::parseJustName(classData, classDataLen);
-        log(LOGGER_AGENT_CALLBACKS)->debug("BEFORE LOADING: {} is about to be loaded by {}", className, loaderName);
+        log(LOGGER_AGENT_CALLBACKS)->info("BEFORE LOADING: {} is about to be loaded by {}, is redefined = {} ", className, loaderName,
+                                          classBeingRedefined != NULL);
 
         // Do not try to instrument classes loaded by ignored class loaders and auxiliary classes from byte buddy
         if (Agent::getInstApi()->shouldContinue(className, loaderName)) {
-            bool wasSentBefore = Agent::getInstApi()->sendClass(name, classData, classDataLen);
-            if(!wasSentBefore){
-                Agent::getInstApi()->loadDependencies(jni, name, loader, classData, classDataLen);
-                Agent::getInstApi()->instrument(name, newClassData, newClassDataLen);
+
+            if(!Agent::getInstApi()->isClassOnInstrumentor(className)){
+                Agent::getInstApi()->sendClassData(className, classData, classDataLen);
+                Agent::getInstApi()->loadDependencies(jni, className, loader, classData, classDataLen);
+                Agent::getInstApi()->instrument(className, newClassData, newClassDataLen);
             }
         }
 
-        log(LOGGER_AGENT_CALLBACKS)->debug("AFTER LOADING: {} loaded by {}", className, loaderName);
+        log(LOGGER_AGENT_CALLBACKS)->info("AFTER LOADING: {} loaded by {}", className, loaderName);
         AgentUtils::detachJNIFromCurrentThread(attachStatus);
     }
     AgentUtils::exitCriticalSection(jvmti);
@@ -62,9 +64,9 @@ void JNICALL AgentCallbacks::cbVMStart(jvmtiEnv *jvmti, JNIEnv *jni) {
 }
 
 void JNICALL AgentCallbacks::cbClassLoad(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread, jclass clazz) {
-    log(LOGGER_AGENT_CALLBACKS)->debug("Class: {} loaded", JavaUtils::getClassName(jni, clazz));
+    //log(LOGGER_AGENT_CALLBACKS)->debug("Class: {} loaded", JavaUtils::getClassName(jni, clazz));
 }
 
 void JNICALL AgentCallbacks::cbClassPrepare(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread, jclass klass) {
-    log(LOGGER_AGENT_CALLBACKS)->debug("Class: {} prepared", JavaUtils::getClassName(jni, klass));
+    //log(LOGGER_AGENT_CALLBACKS)->debug("Class: {} prepared", JavaUtils::getClassName(jni, klass));
 }
