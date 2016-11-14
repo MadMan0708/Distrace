@@ -25,11 +25,13 @@ byte InstrumentorAPI::REQ_TYPE_INSTRUMENT = 0;
 byte InstrumentorAPI::REQ_TYPE_STOP = 1;
 byte InstrumentorAPI::REQ_TYPE_CHECK_HAS_CLASS = 2;
 byte InstrumentorAPI::REQ_TYPE_REGISTER_BYTECODE = 3;
+byte InstrumentorAPI::REQ_TYPE_HELPER_CLASSES = 4;
 std::string InstrumentorAPI::ACK_REQ_MSG = "ack_req_msg";
 std::string InstrumentorAPI::ACK_REQ_INST_YES = "ack_req_int_yes";
 std::string InstrumentorAPI::ACK_REQ_INST_NO = "ack_req_int_no";
 std::string InstrumentorAPI::ACK_REQ_AUX_CLASSES = "auxiliary_types";
 std::string InstrumentorAPI::ACK_REQ_CLASS_ON_INSTRUMENTOR = "yes";
+std::string InstrumentorAPI::ACK_REQ_INITIALIZERS = "initializers";
 std::mutex InstrumentorAPI::mtx; // mutex for critical section
 
 std::vector<std::string> InstrumentorAPI::ignoredPackages = {
@@ -48,9 +50,10 @@ std::vector<std::string> InstrumentorAPI::ignoredLoaders =  {
 
 InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
     this->socket = std::move(socket);
-    this->pathToDirWithAuxClasses = Utils::createUniqueTempDir();
-    log(LOGGER_INSTRUMENTOR_API)->info("Adding directory for auxiliary classes to classpath : {}", this->pathToDirWithAuxClasses);
-    Agent::globalData->jvmti->AddToSystemClassLoaderSearch(this->pathToDirWithAuxClasses.c_str());
+    this->pathToClassDir = Utils::createUniqueTempDir();
+    log(LOGGER_INSTRUMENTOR_API)->info("Adding directory for helper classes sent from Instrumentor JVM"
+                                               " to classpath : {}", this->pathToClassDir);
+    Agent::globalData->jvmti->AddToSystemClassLoaderSearch(this->pathToClassDir.c_str());
 }
 
 void InstrumentorAPI::loadDependencies(JNIEnv *jni, std::string className, jobject loader, const unsigned char *classData,
@@ -77,14 +80,13 @@ void InstrumentorAPI::loadDependencies(JNIEnv *jni, std::string className, jobje
     delete parser;
 }
 
-void InstrumentorAPI::instrument(std::string className, unsigned char **newClassData, jint *newClassDataLen) {
+void InstrumentorAPI::instrument(JNIEnv *jni, jobject loader, std::string className, unsigned char **newClassData, jint *newClassDataLen) {
     log(LOGGER_INSTRUMENTOR_API)->info("About to instrument class: {}", className);
     // send instrumentor just name because it already has the class
-    if (shouldInstrument(className)) {
+    if (shouldInstrument(jni, loader,  className)) {
 
         // receive length of the byte code
-        auto lengthAsString = receiveStringReply();
-        auto expectedLength = std::atoi(lengthAsString.c_str());
+        auto expectedLength = receiveIntReply();
 
         // receive the new bytecode
         *newClassData = (byte *) malloc(sizeof(byte) *expectedLength);
@@ -94,7 +96,7 @@ void InstrumentorAPI::instrument(std::string className, unsigned char **newClass
     }
 }
 
-bool InstrumentorAPI::shouldInstrument(std::string className) {
+bool InstrumentorAPI::shouldInstrument(JNIEnv *jni, jobject loader, std::string className) {
     // critical section. Communication started from different threads would break nanomsg
     mtx.lock();
     log(LOGGER_INSTRUMENTOR_API)->info("Asking Instrumentor whether it needs to instrument class {}", className);
@@ -105,6 +107,7 @@ bool InstrumentorAPI::shouldInstrument(std::string className) {
     bool returnVal = false;
     // receive auxiliary classes
     loadAuxiliaryClasses(className);
+    loadInitializers(jni, loader, className);
     auto reply = receiveStringReply();
     if (reply == ACK_REQ_INST_YES) {
         log(LOGGER_INSTRUMENTOR_API)->info("Instrumentor reply: Class {} will be instrumented.", className);
@@ -122,43 +125,85 @@ void InstrumentorAPI::loadAuxiliaryClasses(std::string className){
     log(LOGGER_INSTRUMENTOR_API)->info("Loading auxiliary classes for {}", className);
     auto reply = receiveStringReply();
 
-    // keep loading auxiliary classes until we receive signal that there are any left
+    // keep loading auxiliary classes until we receive signal that there aren't any left
     while(reply == ACK_REQ_AUX_CLASSES){
         auto auxClassName = receiveStringReply();
-        auto lengthAsString = receiveStringReply();
-        auto expectedLength = std::atoi(lengthAsString.c_str());
+        auto expectedLength = receiveIntReply();
 
         byte* classBytes = (byte *) malloc(sizeof(byte) * expectedLength);
         receiveByteArrayReply(&classBytes, expectedLength);
         log(LOGGER_INSTRUMENTOR_API)->info("Receive bytecode for auxiliary class {}", auxClassName);
 
+        saveClassOnDisk(auxClassName, classBytes, expectedLength);
 
-        std::vector<std::string> tokens;
-        boost::split(tokens, auxClassName, boost::is_any_of("."), boost::token_compress_on);
-        auto fullName = tokens.back() + ".class";
-        tokens.pop_back();
-
-        // create path out of packages hierarchy
-        std::string sep(1, boost::filesystem::path::preferred_separator);
-        auto class_path = boost::algorithm::join(tokens, sep);
-        auto path = pathToDirWithAuxClasses + class_path + sep;
-        auto fullPath = path + fullName;
-
-        // create directory structure same as the packages hierarchy in which is this class located
-        boost::filesystem::create_directories(path);
-        FILE* file = fopen(fullPath.c_str(), "wb" );
-        if(file!=NULL){
-            log(LOGGER_INSTRUMENTOR_API)->error("Writing to file {}", fullPath);
-
-            fwrite(classBytes, sizeof(classBytes[0]), expectedLength, file);
-            fclose(file);
-        }else{
-            log(LOGGER_INSTRUMENTOR_API)->error("Error opening the file {}", fullPath);
-        }
-
-        putToAuxClassCache(auxClassName);
+        ignoredClasses.insert(auxClassName);
         reply = receiveStringReply();
     }
+}
+
+void InstrumentorAPI::saveClassOnDisk(std::string className, byte* classBytes, int classBytesLength){
+    std::vector<std::string> tokens;
+    boost::split(tokens, className, boost::is_any_of("/"), boost::token_compress_on);
+    auto fullName = tokens.back() + ".class";
+    tokens.pop_back();
+
+    // create path out of packages hierarchy
+    std::string sep(1, boost::filesystem::path::preferred_separator);
+    auto class_path = boost::algorithm::join(tokens, sep);
+    auto path = pathToClassDir + class_path + sep;
+    auto fullPath = path + fullName;
+
+    // create directory structure same as the packages hierarchy in which is this class located
+    boost::filesystem::create_directories(path);
+    FILE* file = fopen(fullPath.c_str(), "wb" );
+    if(file!=NULL){
+        log(LOGGER_INSTRUMENTOR_API)->info("Writing to file {}", fullPath);
+
+        fwrite(classBytes, sizeof(classBytes[0]), classBytesLength, file);
+        fclose(file);
+    }else{
+        log(LOGGER_INSTRUMENTOR_API)->error("Error opening the file {}", fullPath);
+    }
+}
+
+void InstrumentorAPI::loadInitializers(JNIEnv *jni, jobject loader, std::string className){
+    log(LOGGER_INSTRUMENTOR_API)->info("Loading initializers for {}", className);
+    auto reply = receiveStringReply();
+    // keep loading initializers until we receive signal that there are any left
+    while(reply == ACK_REQ_INITIALIZERS) {
+        loadInterceptor(jni, loader, className);
+        auto initializerClassName = receiveStringReply();
+        auto expectedLength = receiveIntReply();
+
+        byte* classBytes = (byte *) malloc(sizeof(byte) * expectedLength);
+        receiveByteArrayReply(&classBytes, expectedLength);
+        log(LOGGER_INSTRUMENTOR_API)->info("Receive bytecode for initializer class {}", initializerClassName);
+        auto withDots = JavaUtils::toNameWithDots(className);
+        jbyteArray data = JavaUtils::asJByteArray(jni, classBytes, expectedLength);
+        initializers[withDots].push_back(data);
+        reply = receiveStringReply();
+    }
+}
+
+void InstrumentorAPI::loadInterceptor(JNIEnv *jni, jobject loader, std::string className) {
+    log(LOGGER_INSTRUMENTOR_API)->info("Loading interceptor for {}", className);
+
+    auto interceptorClassName = receiveStringReply();
+
+    if(interceptors.find(interceptorClassName) == interceptors.end()){
+        log(LOGGER_INSTRUMENTOR_API)->info("Storing new interceptor: {}", interceptorClassName);
+        auto interceptorBytesLen = receiveIntReply();
+        byte* interceptorBytes = (byte *) malloc(sizeof(byte) * interceptorBytesLen);
+        receiveByteArrayReply(&interceptorBytes, interceptorBytesLen);
+        interceptors[interceptorClassName] = std::pair<unsigned char *, int>(interceptorBytes, interceptorBytesLen);
+        ignoredClasses.insert(interceptorClassName);
+    }
+
+    auto pair = interceptors.at(interceptorClassName);
+    auto bytes = pair.first;
+    auto bytesLen = pair.second;
+    log(LOGGER_INSTRUMENTOR_API)->info("Loading interceptor class {}", interceptorClassName);
+    jni->DefineClass(interceptorClassName.c_str(), loader, (jbyte*)bytes, bytesLen);
 }
 
 int InstrumentorAPI::init() {
@@ -181,7 +226,7 @@ int InstrumentorAPI::init() {
 
         std::string launchCommand =
                 "java -cp " + instrumentorServerJar + ":" + instrumentorServerCP + " " + instrumentorMainClass + " " + connectionStr + " " +
-                logLevel + " " + logDir  + " & ";
+                logLevel + " " + logDir  + " &";
         log(LOGGER_INSTRUMENTOR_API)->info("Starting Instrumentor JVM with the command: {}", launchCommand);
         int result = system(Utils::stringToCharPointer(launchCommand));
         if (result < 0) {
@@ -204,26 +249,7 @@ int InstrumentorAPI::init() {
     }
 
     Agent::globalData->instApi = new InstrumentorAPI(std::move(socket));
-
-    // add instrumentor libraries jar on the classpath so our jvm can see created interceptors
-    const std::string instrumentorLibJar = Agent::getArgs()->getArgValue(AgentArgs::ARG_INSTRUMENTOR_LIB_JAR);
-    jvmtiError error = Agent::globalData->jvmti->AddToSystemClassLoaderSearch(instrumentorLibJar.c_str());
-
-    auto ret = AgentUtils::checkJVMTIError(Agent::globalData->jvmti, error,
-                                           "Path: " + instrumentorLibJar +
-                                           " successfully added on the system's classloader search path",
-                                           "Cannot add path " + instrumentorLibJar +
-                                           " on the system's classloader search path");
-    if(ret == JNI_ERR){
-        return JNI_ERR;
-    }
-
-    error = Agent::globalData->jvmti->AddToBootstrapClassLoaderSearch(instrumentorLibJar.c_str());
-    return AgentUtils::checkJVMTIError(Agent::globalData->jvmti, error,
-                                       "Path: " + instrumentorLibJar +
-                                       " successfully added on the bootstrap's classloader search path",
-                                       "Cannot add path " + instrumentorLibJar +
-                                       " on the bootstraps's classloader search path");
+    return JNI_OK;
 }
 
 void InstrumentorAPI::stop() {
@@ -235,14 +261,42 @@ void InstrumentorAPI::stop() {
     boost::filesystem::remove(fileToDelete);
 
     // remove also all auxiliary classes
-    boost::filesystem::remove_all(pathToDirWithAuxClasses);
+    boost::filesystem::remove_all(pathToClassDir);
 
     // inform instrumentor JVM that the application is being stopped
     sendRequestAndAssertReply(REQ_TYPE_STOP);
 }
 
 bool InstrumentorAPI::shouldContinue(std::string className, std::string loaderName) {
-    return !(isIgnoredClassLoader(loaderName) || isInAuxClassCache(className));
+    return !(isIgnoredClassLoader(loaderName) || isIgnoredClass(className));
+}
+
+std::vector<jbyteArray> InstrumentorAPI::getInitializersFor(std::string className) {
+    log(LOGGER_INSTRUMENTOR_API)->debug("Trying to find initializers for {}", className);
+    if(initializers.find(className) != initializers.end()){
+        log(LOGGER_INSTRUMENTOR_API)->debug("Found initializer for {}", className);
+        return initializers.at(className);
+    }else{
+        log(LOGGER_INSTRUMENTOR_API)->debug("No initializer found for {}", className);
+        return std::vector<jbyteArray>();
+    }
+}
+
+void InstrumentorAPI::loadPrepClasses() {
+    sendRequestAndAssertReply(REQ_TYPE_HELPER_CLASSES);
+
+    auto numOfClasses = receiveIntReply();
+    for(int i = 0; i<numOfClasses; i++){
+        // now receive byte code for Interceptor interface and save it
+        auto className = receiveStringReply();
+        auto expectedLength = receiveIntReply();
+        byte* classBytes = (byte *) malloc(sizeof(byte) * expectedLength);
+        receiveByteArrayReply(&classBytes, expectedLength);
+        log(LOGGER_INSTRUMENTOR_API)->info("Obtained class {}", className);
+
+        ignoredClasses.insert(className);
+        saveClassOnDisk(className, classBytes, expectedLength);
+    }
 }
 
 int InstrumentorAPI::sendClassData(std::string className, const unsigned char *classData, int classDataLen){
@@ -278,10 +332,9 @@ bool InstrumentorAPI::isClassOnInstrumentor(std::string className){
         sendRequestAndAssertReply(REQ_TYPE_CHECK_HAS_CLASS);
         auto ret = sendAndReceive(className);
         mtx.unlock();
-
         if(ret == ACK_REQ_CLASS_ON_INSTRUMENTOR){
             // store the information about the class locally so we can minimize number of requests to the instrumentor
-            Agent::globalData->instApi->putToInstrumentorClassesCache(className);
+            putToInstrumentorClassesCache(className);
         }
         return  ret == ACK_REQ_CLASS_ON_INSTRUMENTOR;
     }
@@ -299,15 +352,8 @@ void InstrumentorAPI::putToInstrumentorClassesCache(std::string className){
     instrumentorClassesCache.insert(className);
 }
 
-bool InstrumentorAPI::isInAuxClassCache(std::string className){
-
-    std::string class_name(className);
-    std::replace(class_name.begin(), class_name.end(), '/', '.');
-    return std::find(auxClassesCache.begin(), auxClassesCache.end(), class_name) != auxClassesCache.end();
-}
-
-void InstrumentorAPI::putToAuxClassCache(std::string className){
-    auxClassesCache.insert(className);
+bool InstrumentorAPI::isIgnoredClass(std::string className){
+    return std::find(ignoredClasses.begin(), ignoredClasses.end(), className) != ignoredClasses.end();
 }
 
 bool InstrumentorAPI::isInIgnoredPackage(std::string className) {
@@ -322,7 +368,6 @@ bool InstrumentorAPI::isInIgnoredPackage(std::string className) {
 bool InstrumentorAPI::isIgnoredClassLoader(std::string classLoader) {
     return std::find(ignoredLoaders.begin(), ignoredLoaders.end(), classLoader) != ignoredLoaders.end();
 }
-
 
 int InstrumentorAPI::sendStringRequest(std::string data) {
     auto originalLen = data.length();
@@ -366,8 +411,7 @@ int InstrumentorAPI::receiveByteArrayReply(byte **inputBuffer, int expectedLengt
 
 int InstrumentorAPI::sendAndReceive(const byte *inputData, int inputDataLen, byte **outputBuffer) {
     sendByteArrayRequest(inputData, inputDataLen);
-    auto lengthAsString = receiveStringReply();
-    auto expectedLength = std::atoi(lengthAsString.c_str());
+    auto expectedLength = receiveIntReply();
     *outputBuffer = (byte *) malloc(sizeof(byte) * expectedLength);
     return receiveByteArrayReply(outputBuffer, expectedLength);
 }
@@ -384,6 +428,16 @@ void InstrumentorAPI::assertBytesSent(int numBytesSent, size_t originalLen) {
     }
     assert(numBytesSent == originalLen);
 }
+
+int InstrumentorAPI::receiveIntReply() {
+    auto lengthAsString = receiveStringReply();
+    return std::atoi(lengthAsString.c_str());
+}
+
+
+
+
+
 
 
 

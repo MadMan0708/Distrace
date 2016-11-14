@@ -10,6 +10,6 @@ public class BaseTaskTransformer extends BaseTransformer{
 
     @Override
     public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
-        return builder.method(ElementMatchers.named("toString")).intercept(MethodDelegation.to(BaseTaskInterceptor.class));
+        return builder.method(ElementMatchers.named("toString")).intercept(MethodDelegation.to(new TaskInterceptor("Instrumented by Base")));
     }
 }

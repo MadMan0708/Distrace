@@ -10,6 +10,7 @@
 #include <string>
 #include "Logging.h"
 
+
 namespace Distrace{
     /**
      * This namespace contains various utilities methods to work with JVM and Java objects
@@ -22,9 +23,19 @@ namespace Distrace{
         jstring asJavaString(JNIEnv *jni, std::string str);
 
         /**
-         * Trigger class loading of specified class using the provided class loader
+         * Load class using the specified class loader
+         */
+        jclass loadClass(JNIEnv *jni, jobject loader, std::string className);
+
+        /**
+         * Trigger class loading of specified class using the provided class loader ( via Java code)
          */
         void triggerLoadingWithSpecificLoader(JNIEnv *jni, std::string className, jobject loader);
+
+        /**
+         * Get array of bytes from Java input stream
+         */
+        int fromInputStream(JNIEnv *jni, jobject inputStream, const unsigned char **buf);
 
         /**
          * Obtains byte array containing bytecode for class className
@@ -35,6 +46,11 @@ namespace Distrace{
          * Converts jbytearray to char*
          */
         int asUnsignedCharArray(JNIEnv *jni, jbyteArray input, const unsigned char **output);
+
+        /**
+         * Converts char* to jbytearray
+         */
+        jbyteArray asJByteArray(JNIEnv *jni, unsigned char *data, int dataLen);
 
         /**
          * Converts fully qualified name separated by slashed to the same name separated by dots

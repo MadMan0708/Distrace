@@ -93,10 +93,10 @@ std::string ByteReader::readUTF(){
                     /* 110x xxxx   10xx xxxx*/
                     count += 2;
                     if (count > utflen)
-                        throw "malformed input: partial character at end";
+                        throw std::runtime_error("malformed input: partial character at end");
                     char2 = (int) bytearr[count-1];
                     if ((char2 & 0xC0) != 0x80)
-                        throw "malformed input around byte " + std::to_string(count);
+                        throw std::runtime_error("malformed input around byte " + std::to_string(count));
                     chararr[chararr_count++]=(char)(((c & 0x1F) << 6) |
                                                     (char2 & 0x3F));
                     break;
@@ -104,14 +104,14 @@ std::string ByteReader::readUTF(){
                     /* 1110 xxxx  10xx xxxx  10xx xxxx */
                     count += 3;
                     if (count > utflen) {
-                        throw "malformed input: partial character at end";
+                        throw std::runtime_error("malformed input: partial character at end");
                     }
 
                     char2 = (int) bytearr[count-2];
                     char3 = (int) bytearr[count-1];
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
-                        throw "malformed input around byte " + std::to_string(count - 1);
+                        throw std::runtime_error("malformed input around byte " + std::to_string(count - 1));
                     }
                     chararr[chararr_count++]=(char)(((c     & 0x0F) << 12) |
                                                     ((char2 & 0x3F) << 6)  |
@@ -119,7 +119,7 @@ std::string ByteReader::readUTF(){
                     break;
                 default:
                     /* 10xx xxxx,  1111 xxxx */
-                    throw "malformed input around byte " + std::to_string(count);
+                    throw std::runtime_error("malformed input around byte " + std::to_string(count));
             }
         }
 

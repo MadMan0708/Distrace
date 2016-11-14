@@ -27,7 +27,7 @@ public class Starter {
 
         @Override
         public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
-            return builder.method(ElementMatchers.named("map")).intercept(MethodDelegation.to(MRTaskInterceptor.class)
+            return builder.method(ElementMatchers.named("map")).intercept(MethodDelegation.to(new MRTaskInterceptor())
                     .andThen(SuperMethodCall.INSTANCE));
         }
     }

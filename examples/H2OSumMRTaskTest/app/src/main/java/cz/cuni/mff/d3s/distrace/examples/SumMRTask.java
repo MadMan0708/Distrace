@@ -8,10 +8,11 @@ import water.fvec.Chunk;
  */
 public class SumMRTask extends MRTask<SumMRTask> {
 
-    public long getFinalSum(){
+
+    public long getSum(){
         return sum;
     }
-        private long sum = 0;
+         long sum = 0;
         @Override
         public void map(Chunk c) {
             for(int i=0; i<c._len; i++){

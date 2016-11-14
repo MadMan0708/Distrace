@@ -9,6 +9,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 public class ExtendedTaskTransformer extends BaseTransformer{
     @Override
     public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
-        return builder.method(ElementMatchers.named("toString")).intercept(MethodDelegation.to(ExtendedTaskInterceptor.class));
+        return builder.method(ElementMatchers.named("toString")).intercept(MethodDelegation.to(new TaskInterceptor("Instrumented by Extended")));
     }
 }

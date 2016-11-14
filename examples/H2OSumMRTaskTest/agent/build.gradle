@@ -10,12 +10,11 @@ ext {
     h2oVersion = "3.10.0.7"
 }
 
-
-
 dependencies {
     // use functionality provided by core-instrumentor
     compile project(path: ':distrace-core-instrumenter', configuration: 'shadow')
     compile "ai.h2o:h2o-core:${h2oVersion}"
+    compile project(":distrace-examples-H2OSumMRTaskTest-app")
 }
 
 artifacts {
@@ -27,5 +26,6 @@ shadowJar{
         include(project(path: ':distrace-core-instrumenter', configuration: 'shadow'))
         // exclude application classes from the final jar
         exclude(dependency("ai.h2o:h2o-core:${h2oVersion}"))
+        exclude(project(":distrace-examples-H2OSumMRTaskTest-app"))
     }
 }

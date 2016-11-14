@@ -5,6 +5,8 @@ import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
 import cz.cuni.mff.d3s.distrace.utils.InstrumentorClassLoader;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
+import net.bytebuddy.implementation.LoadedTypeInitializer;
+import net.bytebuddy.utility.privilege.SetAccessibleAction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +22,7 @@ public class InstrumentorServer {
     private static final byte REQ_TYPE_STOP = 1;
     private static final byte REQ_TYPE_CHECK_HAS_CLASS = 2;
     private static final byte REQ_TYPE_REGISTER_BYTECODE = 3;
+    private static final byte REQ_TYPE_PREP_CLASSES = 4;
     private PairSocket sock;
     private String sockAddr;
     private ClassFileTransformer transformer;
@@ -34,7 +37,7 @@ public class InstrumentorServer {
 
     private void handleRegisterByteCode(){
         byte[] classNameSlashes = sock.recvBytes();
-        String classNameDots = Utils.convertToJavaName(new String(classNameSlashes, StandardCharsets.UTF_8));
+        String classNameDots = Utils.toNameWithDots(new String(classNameSlashes, StandardCharsets.UTF_8));
 
         byte[] byteCode = sock.recvBytes();
         log.info("Registering bytecode for class " + classNameDots );
@@ -43,8 +46,7 @@ public class InstrumentorServer {
 
     private void handleHasClassCheck() {
         byte[] classNameSlashes = sock.recvBytes();
-        String classNameDots = Utils.convertToJavaName(new String(classNameSlashes, StandardCharsets.UTF_8));
-
+        String classNameDots = Utils.toNameWithDots(new String(classNameSlashes, StandardCharsets.UTF_8));
 
         log.info("Checking whether class is available " + classNameDots);
 
@@ -64,16 +66,40 @@ public class InstrumentorServer {
                 this.getClass().getClassLoader().loadClass(classNameDots);
                 log.info("Instrumentor contains class " + classNameDots);
                 sock.send("yes");
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException| NoClassDefFoundError e) {
                 log.info("Instrumentor does not contain class " + classNameDots);
                 sock.send("no");
             }
         }
     }
 
+    private void sendClazz(Class clazz) throws java.io.IOException{
+        byte[] bytes = Utils.getBytesForClass(clazz);
+        sock.send(Utils.toNameWithSlashes(clazz.getName()));
+        sock.send(bytes.length + "");
+        sock.send(bytes);
+    }
+
+    private void handleSentPrepClasses(){
+        try {
+            sock.send(5 + ""); // number of classes to be instrumented
+            sendClazz(Interceptor.class);
+            sendClazz(LoadedTypeInitializer.class);
+            sendClazz(LoadedTypeInitializer.Compound.class);
+            sendClazz(LoadedTypeInitializer.ForStaticField.class);
+            sendClazz(SetAccessibleAction.class);
+
+        } catch (java.io.IOException ignore) {
+            assert false : " Can't never be here since we know this class is available and we know our class loader" +
+                    "structure";
+        }
+
+
+    }
+
     private void handleInstrument() {
         byte[] classNameSlashes = sock.recvBytes();
-        String classNameDots = Utils.convertToJavaName(new String(classNameSlashes, StandardCharsets.UTF_8));
+        String classNameDots = Utils.toNameWithDots(new String(classNameSlashes, StandardCharsets.UTF_8));
 
         // first look into cache and send the instrumented bytecode to the native agent
         if(byteCodeCache.containsKey(classNameDots)){
@@ -85,7 +111,6 @@ public class InstrumentorServer {
             byteCodeCache.put(classNameDots, transformed);
             sendByteCodeToAgent(transformed);
         }
-
     }
 
     private void sendByteCodeToAgent(byte[] transformed){
@@ -121,6 +146,11 @@ public class InstrumentorServer {
             case REQ_TYPE_REGISTER_BYTECODE:
                 handleRegisterByteCode();
                 break;
+            case REQ_TYPE_PREP_CLASSES:
+                handleSentPrepClasses();
+                break;
+            default:
+                throw new RuntimeException("Unknown request type " + requestType);
         }
     }
 

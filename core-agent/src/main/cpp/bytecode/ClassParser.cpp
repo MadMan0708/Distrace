@@ -19,7 +19,7 @@ void ClassParser::readMagicId(){
     int magicId = reader.readInt();
     int JVM_CLASSFILE_MAGIC = 0xCAFEBABE;
     if(JVM_CLASSFILE_MAGIC != magicId){
-        throw "Magic id is not correct";
+        throw std::runtime_error("Magic id is not correct");
     }
 }
 
@@ -44,7 +44,7 @@ void ClassParser::readClassInfo(){
     }
     if (((access_flags & JavaConst::ACC_ABSTRACT) != 0)
         && ((access_flags & JavaConst::ACC_FINAL) != 0)) {
-        throw "Class can't be both final and abstract";
+        throw std::runtime_error("Class can't be both final and abstract");
     }
     // read and save class name
     classNameIndex = reader.readShort();

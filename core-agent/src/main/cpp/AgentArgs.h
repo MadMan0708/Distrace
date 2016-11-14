@@ -18,7 +18,6 @@ namespace Distrace {
     public:
         static const std::string ARG_INSTRUMENTOR_SERVER_JAR;
         static const std::string ARG_INSTRUMENTOR_SERVER_CP;
-        static const std::string ARG_INSTRUMENTOR_LIB_JAR;
         static const std::string ARG_INSTRUMENTOR_MAIN_CLASS;
         static const std::string ARG_CONNECTION_STR;
         static const std::string ARG_LOG_LEVEL;

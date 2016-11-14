@@ -19,7 +19,6 @@ using namespace Distrace::Logging;
 // instantiate argument names
 const std::string AgentArgs::ARG_INSTRUMENTOR_SERVER_JAR = "instrumentor_server_jar";
 const std::string AgentArgs::ARG_INSTRUMENTOR_SERVER_CP = "instrumentor_server_cp";
-const std::string AgentArgs::ARG_INSTRUMENTOR_LIB_JAR = "instrumentor_lib_jar";
 const std::string AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS = "instrumentor_main_class";
 const std::string AgentArgs::ARG_CONNECTION_STR = "connection_str";
 const std::string AgentArgs::ARG_LOG_LEVEL = "log_level";
@@ -107,10 +106,6 @@ int AgentArgs::checkForMandatoryArg(std::string arg_name, std::string &err_msg){
 }
 
 int AgentArgs::checkForMandatoryArgs(std::string &err_msg) {
-    if(checkForMandatoryArg(ARG_INSTRUMENTOR_LIB_JAR, err_msg) == JNI_ERR){
-        return JNI_ERR;
-    }
-
     if(!isArgSet(ARG_CONNECTION_STR) || (isArgSet(ARG_CONNECTION_STR) && getArgValue(ARG_CONNECTION_STR) == "ipc")){
         if(checkForMandatoryArg(ARG_INSTRUMENTOR_MAIN_CLASS, err_msg) == JNI_ERR){
             err_msg = ARG_INSTRUMENTOR_MAIN_CLASS+" is missing, it has to be set when starting in local mode!";

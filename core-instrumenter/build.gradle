@@ -6,11 +6,19 @@ dependencies {
     testCompile "junit:junit:4.12"
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6'
-    compile 'net.bytebuddy:byte-buddy:1.4.24'
-    compile 'net.bytebuddy:byte-buddy-agent:1.4.24'
+    compile 'net.bytebuddy:byte-buddy:1.5.3'
+    compile 'net.bytebuddy:byte-buddy-agent:1.5.3'
     compile "jnanomsg:jnanomsg:0.4.3"
+
+    // for deep cloning
     compile "org.apache.bcel:bcel:6.0"
     compile "uk.com.robust-it:cloning:1.9.3"
+
+    // for finding all interceptors
+    compile "org.reflections:reflections:0.9.10"
+    compile 'com.google.guava:guava:20.0'
+    compile "javassist:javassist:3.12.1.GA"
+    compile "dom4j:dom4j:1.6.1"
 }
 
 // Setup test environment
@@ -23,17 +31,22 @@ test {
 
 shadowJar{
     dependencies {
+        include(dependency("dom4j:dom4j:1.6.1"))
+        include(dependency("javassist:javassist:3.12.1.GA"))
+        include(dependency("com.google.guava:guava:20.0"))
+        include(dependency("org.reflections:reflections:0.9.10"))
         include(dependency("org.objenesis:objenesis:2.1"))
         include(dependency("uk.com.robust-it:cloning:1.9.3"))
-        include(dependency("net.bytebuddy:byte-buddy-agent:1.4.24"))
-        include(dependency("net.bytebuddy:byte-buddy:1.4.24"))
+        include(dependency("net.bytebuddy:byte-buddy-agent:1.5.3"))
+        include(dependency("net.bytebuddy:byte-buddy:1.5.3"))
         include(dependency("jnanomsg:jnanomsg:0.4.3"))
         include(dependency("net.java.dev.jna:jna:4.2.1"))
         include(dependency("org.apache.logging.log4j:log4j-api:2.6"))
         include(dependency("org.apache.logging.log4j:log4j-core:2.6"))
         include(dependency("org.apache.bcel:bcel:6.0"))
-
     }
+    // need to relocate dependencies in case they are used by instrumented programs
+    relocate "javassist", "shadowed.javassist"
 }
 
 artifacts {

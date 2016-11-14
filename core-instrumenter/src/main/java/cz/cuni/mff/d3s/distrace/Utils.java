@@ -2,33 +2,50 @@ package cz.cuni.mff.d3s.distrace;
 
 import com.rits.cloning.Cloner;
 import com.rits.cloning.ObjenesisInstantiationStrategy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.reflections.Reflections;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Various helper methods
  */
 public class Utils {
+    private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
 
-    public static String convertToJavaName(String name){
-        return name.replaceAll("/", ".");
+
+    public static Map<String, byte[]> getInterceptorByteCodes(){
+        // discover all interceptors
+
+        Reflections reflections = new Reflections();
+        Set<Class<? extends Interceptor>> classes = reflections.getSubTypesOf(Interceptor.class);
+
+        Map<String, byte[]> byteCodes = new HashMap<>();
+        log.info("Discovering interceptor classes");
+        for(Class cls: classes){
+            log.info("Found interceptor class: " + cls);
+            InputStream inputStream = cls.getResourceAsStream("/"+cls.getName().replace(".","/")+".class");
+            try {
+                byteCodes.put(Utils.toNameWithSlashes(cls.getName()), toByteArray(inputStream));
+            } catch (IOException ignore) {
+               // this should never happen
+            }
+        }
+        return byteCodes;
     }
 
+    public static String toNameWithDots(String name){
+        return name.replace('/', '.');
+    }
 
-    private static InputStream openClassfile(String classname, ClassLoader cl) {
-        String cname = classname.replace('.', '/') + ".class";
-        if (cl == null)
-            return null;
-        else
-            return cl.getResourceAsStream(cname);
+    public static String toNameWithSlashes(String name){
+        return name.replace('.', '/');
     }
 
     @SuppressWarnings("unused")
@@ -44,24 +61,21 @@ public class Utils {
         }
     }
 
-    @SuppressWarnings("unused")
-    public static byte[] getBytesFromClassFile(String classname, ClassLoader cl) {
-        try {
-            InputStream inputStream = openClassfile(classname, cl);
-            if(inputStream != null) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                int reads = inputStream.read();
-                while (reads != -1) {
-                    baos.write(reads);
-                    reads = inputStream.read();
-                }
-                return baos.toByteArray();
-            }else{
-                return null;
-            }
-        }catch (IOException e){
-            return null;
+    private static byte[] toByteArray(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        int reads = inputStream.read();
+        while (reads != -1) {
+            baos.write(reads);
+            reads = inputStream.read();
         }
+        return baos.toByteArray();
+    }
+
+    public static byte[] getBytesForClass(Class cl) throws IOException {
+        String resourceName = "/" + cl.getName().replace(".","/") + ".class";
+        InputStream inputStream = cl.getResourceAsStream(resourceName);
+        return toByteArray(inputStream);
     }
 
 }

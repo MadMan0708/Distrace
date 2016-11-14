@@ -11,8 +11,14 @@ using namespace Distrace::Logging;
 namespace Distrace {
     namespace JavaUtils {
 
-        jstring asJavaString(JNIEnv *env, std::string str){
-            return env->NewStringUTF(str.c_str());
+        jstring asJavaString(JNIEnv *jni, std::string str){
+            return jni->NewStringUTF(str.c_str());
+        }
+
+        jclass loadClass(JNIEnv *jni, jobject loader, std::string className){
+            jclass clazz = jni->GetObjectClass(loader);
+            jmethodID loadClassMethod = jni->GetMethodID(clazz, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+            return (jclass)jni->CallObjectMethod(loader, loadClassMethod, asJavaString(jni, className));
         }
 
         void triggerLoadingWithSpecificLoader(JNIEnv *jni, std::string className, jobject loader){
@@ -22,24 +28,56 @@ namespace Distrace {
             jni->CallStaticVoidMethod(utils, getClass, jClassName, loader);
         }
 
+        int fromInputStream(JNIEnv *jni, jobject inputStream, const unsigned char **buff){
+            auto baosClazz = jni->FindClass("java/io/ByteArrayOutputStream");
+            auto baosConstructor = jni->GetMethodID(baosClazz, "<init>","()V");
+            auto baosWriteMethod = jni->GetMethodID(baosClazz, "write", "(I)V");
+            auto baosToArrayMethod = jni->GetMethodID(baosClazz, "toByteArray", "()[B");
+
+            auto baos = jni->NewObject(baosClazz, baosConstructor);
+
+            auto inputStreamClazz = jni->GetObjectClass(inputStream);
+            auto readMethod = jni->GetMethodID(inputStreamClazz, "read", "()I");
+            auto reads = jni->CallIntMethod(inputStream, readMethod);
+
+            while (reads != -1) {
+                jni->CallVoidMethod(baos, baosWriteMethod, reads);
+                reads = jni->CallIntMethod(inputStream, readMethod);
+            }
+
+            auto byteArray = (jbyteArray) jni->CallObjectMethod(baos, baosToArrayMethod);
+            return asUnsignedCharArray(jni, byteArray, buff);
+
+        }
+
         int getBytesForClass(JNIEnv *jni, std::string className, jobject loader, const unsigned char **buf){
-            jclass utils = jni->FindClass("cz/cuni/mff/d3s/distrace/Utils");
-            jmethodID  getBytesMethod = jni->GetStaticMethodID(utils, "getBytesFromClassFile", "(Ljava/lang/String;Ljava/lang/ClassLoader;)[B");
-            jstring jClassName = asJavaString(jni, className);
-            jbyteArray array = (jbyteArray) jni->CallStaticObjectMethod(utils, getBytesMethod, jClassName, loader);
-            if(array == NULL){
+            auto resourceName = toNameWithSlashes(className) + ".class";
+            if( loader == NULL){
                 return 0;
             }else{
-                return asUnsignedCharArray(jni, array, buf);
+                auto loaderClazz = jni->GetObjectClass(loader);
+                auto resourceAsStreamMethod = jni->GetMethodID(loaderClazz, "getResourceAsStream", "(Ljava/lang/String;)Ljava/io/InputStream;");
+                auto inputStream = jni->CallObjectMethod(loader, resourceAsStreamMethod, asJavaString(jni, resourceName));
+                if(inputStream == NULL){
+                    return 0;
+                }else{
+                    return fromInputStream(jni, inputStream, buf);
+                }
             }
         }
 
-        int asUnsignedCharArray(JNIEnv *env, jbyteArray input, const unsigned char **output) {
-            int len = env->GetArrayLength (input);
+        int asUnsignedCharArray(JNIEnv *jni, jbyteArray input, const unsigned char **output) {
+            int len = jni->GetArrayLength (input);
             unsigned char *buffer = new unsigned char[len];
-            env->GetByteArrayRegion (input, 0, len, reinterpret_cast<jbyte*>(buffer));
+            jni->GetByteArrayRegion (input, 0, len, reinterpret_cast<jbyte*>(buffer));
             *output = buffer;
             return len;
+        }
+
+        jbyteArray asJByteArray(JNIEnv *jni, unsigned char *data, int dataLen){
+            jbyteArray array = jni->NewByteArray (dataLen);
+            jni->SetByteArrayRegion (array, 0, dataLen, reinterpret_cast<jbyte*>(data));
+            return array;
         }
 
         std::string toNameWithDots(std::string className){
