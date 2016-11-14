@@ -93,8 +93,6 @@ public class InstrumentorServer {
             assert false : " Can't never be here since we know this class is available and we know our class loader" +
                     "structure";
         }
-
-
     }
 
     private void handleInstrument() {

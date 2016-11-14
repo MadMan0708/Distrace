@@ -11,7 +11,6 @@ dependencies {
     compile "jnanomsg:jnanomsg:0.4.3"
 
     // for deep cloning
-    compile "org.apache.bcel:bcel:6.0"
     compile "uk.com.robust-it:cloning:1.9.3"
 
     // for finding all interceptors
@@ -43,7 +42,6 @@ shadowJar{
         include(dependency("net.java.dev.jna:jna:4.2.1"))
         include(dependency("org.apache.logging.log4j:log4j-api:2.6"))
         include(dependency("org.apache.logging.log4j:log4j-core:2.6"))
-        include(dependency("org.apache.bcel:bcel:6.0"))
     }
     // need to relocate dependencies in case they are used by instrumented programs
     relocate "javassist", "shadowed.javassist"
