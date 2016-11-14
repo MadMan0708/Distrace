@@ -7,22 +7,21 @@ import water.fvec.Chunk;
  * Simple sum MR task
  */
 public class SumMRTask extends MRTask<SumMRTask> {
+    long sum = 0;
 
-
-    public long getSum(){
+    public long getSum() {
         return sum;
     }
-         long sum = 0;
-        @Override
-        public void map(Chunk c) {
-            for(int i=0; i<c._len; i++){
-                sum+=c.at8(i);
-            }
+
+    @Override
+    public void map(Chunk c) {
+        for (int i = 0; i < c._len; i++) {
+            sum += c.at8(i);
         }
+    }
 
     @Override
     public void reduce(SumMRTask mrt) {
-            sum += mrt.sum;
-
-}
+        sum += mrt.sum;
+    }
 }

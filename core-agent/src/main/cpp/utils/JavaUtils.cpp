@@ -28,6 +28,13 @@ namespace Distrace {
             jni->CallStaticVoidMethod(utils, getClass, jClassName, loader);
         }
 
+        bool isClassLoaded(JNIEnv *jni, jobject loader, std::string className){
+            auto loaderClazz = jni->GetObjectClass(loader);
+            auto findLoadedClazzMethod = jni->GetMethodID(loaderClazz, "findLoadedClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+            auto ret = jni->CallObjectMethod(loader, findLoadedClazzMethod, asJavaString(jni, className));
+            return ret != NULL;
+        }
+
         int fromInputStream(JNIEnv *jni, jobject inputStream, const unsigned char **buff){
             auto baosClazz = jni->FindClass("java/io/ByteArrayOutputStream");
             auto baosConstructor = jni->GetMethodID(baosClazz, "<init>","()V");

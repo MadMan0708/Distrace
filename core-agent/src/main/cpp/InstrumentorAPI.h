@@ -80,6 +80,7 @@ namespace Distrace {
         void loadPrepClasses();
     private:
 
+        std::map<jobject, std::set<std::string>> loadedInterceptorsPerCl;
         /**
          * Map storing name of the instrumented classes as keys and loaded type initializers as their values
          */

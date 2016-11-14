@@ -203,7 +203,12 @@ void InstrumentorAPI::loadInterceptor(JNIEnv *jni, jobject loader, std::string c
     auto bytes = pair.first;
     auto bytesLen = pair.second;
     log(LOGGER_INSTRUMENTOR_API)->info("Loading interceptor class {}", interceptorClassName);
-    jni->DefineClass(interceptorClassName.c_str(), loader, (jbyte*)bytes, bytesLen);
+    //need to check whether to interceptor has been already loaded by this class loader to prevent
+    // LinkageError  - duplicate class definition
+    if(loadedInterceptorsPerCl[loader].find(interceptorClassName) == loadedInterceptorsPerCl[loader].end()){
+        jni->DefineClass(interceptorClassName.c_str(), loader, (jbyte*)bytes, bytesLen);
+        loadedInterceptorsPerCl[loader].insert(interceptorClassName);
+    }
 }
 
 int InstrumentorAPI::init() {

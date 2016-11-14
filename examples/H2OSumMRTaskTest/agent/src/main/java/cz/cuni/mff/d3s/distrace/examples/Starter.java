@@ -9,15 +9,18 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.implementation.SuperMethodCall;
-import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
+import water.fvec.Chunk;
+
+import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 public class Starter {
     public static void main(String args[]){
         new Instrumentor().start(args, new CustomAgentBuilder() {
             @Override
             public AgentBuilder createAgent(BaseAgentBuilder builder) {
-                return builder.type(ElementMatchers.named("cz.cuni.mff.d3s.distrace.examples.SumMRTask")).transform(new
+                return builder.type(ElementMatchers.named(SumMRTask.class.getName())).transform(new
                 MRTaskTransformer());
             }
         });
@@ -27,8 +30,13 @@ public class Starter {
 
         @Override
         public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
-            return builder.method(ElementMatchers.named("map")).intercept(MethodDelegation.to(new MRTaskInterceptor())
-                    .andThen(SuperMethodCall.INSTANCE));
+            return builder
+                    .method(named("map").and(takesArguments(Chunk.class)))
+                    .intercept(MethodDelegation.to(new MRTaskInterceptor())
+                            .andThen(SuperMethodCall.INSTANCE))
+                    .method(named("reduce").and(takesArguments(SumMRTask.class)))
+                    .intercept(MethodDelegation.to(new MRTaskInterceptor())
+                            .andThen(SuperMethodCall.INSTANCE));
         }
     }
 }

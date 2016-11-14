@@ -33,6 +33,11 @@ namespace Distrace{
         void triggerLoadingWithSpecificLoader(JNIEnv *jni, std::string className, jobject loader);
 
         /**
+         * Check if the class is loaded by specified class loader and returns true if it is, otherwise return false
+         */
+        bool isClassLoaded(JNIEnv *jni, jobject loader, std::string className);
+
+        /**
          * Get array of bytes from Java input stream
          */
         int fromInputStream(JNIEnv *jni, jobject inputStream, const unsigned char **buf);
