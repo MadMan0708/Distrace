@@ -19,11 +19,12 @@ public class Instrumentor {
      * @param args command line arguments of the instrumentor
      */
     public void start(String[] args, CustomAgentBuilder builder){
-        assert args.length == 3; // we always start Instrumentor from native agent and 3 parameters should be
+        assert args.length == 4; // we always start Instrumentor from native agent and 4 parameters should be
         // always passed to it
         // - socket address
         // - log level
         // - log dir
+        // - path to class dir
 
         String socketAddress = args[0];
 
@@ -34,15 +35,17 @@ public class Instrumentor {
 
         String logLevel = args[1];
         String logDir = args[2];
+        String pathToClasses = args[3];
         ConfigurationFactory.setConfigurationFactory(new InstrumentorConfFactory(logLevel, logDir));
         log = LogManager.getLogger(Instrumentor.class);
         log.info("Running forked JVM \n" +
                 "   connection string : " + socketAddress + "\n" +
                 "   log level         : " + logLevel + "\n" +
                 "   log dir           : " + logDir + "\n" +
+                "   path to classes   : " + pathToClasses + "\n" +
                 "");
 
-        new InstrumentorServer(socketAddress, builder)
+        new InstrumentorServer(socketAddress, builder, pathToClasses)
                 .start();
 
     }

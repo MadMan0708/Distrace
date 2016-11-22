@@ -9,7 +9,6 @@ public class TraceContextManager {
     private static HashMap<Long,TraceContext> contexts = new HashMap<>();
     public static void registerTraceContext(Thread thread, TraceContext context){
         contexts.put(thread.getId(), context);
-
     }
 
     public static TraceContext get(Thread thread){

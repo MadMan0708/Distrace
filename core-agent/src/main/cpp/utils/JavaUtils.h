@@ -18,6 +18,11 @@ namespace Distrace{
     namespace JavaUtils {
 
         /**
+         * Get hashcode of provided Java object
+         */
+        jint getHashCode(JNIEnv *jni, jobject object);
+
+        /**
          * Converts std::string to jstring
          */
         jstring asJavaString(JNIEnv *jni, std::string str);

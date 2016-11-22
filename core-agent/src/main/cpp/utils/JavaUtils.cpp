@@ -11,6 +11,12 @@ using namespace Distrace::Logging;
 namespace Distrace {
     namespace JavaUtils {
 
+        jint getHashCode(JNIEnv *jni, jobject object){
+            jclass clazz = jni->GetObjectClass(object);
+            jmethodID hashCodeMethod = jni->GetMethodID(clazz, "hashCode", "()I");
+            return jni->CallIntMethod(object, hashCodeMethod);
+        }
+
         jstring asJavaString(JNIEnv *jni, std::string str){
             return jni->NewStringUTF(str.c_str());
         }

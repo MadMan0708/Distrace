@@ -48,9 +48,9 @@ std::vector<std::string> InstrumentorAPI::ignoredLoaders =  {
         // see http://stackoverflow.com/questions/6505274/what-for-sun-jvm-creates-instances-of-sun-reflect-delegatingclassloader-at-runti
 };
 
-InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
+InstrumentorAPI::InstrumentorAPI(nnxx::socket socket, std::string pathToClassDir) {
     this->socket = std::move(socket);
-    this->pathToClassDir = Utils::createUniqueTempDir();
+    this->pathToClassDir = pathToClassDir;
     log(LOGGER_INSTRUMENTOR_API)->info("Adding directory for helper classes sent from Instrumentor JVM"
                                                " to classpath : {}", this->pathToClassDir);
     Agent::globalData->jvmti->AddToSystemClassLoaderSearch(this->pathToClassDir.c_str());
@@ -93,6 +93,31 @@ void InstrumentorAPI::instrument(JNIEnv *jni, jobject loader, std::string classN
         *newClassDataLen = receiveByteArrayReply(newClassData, expectedLength);
 
         log(LOGGER_INSTRUMENTOR_API)->info("The class {} has been instrumented.", className);
+    }
+}
+
+void InstrumentorAPI::saveClassOnDisk(std::string className, byte* classBytes, int classBytesLength){
+    std::vector<std::string> tokens;
+    boost::split(tokens, className, boost::is_any_of("/"), boost::token_compress_on);
+    auto fullName = tokens.back() + ".class";
+    tokens.pop_back();
+
+    // create path out of packages hierarchy
+    std::string sep(1, boost::filesystem::path::preferred_separator);
+    auto class_path = boost::algorithm::join(tokens, sep);
+    auto path = pathToClassDir + class_path + sep;
+    auto fullPath = path + fullName;
+
+    // create directory structure same as the packages hierarchy in which is this class located
+    boost::filesystem::create_directories(path);
+    FILE* file = fopen(fullPath.c_str(), "wb" );
+    if(file!=NULL){
+        log(LOGGER_INSTRUMENTOR_API)->info("Writing to file {}", fullPath);
+
+        fwrite(classBytes, sizeof(classBytes[0]), classBytesLength, file);
+        fclose(file);
+    }else{
+        log(LOGGER_INSTRUMENTOR_API)->error("Error opening the file {}", fullPath);
     }
 }
 
@@ -141,30 +166,6 @@ void InstrumentorAPI::loadAuxiliaryClasses(std::string className){
     }
 }
 
-void InstrumentorAPI::saveClassOnDisk(std::string className, byte* classBytes, int classBytesLength){
-    std::vector<std::string> tokens;
-    boost::split(tokens, className, boost::is_any_of("/"), boost::token_compress_on);
-    auto fullName = tokens.back() + ".class";
-    tokens.pop_back();
-
-    // create path out of packages hierarchy
-    std::string sep(1, boost::filesystem::path::preferred_separator);
-    auto class_path = boost::algorithm::join(tokens, sep);
-    auto path = pathToClassDir + class_path + sep;
-    auto fullPath = path + fullName;
-
-    // create directory structure same as the packages hierarchy in which is this class located
-    boost::filesystem::create_directories(path);
-    FILE* file = fopen(fullPath.c_str(), "wb" );
-    if(file!=NULL){
-        log(LOGGER_INSTRUMENTOR_API)->info("Writing to file {}", fullPath);
-
-        fwrite(classBytes, sizeof(classBytes[0]), classBytesLength, file);
-        fclose(file);
-    }else{
-        log(LOGGER_INSTRUMENTOR_API)->error("Error opening the file {}", fullPath);
-    }
-}
 
 void InstrumentorAPI::loadInitializers(JNIEnv *jni, jobject loader, std::string className){
     log(LOGGER_INSTRUMENTOR_API)->info("Loading initializers for {}", className);
@@ -202,18 +203,21 @@ void InstrumentorAPI::loadInterceptor(JNIEnv *jni, jobject loader, std::string c
     auto pair = interceptors.at(interceptorClassName);
     auto bytes = pair.first;
     auto bytesLen = pair.second;
-    log(LOGGER_INSTRUMENTOR_API)->info("Loading interceptor class {}", interceptorClassName);
-    //need to check whether to interceptor has been already loaded by this class loader to prevent
+    // need to check whether the interceptor has been already loaded by this class loader to prevent
     // LinkageError  - duplicate class definition
-    if(loadedInterceptorsPerCl[loader].find(interceptorClassName) == loadedInterceptorsPerCl[loader].end()){
+    int loaderHash = JavaUtils::getHashCode(jni, loader);
+    if(loadedInterceptorsPerCl[loaderHash].find(interceptorClassName) == loadedInterceptorsPerCl[loaderHash].end()){
+        log(LOGGER_INSTRUMENTOR_API)->debug("Loading interceptor class {} by {}", interceptorClassName, JavaUtils::getHashCode(jni, loader));
         jni->DefineClass(interceptorClassName.c_str(), loader, (jbyte*)bytes, bytesLen);
-        loadedInterceptorsPerCl[loader].insert(interceptorClassName);
+        loadedInterceptorsPerCl[loaderHash].insert(interceptorClassName);
+    }else{
+        log(LOGGER_INSTRUMENTOR_API)->debug("Interceptor class already loaded {} by {}", interceptorClassName, JavaUtils::getClassLoaderName(jni, loader));
     }
 }
 
 int InstrumentorAPI::init() {
     const std::string connectionStr = Agent::getArgs()->getArgValue(AgentArgs::ARG_CONNECTION_STR);
-
+    auto classDir = Utils::createUniqueTempDir();
     // launch Instrumentor JVM only in case of ipc, when tcp is set, the instrumentor JVM should be already running.
     if(Agent::getArgs()->isRunningInLocalMode()){
         // fork instrumentor JVM
@@ -231,7 +235,7 @@ int InstrumentorAPI::init() {
 
         std::string launchCommand =
                 "java -cp " + instrumentorServerJar + ":" + instrumentorServerCP + " " + instrumentorMainClass + " " + connectionStr + " " +
-                logLevel + " " + logDir  + " &";
+                logLevel + " " + logDir  + " " + classDir + " &";
         log(LOGGER_INSTRUMENTOR_API)->info("Starting Instrumentor JVM with the command: {}", launchCommand);
         int result = system(Utils::stringToCharPointer(launchCommand));
         if (result < 0) {
@@ -253,7 +257,7 @@ int InstrumentorAPI::init() {
         log(LOGGER_INSTRUMENTOR_API)->info("Connection to the instrumentor JVM established. Assigned endpoint ID is = {}", endpoint);
     }
 
-    Agent::globalData->instApi = new InstrumentorAPI(std::move(socket));
+    Agent::globalData->instApi = new InstrumentorAPI(std::move(socket), classDir);
     return JNI_OK;
 }
 
@@ -265,7 +269,7 @@ void InstrumentorAPI::stop() {
     boost::filesystem::path fileToDelete(file);
     boost::filesystem::remove(fileToDelete);
 
-    // remove also all auxiliary classes
+    // remove also all helper classes
     boost::filesystem::remove_all(pathToClassDir);
 
     // inform instrumentor JVM that the application is being stopped

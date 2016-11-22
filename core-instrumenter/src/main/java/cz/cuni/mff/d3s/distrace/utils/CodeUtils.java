@@ -1,10 +1,7 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
-import cz.cuni.mff.d3s.distrace.TraceContextManager;
-import cz.cuni.mff.d3s.distrace.api.TraceContext;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.dynamic.DynamicType;
-
 
 /**
  * Helper methods for code generation
@@ -15,20 +12,8 @@ public class CodeUtils {
         return builder.defineField(name, clazz, Visibility.PRIVATE);
     }
 
-    public static TraceContext injectTraceContext(){
-        return injectTraceContextOn(Thread.currentThread());
-    }
-
-    public static TraceContext injectTraceContextOn(Thread thread){
-        return TraceContextManager.getOrCreate(thread, new TraceContext());
-    }
-
-    public static void propagateTraceContext(Thread to){
-        TraceContextManager.getOrCreate(to, TraceContextManager.get(Thread.currentThread()));
-    }
-
-    public static TraceContext getTraceContext(){
-        return TraceContextManager.get(Thread.currentThread());
+    public static DynamicType.Builder<?> defineTraceId(DynamicType.Builder<?> builder){
+        return defineField(builder, Long.class, "____traceId");
     }
 
 }

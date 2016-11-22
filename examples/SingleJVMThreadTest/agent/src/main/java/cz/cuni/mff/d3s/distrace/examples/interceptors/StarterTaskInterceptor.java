@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.distrace.examples.interceptors;
 
-import cz.cuni.mff.d3s.distrace.utils.CodeUtils;
+import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 /**
@@ -9,12 +9,12 @@ import net.bytebuddy.implementation.bind.annotation.This;
 public class StarterTaskInterceptor {
 
     public static void start(@This Thread thread){
-        CodeUtils.injectTraceContextOn(thread);
+        InstrumentUtils.injectTraceContextOn(thread);
         System.out.println("Method start on starter task was called. Thread id: " + thread.getId());
     }
 
     public static void run(){
-        System.out.println("Method run on starter task was called. Thread id: " + Thread.currentThread().getId() + ", trace id: "+ CodeUtils.getTraceContext().getTraceId());
+        System.out.println("Method run on starter task was called. Thread id: " + Thread.currentThread().getId() + ", trace id: "+ InstrumentUtils.getTraceContext().getTraceId());
 
     }
 }

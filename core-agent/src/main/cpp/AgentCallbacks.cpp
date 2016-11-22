@@ -75,6 +75,7 @@ void JNICALL AgentCallbacks::cbClassPrepare(jvmtiEnv *jvmti, JNIEnv *jni, jthrea
     log(LOGGER_AGENT_CALLBACKS)->debug("Class: {} prepared", className);
     auto initializers = Agent::getInstApi()->getInitializersFor(className);
     for( auto initializer : initializers){
+        log(LOGGER_INSTRUMENTOR_API)->debug("Loading initializer for {}", className);
         // get the class name from the map of instrumented classes, find the loaded type initializer and call the onLoad
         // method on this class
         auto baosClazz = jni->FindClass("java/io/ByteArrayInputStream");

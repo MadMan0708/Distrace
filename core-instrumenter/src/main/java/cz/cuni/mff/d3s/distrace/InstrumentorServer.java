@@ -1,8 +1,7 @@
 package cz.cuni.mff.d3s.distrace;
 
-import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentorClassLoader;
+import cz.cuni.mff.d3s.distrace.api.TraceContext;
+import cz.cuni.mff.d3s.distrace.utils.*;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
 import net.bytebuddy.implementation.LoadedTypeInitializer;
@@ -28,10 +27,12 @@ public class InstrumentorServer {
     private ClassFileTransformer transformer;
     private CustomAgentBuilder builder;
     private InstrumentorClassLoader instLoader = new InstrumentorClassLoader();
+    private String pathToClasses;
 
-    InstrumentorServer(String sockAddr, CustomAgentBuilder builder) {
+    InstrumentorServer(String sockAddr, CustomAgentBuilder builder, String pathToClasses) {
         this.sockAddr = sockAddr;
         this.builder = builder;
+        this.pathToClasses = pathToClasses;
     }
 
 
@@ -82,12 +83,15 @@ public class InstrumentorServer {
 
     private void handleSentPrepClasses(){
         try {
-            sock.send(5 + ""); // number of classes to be instrumented
+            sock.send(8 + ""); // number of classes to be instrumented
             sendClazz(Interceptor.class);
             sendClazz(LoadedTypeInitializer.class);
             sendClazz(LoadedTypeInitializer.Compound.class);
             sendClazz(LoadedTypeInitializer.ForStaticField.class);
             sendClazz(SetAccessibleAction.class);
+            sendClazz(InstrumentUtils.class);
+            sendClazz(TraceContextManager.class);
+            sendClazz(TraceContext.class);
 
         } catch (java.io.IOException ignore) {
             assert false : " Can't never be here since we know this class is available and we know our class loader" +
