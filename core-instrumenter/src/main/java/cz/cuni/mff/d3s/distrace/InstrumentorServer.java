@@ -1,7 +1,10 @@
 package cz.cuni.mff.d3s.distrace;
 
 import cz.cuni.mff.d3s.distrace.api.TraceContext;
-import cz.cuni.mff.d3s.distrace.utils.*;
+import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
+import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.utils.InstrumentorClassLoader;
 import nanomsg.exceptions.IOException;
 import nanomsg.pair.PairSocket;
 import net.bytebuddy.implementation.LoadedTypeInitializer;
@@ -159,7 +162,7 @@ public class InstrumentorServer {
     void start() {
         sock = new PairSocket();
         sock.bind(sockAddr);
-        transformer = builder.createAgent(new BaseAgentBuilder(sock, instLoader)).makeRaw();
+        transformer = builder.createAgent(new BaseAgentBuilder(sock, instLoader), pathToClasses).makeRaw();
         //noinspection InfiniteLoopStatement
         while (true) {
 

@@ -6,9 +6,7 @@ import net.bytebuddy.asm.Advice.OnMethodExit;
 
 import java.lang.reflect.Field;
 
-/**
- * Created by kuba on 15/09/16.
- */
+
 public class CallbackCreatorAdvice {
 
     @OnMethodExit

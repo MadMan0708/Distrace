@@ -17,7 +17,7 @@ public class Starter {
         new Instrumentor().start(args,
                 new CustomAgentBuilder() {
                     @Override
-                    public AgentBuilder createAgent(BaseAgentBuilder builder) {
+                    public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToGeneratedClasses) {
                         return builder
                                 .type(is(CallbackCreator.class))
                                 .transform(new CallBackCreatorTransformer())

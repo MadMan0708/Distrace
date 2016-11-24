@@ -55,6 +55,9 @@ public class BaseAgentBuilder {
                 String name = Utils.toNameWithSlashes(type.getClass().getName());
                 sock.send(name);
                 if(!sendInterceptors.contains(name)){
+                    if(interceptorsByteCodes.get(name)==null){
+                        throw new RuntimeException("Byte code for interceptor class "+ name +" not found! Are you sure your interceptor is implementing the Interceptor interface ?");
+                    }
                     sock.send(interceptorsByteCodes.get(name).length + "");
                     sock.send(interceptorsByteCodes.get(name));
                     sendInterceptors.add(name);

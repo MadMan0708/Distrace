@@ -5,9 +5,6 @@ import cz.cuni.mff.d3s.distrace.utils.InstrumentorConfFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
-import org.reflections.Reflections;
-
-import java.util.Set;
 
 public class Instrumentor {
     private static Logger log;
@@ -49,6 +46,5 @@ public class Instrumentor {
                 .start();
 
     }
-
 
 }

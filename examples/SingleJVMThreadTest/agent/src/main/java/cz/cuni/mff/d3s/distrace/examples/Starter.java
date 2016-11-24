@@ -1,8 +1,6 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
 import cz.cuni.mff.d3s.distrace.Instrumentor;
-import cz.cuni.mff.d3s.distrace.examples.transformers.DependantTaskTransformer;
-import cz.cuni.mff.d3s.distrace.examples.transformers.StarterTaskTransformer;
 import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
 import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -17,7 +15,7 @@ public class Starter {
         new Instrumentor().start(args,
                 new CustomAgentBuilder() {
                     @Override
-                    public AgentBuilder createAgent(BaseAgentBuilder builder) {
+                    public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToGeneratedClasses) {
                         return builder
                                 .type(named("cz.cuni.mff.d3s.distrace.examples.StarterTask"))
                                 .transform(new StarterTaskTransformer())

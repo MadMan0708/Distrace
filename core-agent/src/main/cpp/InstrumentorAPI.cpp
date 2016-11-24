@@ -93,6 +93,45 @@ void InstrumentorAPI::instrument(JNIEnv *jni, jobject loader, std::string classN
         *newClassDataLen = receiveByteArrayReply(newClassData, expectedLength);
 
         log(LOGGER_INSTRUMENTOR_API)->info("The class {} has been instrumented.", className);
+
+        saveClassOnDisk(className, *newClassData, *newClassDataLen);
+    }
+}
+
+void InstrumentorAPI::loadInitializersForClass(JNIEnv *jni, jclass clazz, std::string className){
+    auto initializers = getInitializersFor(className);
+    for( auto initializerPair : initializers){
+        log(LOGGER_INSTRUMENTOR_API)->debug("Loading initializer for {}", className);
+        // get the class name from the map of instrumented classes, find the loaded type initializer and call the onLoad
+        // method on this class
+        auto baosClazz = jni->FindClass("java/io/ByteArrayInputStream");
+        auto oisClazz = jni->FindClass("java/io/ObjectInputStream");
+
+        auto initializerBytes = JavaUtils::asJByteArray(jni, initializerPair.first, initializerPair.second);
+        auto baosConstructor = jni->GetMethodID(baosClazz, "<init>", "([B)V");
+        auto oisConstructor = jni->GetMethodID(oisClazz, "<init>", "(Ljava/io/InputStream;)V");
+
+        auto baosInstance = jni->NewObject(baosClazz, baosConstructor, initializerBytes);
+        auto oisInstance = jni->NewObject(oisClazz, oisConstructor, baosInstance);
+
+        auto readObjectMethod = jni->GetMethodID(oisClazz, "readObject","()Ljava/lang/Object;");
+
+        jobject instance = jni->CallObjectMethod(oisInstance, readObjectMethod);
+        // call method on instance to ensure loading of interceptor onLoad on instance
+        auto initializerClass = jni->GetObjectClass(instance);
+        auto onLoadMethod = jni->GetMethodID(initializerClass, "onLoad", "(Ljava/lang/Class;)V");
+        jni->CallObjectMethod(instance, onLoadMethod, clazz);
+    }
+}
+
+std::vector<std::pair<unsigned char *, int>> InstrumentorAPI::getInitializersFor(std::string className) {
+    log(LOGGER_INSTRUMENTOR_API)->debug("Trying to find initializers for {}", className);
+    if(initializers.find(className) != initializers.end()){
+        log(LOGGER_INSTRUMENTOR_API)->debug("Found initializer for {}", className);
+        return initializers.at(className);
+    }else{
+        log(LOGGER_INSTRUMENTOR_API)->debug("No initializer found for {}", className);
+        return std::vector<std::pair<unsigned char *, int>>();
     }
 }
 
@@ -181,7 +220,7 @@ void InstrumentorAPI::loadInitializers(JNIEnv *jni, jobject loader, std::string 
         log(LOGGER_INSTRUMENTOR_API)->info("Receive bytecode for initializer class {}", initializerClassName);
         auto withDots = JavaUtils::toNameWithDots(className);
         jbyteArray data = JavaUtils::asJByteArray(jni, classBytes, expectedLength);
-        initializers[withDots].push_back(data);
+        initializers[withDots].push_back(std::pair<unsigned char *, int>(classBytes, expectedLength));
         reply = receiveStringReply();
     }
 }
@@ -198,6 +237,7 @@ void InstrumentorAPI::loadInterceptor(JNIEnv *jni, jobject loader, std::string c
         receiveByteArrayReply(&interceptorBytes, interceptorBytesLen);
         interceptors[interceptorClassName] = std::pair<unsigned char *, int>(interceptorBytes, interceptorBytesLen);
         ignoredClasses.insert(interceptorClassName);
+        saveClassOnDisk(interceptorClassName, interceptorBytes, interceptorBytesLen);
     }
 
     auto pair = interceptors.at(interceptorClassName);
@@ -278,17 +318,6 @@ void InstrumentorAPI::stop() {
 
 bool InstrumentorAPI::shouldContinue(std::string className, std::string loaderName) {
     return !(isIgnoredClassLoader(loaderName) || isIgnoredClass(className));
-}
-
-std::vector<jbyteArray> InstrumentorAPI::getInitializersFor(std::string className) {
-    log(LOGGER_INSTRUMENTOR_API)->debug("Trying to find initializers for {}", className);
-    if(initializers.find(className) != initializers.end()){
-        log(LOGGER_INSTRUMENTOR_API)->debug("Found initializer for {}", className);
-        return initializers.at(className);
-    }else{
-        log(LOGGER_INSTRUMENTOR_API)->debug("No initializer found for {}", className);
-        return std::vector<jbyteArray>();
-    }
 }
 
 void InstrumentorAPI::loadPrepClasses() {

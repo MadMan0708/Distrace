@@ -54,6 +54,11 @@ namespace Distrace {
         void instrument(JNIEnv *jni, jobject loader, std::string name, unsigned char **newClassData, jint *newClassDataLen);
 
         /**
+         * Load initializers for specified class
+         */
+        void loadInitializersForClass(JNIEnv *jni, jclass clazz, std::string className);
+
+        /**
          * This method initializes the instrumentor JVM and return JNI_OK in case of success and JNI_ERR otherwise
          */
         static int init();
@@ -70,11 +75,6 @@ namespace Distrace {
         bool shouldContinue(std::string className, std::string loaderName);
 
         /**
-         * Get serialized initializers for a specified class name
-         */
-        std::vector<jbyteArray> getInitializersFor(std::string className);
-
-        /**
          * Load helper classes from instrumentor JVM
          */
         void loadPrepClasses();
@@ -84,7 +84,7 @@ namespace Distrace {
         /**
          * Map storing name of the instrumented classes as keys and loaded type initializers as their values
          */
-        std::map<std::string, std::vector<jbyteArray>> initializers;
+        std::map<std::string, std::vector<std::pair<unsigned char *, int>>> initializers;
 
         /**
          * Map storing name of the interceptors as keys and interceptors bytecode as their values
@@ -159,6 +159,11 @@ namespace Distrace {
         static std::string ACK_REQ_CLASS_ON_INSTRUMENTOR;
         /** Acknowledgement saying that there are more initializers for current class */
         static std::string ACK_REQ_INITIALIZERS;
+
+        /**
+         * Get serialized initializers for a specified class name
+         */
+        std::vector<std::pair<unsigned char *, int>> getInitializersFor(std::string className);
 
         /**
          * Save class on disk into specific directory where the class loader can see it

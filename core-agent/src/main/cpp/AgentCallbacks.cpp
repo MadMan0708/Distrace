@@ -73,28 +73,5 @@ void JNICALL AgentCallbacks::cbClassLoad(jvmtiEnv *jvmti, JNIEnv *jni, jthread t
 void JNICALL AgentCallbacks::cbClassPrepare(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread, jclass clazz) {
     std::string className = JavaUtils::getClassName(jni, clazz);
     log(LOGGER_AGENT_CALLBACKS)->debug("Class: {} prepared", className);
-    auto initializers = Agent::getInstApi()->getInitializersFor(className);
-    for( auto initializer : initializers){
-        log(LOGGER_INSTRUMENTOR_API)->debug("Loading initializer for {}", className);
-        // get the class name from the map of instrumented classes, find the loaded type initializer and call the onLoad
-        // method on this class
-        auto baosClazz = jni->FindClass("java/io/ByteArrayInputStream");
-        auto oisClazz = jni->FindClass("java/io/ObjectInputStream");
-
-
-        auto baosConstructor = jni->GetMethodID(baosClazz, "<init>", "([B)V");
-        auto oisConstructor = jni->GetMethodID(oisClazz, "<init>", "(Ljava/io/InputStream;)V");
-
-        auto baosInstance = jni->NewObject(baosClazz, baosConstructor, initializer);
-        auto oisInstance = jni->NewObject(oisClazz, oisConstructor, baosInstance);
-
-        auto readObjectMethod = jni->GetMethodID(oisClazz, "readObject","()Ljava/lang/Object;");
-
-        jobject instance = jni->CallObjectMethod(oisInstance, readObjectMethod);
-        // call method on instance to ensure loading of interceptor onLoad on instance
-        auto initializerClass = jni->GetObjectClass(instance);
-        auto onLoadMethod = jni->GetMethodID(initializerClass, "onLoad", "(Ljava/lang/Class;)V");
-        jni->CallObjectMethod(instance, onLoadMethod, clazz);
-    }
-
+    Agent::getInstApi()->loadInitializersForClass(jni, clazz, className);
 }
