@@ -20,13 +20,14 @@ buildscript {
 
 ext {
     javaProjects = [
-            project(':distrace-core-instrumenter'),
-            project(':distrace-core-agent-attacher')
+            project(':distrace-server'),
+            project(':distrace-instrumenter'),
+            project(':distrace-agent-attacher')
     ]
     javaProjects.addAll(rootProject.childProjects.values().findAll { it.name.startsWith("distrace-examples") })
 
     cppProjects = [
-            project(':distrace-core-agent')
+            project(':distrace-agent')
     ]
 
 }

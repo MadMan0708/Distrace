@@ -4,7 +4,7 @@ description = "Instrumentation agent"
 
 dependencies {
     // use functionality provided by core-instrumentor
-    compile project(path: ':distrace-core-instrumenter', configuration: 'shadow')
+    compile project(path: ':distrace-instrumenter', configuration: 'shadow')
     compile project(path: ':distrace-examples-SingleJVMCallbackTest-app', configuration: 'archives')
 }
 
@@ -14,7 +14,7 @@ artifacts {
 
 shadowJar{
     dependencies {
-        include(project(path: ':distrace-core-instrumenter', configuration: 'shadow'))
+        include(project(path: ':distrace-instrumenter', configuration: 'shadow'))
         // exclude application classes from the final jar
         exclude(project(path: ':distrace-examples-SingleJVMCallbackTest-app', configuration: 'archives'))
     }

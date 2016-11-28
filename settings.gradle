@@ -1,8 +1,9 @@
 rootProject.name = 'distrace'
 
-include 'core-agent'
-include 'core-agent-attacher'
-include 'core-instrumenter'
+include 'server'
+include 'agent'
+include 'agent-attacher'
+include 'instrumenter'
 
 
 def includeAllTestProjects(File startPath) {
