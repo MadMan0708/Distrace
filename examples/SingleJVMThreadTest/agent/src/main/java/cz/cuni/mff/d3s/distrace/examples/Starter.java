@@ -19,7 +19,7 @@ public class Starter {
                         return builder
                                 .type(named("cz.cuni.mff.d3s.distrace.examples.StarterTask"))
                                 .transform(new StarterTaskTransformer())
-                                .type(named("cz.cuni.mff.d3s.distrace.examples.DependableTask"))
+                                .type(named("cz.cuni.mff.d3s.distrace.examples.DependantTask"))
                                 .transform(new DependantTaskTransformer());
 
                     }

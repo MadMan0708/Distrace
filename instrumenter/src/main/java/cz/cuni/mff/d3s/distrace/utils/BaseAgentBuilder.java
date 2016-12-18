@@ -30,11 +30,10 @@ public class BaseAgentBuilder {
     private ArrayList<String> sendInterceptors = new ArrayList<>();
     private Map<String, byte[]> interceptorsByteCodes = Utils.getInterceptorByteCodes();
     private InstrumentorClassLoader instrumentorClassLoader;
-    private PairSocket sock;
+    private SocketWrapper sock;
 
-    public BaseAgentBuilder(PairSocket sock, InstrumentorClassLoader cl) {
+    public BaseAgentBuilder(SocketWrapper sock, InstrumentorClassLoader cl) {
         this.instrumentorClassLoader = cl;
-
         this.sock = sock;
         agentBuilder = initBuilder();
     }
@@ -82,9 +81,7 @@ public class BaseAgentBuilder {
                 }
             }
 
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
             e.printStackTrace();
         }
     }

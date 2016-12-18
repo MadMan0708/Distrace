@@ -7,7 +7,7 @@ package cz.cuni.mff.d3s.distrace.examples;
  */
 public class DependantTask extends Task {
 
-    public DependantTask(String taskName) {
+    DependantTask(String taskName) {
         super(taskName);
     }
 

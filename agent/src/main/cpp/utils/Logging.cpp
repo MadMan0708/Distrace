@@ -64,13 +64,13 @@ namespace Distrace {
             return spdlog::get(logger_name);
         }
 
-        bool is_valid_log_level(std::string log_level){
+        bool isValidLogLevel(std::string log_level){
             return log_levels_map.find(log_level) != log_levels_map.end();
         }
 
 
         void set_log_level(std::string log_level) {
-            if(is_valid_log_level(log_level)){
+            if(isValidLogLevel(log_level)){
                 spdlog::set_level(log_levels_map.at(log_level));
             }else{
                 throw std::runtime_error("Invalid log level: "+ log_level);

@@ -8,6 +8,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
 #include <regex>
+#include <iostream>
 #include "AgentArgs.h"
 #include "utils/Logging.h"
 #include "utils/Utils.h"
@@ -23,6 +24,7 @@ const std::string AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS = "instrumentor_main_cl
 const std::string AgentArgs::ARG_CONNECTION_STR = "connection_str";
 const std::string AgentArgs::ARG_LOG_LEVEL = "log_level";
 const std::string AgentArgs::ARG_LOG_DIR = "log_dir";
+const std::string AgentArgs::ARG_SAVER_TYPE = "saver";
 
 std::map<std::string, std::string> AgentArgs::getArgsMap() {
     return args;
@@ -60,10 +62,7 @@ int AgentArgs::validateConnectionStr(std::string &errorMsg){
         }else{
             // the other possible format is ip:port
             std::regex re("^(.*):\\d{1,5}");
-            if(std::regex_match(value.begin(),value.end(),re))
-            {
-                return JNI_OK;
-            }else{
+            if(!std::regex_match(value.begin(), value.end(), re)) {
                 errorMsg = "Communication type \"" + value + "\" is not recognized value!";
                 return JNI_ERR;
             }
@@ -73,13 +72,36 @@ int AgentArgs::validateConnectionStr(std::string &errorMsg){
 }
 
 int AgentArgs::validateLogLevel(std::string &errorMsg){
-    if (isArgSet(ARG_LOG_LEVEL)) {
-        auto log_level = getArgValue(ARG_LOG_LEVEL);
-        if (!is_valid_log_level(log_level)) {
-            errorMsg = "Log level \"" + log_level + "\" is not recognized value!";
+    if(isArgSet(ARG_LOG_LEVEL)){
+        auto logLevel = getArgValue(ARG_LOG_LEVEL);
+        if (!isValidLogLevel(logLevel)) {
+            errorMsg = "Log level \"" + logLevel + "\" is not recognized value!";
             return JNI_ERR;
         } else {
             return JNI_OK;
+        }
+    }
+    return JNI_OK;
+}
+
+int AgentArgs::validateSaverType(std::string &errorMsg){
+    if(isArgSet(ARG_SAVER_TYPE)){
+        auto saverType = getArgValue(ARG_SAVER_TYPE);
+        if(boost::starts_with(saverType, "directZipkin")){
+            std::regex re("^directZipkin\\(.*:\\d{1,5}\\)");
+            if(!std::regex_match(saverType.begin(), saverType.end(), re)){
+                errorMsg = "Wrong format of directZipkin saver type \"" + saverType + "\". It should be specified as directZipkin(ip:port)";
+                return JNI_ERR;
+            }
+        }else if(boost::starts_with(saverType, "disk")){
+            std::regex re("^disk\\(.*\\)");
+            if(!std::regex_match(saverType.begin(), saverType.end(), re)){
+                errorMsg = "Wrong format of disk saver type \"" + saverType + "\". It should be specified as disk(path)";
+                return JNI_ERR;
+            }
+        }else{
+            errorMsg = "Unknown saver type \"" + saverType + "\" !";
+            return JNI_ERR;
         }
     }
     return JNI_OK;
@@ -91,6 +113,10 @@ int AgentArgs::validateArgs(std::string &err_msg){
     }
 
     if(validateConnectionStr(err_msg) == JNI_ERR){
+        return JNI_ERR;
+    }
+
+    if(validateSaverType(err_msg) == JNI_ERR){
         return JNI_ERR;
     }
 
@@ -137,6 +163,11 @@ void AgentArgs::fillMissingWithDefaults(){
 
     if(!isArgSet(ARG_CONNECTION_STR)){
         args.insert({ARG_CONNECTION_STR, "ipc"});
+    }
+
+    if(!isArgSet(ARG_SAVER_TYPE)){
+        // the default saver is directly to Zipkin where we expect that zipkin is running on localhost on default port
+        args.insert({ARG_SAVER_TYPE, "directZipkin(localhost:9411)"});
     }
 }
 

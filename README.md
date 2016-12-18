@@ -72,6 +72,12 @@ already running on the specified node.
 
 For more information about the communication types please visit [http://nanomsg.org](http://nanomsg.org)
 
+### Visualizing collected traces
+We use Zipkin Server and Zipkin UI to represent collected traces 
+
+https://github.com/openzipkin/zipkin
+
+http://localhost:9411
 
 ## How to start examples
 There are several scripts which makes starting example programs and attaching agent to it simpler - they set the arguments

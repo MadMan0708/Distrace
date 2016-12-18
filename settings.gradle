@@ -1,6 +1,5 @@
 rootProject.name = 'distrace'
 
-include 'server'
 include 'agent'
 include 'agent-attacher'
 include 'instrumenter'

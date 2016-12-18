@@ -15,8 +15,8 @@ public class DependantTaskInterceptor implements Interceptor{
     }
 
     public void run(){
-        System.out.println("Method run on dependant task was called. Thread id: " + Thread.currentThread().getId() +
-                ", trace id: "+ InstrumentUtils.getTraceContext().getTraceId());
-
+        System.out.printf("Method run on dependant task was called. Thread id = %d, trace id = %d, span id = %d\n",
+                Thread.currentThread().getId(), InstrumentUtils.getTraceContext().getTraceId(), InstrumentUtils.getCurrentSpan().getSpanId());
+        InstrumentUtils.getCurrentSpan().setName("Dependant task").store();
     }
 }

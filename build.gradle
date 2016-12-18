@@ -20,7 +20,6 @@ buildscript {
 
 ext {
     javaProjects = [
-            project(':distrace-server'),
             project(':distrace-instrumenter'),
             project(':distrace-agent-attacher')
     ]

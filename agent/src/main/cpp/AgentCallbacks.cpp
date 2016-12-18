@@ -7,6 +7,7 @@
 #include "utils/AgentUtils.h"
 #include "utils/JavaUtils.h"
 #include "bytecode/ClassParser.h"
+#include "NativeMethodsHelper.h"
 
 using namespace Distrace;
 using namespace Distrace::Logging;
@@ -72,6 +73,8 @@ void JNICALL AgentCallbacks::cbClassLoad(jvmtiEnv *jvmti, JNIEnv *jni, jthread t
 
 void JNICALL AgentCallbacks::cbClassPrepare(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread, jclass clazz) {
     std::string className = JavaUtils::getClassName(jni, clazz);
+
+    NativeMethodsHelper::loadNativesFor(jni, clazz, className);
     log(LOGGER_AGENT_CALLBACKS)->debug("Class: {} prepared", className);
     Agent::getInstApi()->loadInitializersForClass(jni, clazz, className);
 }

@@ -5,11 +5,11 @@
 # Version of this distribution
 VERSION=$( cat $TOPDIR/gradle.properties | grep version | grep -v '#' | sed -e "s/.*=//" )
 
-ATTACHER_JAR_NAME="distrace-core-agent-attacher-$VERSION.jar"
-ATTACHER_JAR_FILE="$TOPDIR/core-agent-attacher/build/libs/$ATTACHER_JAR_NAME"
+ATTACHER_JAR_NAME="distrace-agent-attacher-$VERSION.jar"
+ATTACHER_JAR_FILE="$TOPDIR/agent-attacher/build/libs/$ATTACHER_JAR_NAME"
 
-NATIVE_AGENT_LIB_NAME="lib-distrace-agent-core.dylib"
-NATIVE_AGENT_LIB_PATH="$TOPDIR/core-agent/build/$NATIVE_AGENT_LIB_NAME"
+NATIVE_AGENT_LIB_NAME="lib-distrace-agent.dylib"
+NATIVE_AGENT_LIB_PATH="$TOPDIR/agent/build/$NATIVE_AGENT_LIB_NAME"
 
 
 SERVER_JAR_NAME="distrace-examples-$EXAMPLE_NAME-agent-$VERSION-all.jar"
@@ -42,9 +42,10 @@ echo
 # For testing purposes we always expect main class to be this one
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
-LOG_LEVEL="info"
+LOG_LEVEL="off"
 CONNECTION_STR="ipc"
 INSTRUMETOR_CP="$APP_JAR_PATH"
+SAVER="directZipkin(localhost:9411)"
 
 echo
 echo "Using following agent arguments:"
@@ -54,10 +55,11 @@ echo "Socket address          : $CONNECTION_STR"
 echo "Log dir                 : $LOG_DIR"
 echo "Log level               : $LOG_LEVEL"
 echo "Extra server classpath  : $INSTRUMETOR_CP"
+echo "Saver type              : $SAVER"
 echo
 
 
-AGENT_ARGS="$NATIVE_AGENT_LIB_PATH=instrumentor_server_cp=$INSTRUMETOR_CP;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_server_jar=$SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;connection_str=$CONNECTION_STR"
+AGENT_ARGS="$NATIVE_AGENT_LIB_PATH=instrumentor_server_cp=$INSTRUMETOR_CP;saver=$SAVER;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_server_jar=$SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;connection_str=$CONNECTION_STR"
 
 # Remove previous logs
 rm -rf $LOG_DIR

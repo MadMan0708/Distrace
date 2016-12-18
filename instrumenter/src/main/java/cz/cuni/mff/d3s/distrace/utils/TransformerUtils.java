@@ -1,6 +1,7 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
 import cz.cuni.mff.d3s.distrace.Interceptor;
+import cz.cuni.mff.d3s.distrace.api.TraceContext;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.modifier.Visibility;
@@ -12,6 +13,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 
 public class TransformerUtils {
@@ -26,7 +28,6 @@ public class TransformerUtils {
     }
     public static AgentBuilder.Transformer forMethodsIn(final Interceptor interceptor){
         return new AgentBuilder.Transformer(){
-
             @Override
             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
                 return forMethodsInInterceptor(builder, interceptor);
@@ -34,12 +35,15 @@ public class TransformerUtils {
         };
     }
 
-    private static DynamicType.Builder<?> forMethodsInInterceptor(DynamicType.Builder<?> builder, Interceptor interceptor){
+    public static DynamicType.Builder<?> forMethodsInInterceptor(DynamicType.Builder<?> builder, Interceptor interceptor){
         Method[] declaredMethods = interceptor.getClass().getDeclaredMethods();
 
         String[] methodNames = new String[declaredMethods.length];
         for(int i = 0; i<declaredMethods.length; i++){
-            methodNames[i] = declaredMethods[i].getName();
+            // don't take static method into account - they are usually advice methods
+            if(!Modifier.isStatic(declaredMethods[i].getModifiers())) {
+                methodNames[i] = declaredMethods[i].getName();
+            }
         }
         return forMethods(builder, methodNames, interceptor);
     }
@@ -63,7 +67,7 @@ public class TransformerUtils {
     }
 
     public static DynamicType.Builder<?> defineTraceId(DynamicType.Builder<?> builder){
-        return defineField(builder, Long.class, "____traceId");
+        return defineField(builder, TraceContext.class, "____traceId");
     }
 
     /**

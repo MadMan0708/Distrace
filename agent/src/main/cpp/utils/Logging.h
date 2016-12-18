@@ -28,7 +28,7 @@ namespace Distrace {
         void register_loggers();
 
         /** Checks whether the log_level in string is correct log level */
-        bool is_valid_log_level(std::string log_level);
+        bool isValidLogLevel(std::string log_level);
 
         /**
          * Set the log level if the log_level string represents existing log level and returns true, otherwise does

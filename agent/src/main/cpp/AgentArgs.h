@@ -22,6 +22,7 @@ namespace Distrace {
         static const std::string ARG_CONNECTION_STR;
         static const std::string ARG_LOG_LEVEL;
         static const std::string ARG_LOG_DIR;
+        static const std::string ARG_SAVER_TYPE;
 
         /**
          * Get the internal arguments map
@@ -65,22 +66,26 @@ namespace Distrace {
         /**
          * Validate the arguments
          */
-        int validateArgs(std::string &err_msg);
+        int validateArgs(std::string &errorMsg);
 
         /**
          * Validates connection_str argument in case it is set
          */
-        int validateConnectionStr(std::string &err_msg);
+        int validateConnectionStr(std::string &errorMsg);
 
         /**
          * Validates log_level argument in case it is set
          */
-        int validateLogLevel(std::string &err_msg);
+        int validateLogLevel(std::string &errorMsg);
 
+        /**
+         * Validates saver argument in case it is set
+         */
+        int validateSaverType(std::string &errorMsg);
         /**
          * Check for single mandatory argument
          */
-        int checkForMandatoryArg(std::string arg_name, std::string &err_msg);
+        int checkForMandatoryArg(std::string arg_name, std::string &errorMsg);
 
         /**
          * Replace Distrace connection string in arguments by nanomsg address in the arguments
@@ -91,7 +96,7 @@ namespace Distrace {
          * Check for mandatory arguments and in case of error fills err_msg with the error message which
          * can be further logged out
          */
-        int checkForMandatoryArgs(std::string &err_msg);
+        int checkForMandatoryArgs(std::string &errorMsg);
     };
 
 }

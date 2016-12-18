@@ -5,8 +5,8 @@ package cz.cuni.mff.d3s.distrace.examples;
  */
 public class Task extends Thread {
 
-    public String taskName;
-    public Task(String taskName) {
+    String taskName;
+    Task(String taskName) {
         this.taskName = taskName;
     }
 

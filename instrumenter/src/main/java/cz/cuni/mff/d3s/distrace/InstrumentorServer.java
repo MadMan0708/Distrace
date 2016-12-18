@@ -1,12 +1,12 @@
 package cz.cuni.mff.d3s.distrace;
 
+import cz.cuni.mff.d3s.distrace.api.Span;
 import cz.cuni.mff.d3s.distrace.api.TraceContext;
-import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentorClassLoader;
+import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
+import cz.cuni.mff.d3s.distrace.storage.JSONDiskSaver;
+import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
+import cz.cuni.mff.d3s.distrace.utils.*;
 import nanomsg.exceptions.IOException;
-import nanomsg.pair.PairSocket;
 import net.bytebuddy.implementation.LoadedTypeInitializer;
 import net.bytebuddy.utility.privilege.SetAccessibleAction;
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 public class InstrumentorServer {
@@ -25,12 +24,13 @@ public class InstrumentorServer {
     private static final byte REQ_TYPE_CHECK_HAS_CLASS = 2;
     private static final byte REQ_TYPE_REGISTER_BYTECODE = 3;
     private static final byte REQ_TYPE_PREP_CLASSES = 4;
-    private PairSocket sock;
+    private SocketWrapper sock;
     private String sockAddr;
     private ClassFileTransformer transformer;
     private CustomAgentBuilder builder;
     private InstrumentorClassLoader instLoader = new InstrumentorClassLoader();
     private String pathToClasses;
+
 
     InstrumentorServer(String sockAddr, CustomAgentBuilder builder, String pathToClasses) {
         this.sockAddr = sockAddr;
@@ -38,19 +38,34 @@ public class InstrumentorServer {
         this.pathToClasses = pathToClasses;
     }
 
+    private static Class[] helperClasses = {
+            Interceptor.class,
+            LoadedTypeInitializer.class,
+            LoadedTypeInitializer.Compound.class,
+            LoadedTypeInitializer.ForStaticField.class,
+            SetAccessibleAction.class,
+            InstrumentUtils.class,
+            TraceContextManager.class,
+            TraceContext.class,
+            Span.class,
+            SpanSaver.class,
+            JSONDiskSaver.class,
+            DirectZipkinSaver.class
+    };
+
 
     private void handleRegisterByteCode(){
-        byte[] classNameSlashes = sock.recvBytes();
-        String classNameDots = Utils.toNameWithDots(new String(classNameSlashes, StandardCharsets.UTF_8));
+        String classNameSlashes = sock.receiveString();
+        String classNameDots = Utils.toNameWithDots(classNameSlashes);
 
-        byte[] byteCode = sock.recvBytes();
+        byte[] byteCode = sock.receiveBytes();
         log.info("Registering bytecode for class " + classNameDots );
         instLoader.registerByteCode(classNameDots, byteCode);
     }
 
     private void handleHasClassCheck() {
-        byte[] classNameSlashes = sock.recvBytes();
-        String classNameDots = Utils.toNameWithDots(new String(classNameSlashes, StandardCharsets.UTF_8));
+        String classNameSlashes = sock.receiveString();
+        String classNameDots = Utils.toNameWithDots(classNameSlashes);
 
         log.info("Checking whether class is available " + classNameDots);
 
@@ -80,22 +95,16 @@ public class InstrumentorServer {
     private void sendClazz(Class clazz) throws java.io.IOException{
         byte[] bytes = Utils.getBytesForClass(clazz);
         sock.send(Utils.toNameWithSlashes(clazz.getName()));
-        sock.send(bytes.length + "");
+        sock.send(bytes.length);
         sock.send(bytes);
     }
 
     private void handleSentPrepClasses(){
         try {
-            sock.send(8 + ""); // number of classes to be instrumented
-            sendClazz(Interceptor.class);
-            sendClazz(LoadedTypeInitializer.class);
-            sendClazz(LoadedTypeInitializer.Compound.class);
-            sendClazz(LoadedTypeInitializer.ForStaticField.class);
-            sendClazz(SetAccessibleAction.class);
-            sendClazz(InstrumentUtils.class);
-            sendClazz(TraceContextManager.class);
-            sendClazz(TraceContext.class);
-
+            sock.send(helperClasses.length);
+            for(Class clazz: helperClasses){
+                sendClazz(clazz);
+            }
         } catch (java.io.IOException ignore) {
             assert false : " Can't never be here since we know this class is available and we know our class loader" +
                     "structure";
@@ -103,8 +112,8 @@ public class InstrumentorServer {
     }
 
     private void handleInstrument() {
-        byte[] classNameSlashes = sock.recvBytes();
-        String classNameDots = Utils.toNameWithDots(new String(classNameSlashes, StandardCharsets.UTF_8));
+        String classNameSlashes = sock.receiveString();
+        String classNameDots = Utils.toNameWithDots(classNameSlashes);
 
         // first look into cache and send the instrumented bytecode to the native agent
         if(byteCodeCache.containsKey(classNameDots)){
@@ -120,7 +129,7 @@ public class InstrumentorServer {
 
     private void sendByteCodeToAgent(byte[] transformed){
         if (transformed != null) { // the class was transformed
-            sock.send(transformed.length + ""); // send length of instrumented code
+            sock.send(transformed.length); // send length of instrumented code
             sock.send(transformed); // send instrumented bytecode
         }
     }
@@ -160,14 +169,13 @@ public class InstrumentorServer {
     }
 
     void start() {
-        sock = new PairSocket();
-        sock.bind(sockAddr);
+        sock = new SocketWrapper(sockAddr);
         transformer = builder.createAgent(new BaseAgentBuilder(sock, instLoader), pathToClasses).makeRaw();
         //noinspection InfiniteLoopStatement
         while (true) {
 
             try {
-                byte[] requestType = sock.recvBytes();
+                byte[] requestType = sock.receiveBytes();
                 assert requestType.length == 1;
                 byte req = requestType[0];
                 log.debug("Processing request of type " + req);

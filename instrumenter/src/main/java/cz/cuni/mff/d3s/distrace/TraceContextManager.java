@@ -13,7 +13,7 @@ public class TraceContextManager {
 
     public static TraceContext get(Thread thread){
         if(hasTraceContext(thread)){
-            return contexts.get(thread.getId());
+            return new TraceContext(contexts.get(thread.getId())); // we need to return new object
         }else{
             return null;
         }
