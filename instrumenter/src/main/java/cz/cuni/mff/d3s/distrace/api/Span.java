@@ -30,18 +30,18 @@ public class Span implements Serializable{
         this.traceId = traceId;
         this.parentSpanId = 0; // parent span ID = 0 means no parent span ID
         this.spanId = traceId;
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = System.nanoTime() / 1000;
     }
 
     private Span(long traceId, long parentSpanId) {
         this.traceId = traceId;
         this.spanId = parentSpanId + 1;
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = System.nanoTime() / 1000;
         this.parentSpanId = parentSpanId;
     }
 
     public void store(){
-        duration = System.currentTimeMillis() - timestamp;
+        duration = System.nanoTime() / 1000 - timestamp / 1000;
         saver.saveSpan(this);
     }
     public long getParentSpanId(){
