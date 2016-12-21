@@ -1,6 +1,5 @@
 package cz.cuni.mff.d3s.distrace.utils;
 
-import com.sun.management.jmx.Trace;
 import cz.cuni.mff.d3s.distrace.TraceContextManager;
 import cz.cuni.mff.d3s.distrace.api.Span;
 import cz.cuni.mff.d3s.distrace.api.TraceContext;

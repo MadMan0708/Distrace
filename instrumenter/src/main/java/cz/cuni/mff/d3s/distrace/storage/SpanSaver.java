@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.distrace.storage;
 
 import cz.cuni.mff.d3s.distrace.api.Span;
 
+
 public abstract class SpanSaver {
 
     public abstract void saveSpan(Span span);

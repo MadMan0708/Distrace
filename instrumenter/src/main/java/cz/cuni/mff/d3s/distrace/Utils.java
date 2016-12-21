@@ -2,16 +2,14 @@ package cz.cuni.mff.d3s.distrace;
 
 import com.rits.cloning.Cloner;
 import com.rits.cloning.ObjenesisInstantiationStrategy;
+import cz.cuni.mff.d3s.distrace.utils.ClassServiceLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.reflections.Reflections;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Various helper methods
@@ -20,24 +18,21 @@ public class Utils {
     private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
 
 
-    public static Map<String, byte[]> getInterceptorByteCodes(){
-        // discover all interceptors
-
-        Reflections reflections = new Reflections();
-        Set<Class<? extends Interceptor>> classes = reflections.getSubTypesOf(Interceptor.class);
-
+    private static Map<String, byte[]> getByteCodesFor(ArrayList<Class<?>> classes){
         Map<String, byte[]> byteCodes = new HashMap<>();
-        log.info("Discovering interceptor classes");
         for(Class cls: classes){
-            log.info("Found interceptor class: " + cls);
             InputStream inputStream = cls.getResourceAsStream("/"+cls.getName().replace(".","/")+".class");
             try {
                 byteCodes.put(Utils.toNameWithSlashes(cls.getName()), toByteArray(inputStream));
             } catch (IOException ignore) {
-               // this should never happen
+                throw new RuntimeException("Class " + cls + " should be always available!");
             }
         }
         return byteCodes;
+    }
+
+    public static Map<String, byte[]> getInterceptorByteCodes(){
+        return getByteCodesFor(ClassServiceLoader.load(Interceptor.class));
     }
 
     public static String toNameWithDots(String name){

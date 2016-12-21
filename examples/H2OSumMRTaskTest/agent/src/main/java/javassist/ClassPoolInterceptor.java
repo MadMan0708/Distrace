@@ -1,10 +1,12 @@
 package javassist;
 
+import com.google.auto.service.AutoService;
 import cz.cuni.mff.d3s.distrace.Interceptor;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 
-public class ClassPoolInterceptor implements Interceptor{
+@AutoService(Interceptor.class)
+public class ClassPoolInterceptor implements Interceptor {
 
     private boolean alreadyInserted = false;
     private String pathToInstrumentedClasses;
