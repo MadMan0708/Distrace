@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class InstrumentorServer {
@@ -49,10 +50,11 @@ public class InstrumentorServer {
             TraceContext.class,
             Span.class,
             SpanSaver.class,
-            JSONDiskSaver.class,
-            DirectZipkinSaver.class
+            DirectZipkinSaver.class,
+            JSONDiskSaver.class
     };
 
+    private static ArrayList<Class<?>> saverClasses = ClassServiceLoader.load(SpanSaver.class);
 
     private void handleRegisterByteCode(){
         String classNameSlashes = sock.receiveString();
@@ -101,8 +103,11 @@ public class InstrumentorServer {
 
     private void handleSentPrepClasses(){
         try {
-            sock.send(helperClasses.length);
+            sock.send(helperClasses.length + saverClasses.size());
             for(Class clazz: helperClasses){
+                sendClazz(clazz);
+            }
+            for(Class clazz: saverClasses){
                 sendClazz(clazz);
             }
         } catch (java.io.IOException ignore) {

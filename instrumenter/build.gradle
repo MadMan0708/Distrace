@@ -9,7 +9,6 @@ dependencies {
     compile 'net.bytebuddy:byte-buddy:1.5.3'
     compile 'net.bytebuddy:byte-buddy-agent:1.5.3'
     compile "jnanomsg:jnanomsg:0.4.3"
-    compile group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc2'
 
     // for deep cloning
     compile "uk.com.robust-it:cloning:1.9.3"

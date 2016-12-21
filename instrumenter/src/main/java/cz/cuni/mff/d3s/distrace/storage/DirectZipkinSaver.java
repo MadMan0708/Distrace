@@ -1,14 +1,12 @@
 package cz.cuni.mff.d3s.distrace.storage;
 
 
-import com.google.auto.service.AutoService;
 import cz.cuni.mff.d3s.distrace.api.Span;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-@AutoService(SpanSaver.class)
 public class DirectZipkinSaver extends SpanSaver {
 
     private String serverIpPort;
