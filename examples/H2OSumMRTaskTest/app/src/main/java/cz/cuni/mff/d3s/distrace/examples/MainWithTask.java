@@ -17,10 +17,10 @@ public class MainWithTask {
         // Start h2o node
         H2OApp.main(args);
         // Wait for rest of the cloud, for 10 seconds max
-        H2O.waitForCloudSize(3, 10000);
+        H2O.waitForCloudSize(2, 10000);
 
         // Create frame with numbers we want to count
-        Vec numVec = Vec.makeSeq(2, 100000);
+        Vec numVec = Vec.makeSeq(3, 100000);
         Frame frame = new Frame(numVec);
         System.out.println("Number of chunks on frame: " + frame.anyVec().nChunks());
         System.out.println("Frame distributed on nodes:");

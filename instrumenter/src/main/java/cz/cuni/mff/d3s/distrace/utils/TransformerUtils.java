@@ -14,6 +14,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 
 public class TransformerUtils {
@@ -35,17 +36,20 @@ public class TransformerUtils {
         };
     }
 
-    public static DynamicType.Builder<?> forMethodsInInterceptor(DynamicType.Builder<?> builder, Interceptor interceptor){
+    public static DynamicType.Builder<?> forMethodsInInterceptor(DynamicType.Builder<?> builder, Interceptor interceptor, String[] ignore){
         Method[] declaredMethods = interceptor.getClass().getDeclaredMethods();
 
         String[] methodNames = new String[declaredMethods.length];
         for(int i = 0; i<declaredMethods.length; i++){
             // don't take static method into account - they are usually advice methods
-            if(!Modifier.isStatic(declaredMethods[i].getModifiers())) {
+            if(!Modifier.isStatic(declaredMethods[i].getModifiers()) && !Arrays.asList(ignore).contains(methodNames[i])) {
                 methodNames[i] = declaredMethods[i].getName();
             }
         }
         return forMethods(builder, methodNames, interceptor);
+    }
+    public static DynamicType.Builder<?> forMethodsInInterceptor(DynamicType.Builder<?> builder, Interceptor interceptor){
+        return forMethodsInInterceptor(builder, interceptor, new String[]{});
     }
 
     private static DynamicType.Builder<?> forMethods(DynamicType.Builder<?> builder, String[] methods, Interceptor interceptor){

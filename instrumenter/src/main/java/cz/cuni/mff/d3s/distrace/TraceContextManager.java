@@ -13,7 +13,7 @@ public class TraceContextManager {
 
     public static TraceContext get(Thread thread){
         if(hasTraceContext(thread)){
-            return new TraceContext(contexts.get(thread.getId())); // we need to return new object
+            return contexts.get(thread.getId()); // we need to return new object
         }else{
             return null;
         }
@@ -26,6 +26,13 @@ public class TraceContextManager {
     public static TraceContext getOrCreate(Thread thread, TraceContext context){
         if(!hasTraceContext(thread)){
             registerTraceContext(thread, context);
+        }
+        return get(thread);
+    }
+
+    public static TraceContext getOrCreate(Thread thread){
+        if(!hasTraceContext(thread)){
+            registerTraceContext(thread, new TraceContext());
         }
         return get(thread);
     }
