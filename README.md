@@ -99,3 +99,36 @@ Available examples so far:
 
 * SimpleTest - this examples only creates new instance of class and instrumentor does simple instrumentation. It adds 
 additional print statement to the method.
+
+
+## Developing your own instrumentation library
+
+In order to develop custom instrumentation library based on Distrace you need to
+
+1) Download distrace native agent for your platform or run build it using this gradle project
+
+2) Create java project and include ditrace-instrumenter as a compile dependency
+
+3) Code it!
+-  In order to be able to use custom interceptors and savers, the interceptors have to implement Interceptor interface and
+   have to be specified as implementation for Interceptor service in order to be able to load them using our
+   ServiceLoader mechanism.
+     There are 2 ways how to do it. First is to create META-INF/services entries manually or better way
+   is to use AutoService library, add it as a compile dependency into your project and annotate all of your
+   Interceptors with an AutoService annotation. AutoService library will generate all entries in META-INF/services automatically
+   for us.
+   
+-  Create main method in which you start the InstrumentorServer. Pls see one of the examples how it's done.
+      
+-  You can include your application classes as dependency too and use them to build more complex transformers 
+   and interceptors. This will also have a positive performance impact as the classes won't need to be send to the instrumentor at runtime from your application. 
+
+5) Package your instrumentor as one fat jar with distrace-instrumenter and all other dependencies.
+    You can package your instrumentor also with application classes. 
+
+6) Run your application as
+java -agentpath:$AGENT_ARGS -jar app.jar
+
+where arguments can be:
+
+
