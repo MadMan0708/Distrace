@@ -42,7 +42,7 @@ echo
 # For testing purposes we always expect main class to be this one
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
-LOG_LEVEL="off"
+LOG_LEVEL="error"
 CONNECTION_STR="ipc"
 INSTRUMETOR_CP="$APP_JAR_PATH"
 SAVER="directZipkin(localhost:9411)"
