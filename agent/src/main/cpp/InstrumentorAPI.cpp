@@ -10,6 +10,7 @@
 #include <nnxx/pair.h>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
+#include <iostream>
 #include "InstrumentorAPI.h"
 #include "utils/Utils.h"
 #include "Agent.h"
@@ -136,8 +137,7 @@ std::vector<std::pair<unsigned char *, int>> InstrumentorAPI::getInitializersFor
 }
 
 void InstrumentorAPI::saveClassOnDisk(std::string className, byte* classBytes, int classBytesLength){
-    std::vector<std::string> tokens;
-    boost::split(tokens, className, boost::is_any_of("/"), boost::token_compress_on);
+    std::vector<std::string> tokens = Utils::splitString(className, "/", Utils::token_compress_on);
     auto fullName = tokens.back() + ".class";
     tokens.pop_back();
 
@@ -396,7 +396,7 @@ bool InstrumentorAPI::isIgnoredClass(std::string className){
 
 bool InstrumentorAPI::isInIgnoredPackage(std::string className) {
     for(std::vector<std::string>::iterator it = ignoredPackages.begin(); it != ignoredPackages.end(); ++it) {
-        if(boost::starts_with(className, *it)){
+        if(Utils::startsWith(className, *it)){
             return true;
         }
     }

@@ -3,7 +3,6 @@
 //
 
 #include <string>
-#include <boost/algorithm/string.hpp>
 #include <jni.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
@@ -46,9 +45,9 @@ void AgentArgs::connectionStrToNanomsgAddr(){
     std::string connectionStr = getArgValue(ARG_CONNECTION_STR);
     // this function expects already validated connectionStr
     if(connectionStr=="ipc"){
-        connectionStr = "ipc://"+ Utils::createUniqueTempDir()+boost::filesystem::unique_path().string();
+        connectionStr = "ipc://" + Utils::createUniqueTempDir() + boost::filesystem::unique_path().string();
     }else{
-        connectionStr = "tcp://"+connectionStr;
+        connectionStr = "tcp://" + connectionStr;
     }
     args[ARG_CONNECTION_STR] = connectionStr;
 }
@@ -87,13 +86,13 @@ int AgentArgs::validateLogLevel(std::string &errorMsg){
 int AgentArgs::validateSaverType(std::string &errorMsg){
     if(isArgSet(ARG_SAVER_TYPE)){
         auto saverType = getArgValue(ARG_SAVER_TYPE);
-        if(boost::starts_with(saverType, "directZipkin")){
+        if(Utils::startsWith(saverType, "directZipkin")){
             std::regex re("^directZipkin\\(.*:\\d{1,5}\\)");
             if(!std::regex_match(saverType.begin(), saverType.end(), re)){
                 errorMsg = "Wrong format of directZipkin saver type \"" + saverType + "\". It should be specified as directZipkin(ip:port)";
                 return JNI_ERR;
             }
-        }else if(boost::starts_with(saverType, "disk")){
+        }else if(Utils::startsWith(saverType, "disk")){
             std::regex re("^disk\\(.*\\)");
             if(!std::regex_match(saverType.begin(), saverType.end(), re)){
                 errorMsg = "Wrong format of disk saver type \"" + saverType + "\". It should be specified as disk(path)";
@@ -177,13 +176,12 @@ int AgentArgs::parse_args(std::string options, std::string &errorMsg) {
     // logged using the properly set up logger
 
     // first split to arguments pairs
-    std::vector<std::string> pairs;
-    boost::split(pairs, options, boost::is_any_of(";"), boost::token_compress_on);
+    std::vector<std::string> pairs = Utils::splitString(options, ";", Utils::token_compress_on);
+
     for(int i = 0; i < pairs.size(); i++) {
         // Skip the empty pairs. For example, empty string is added to pairs vector of options ends with ;
         if (!pairs[i].empty()) {
-            std::vector<std::string> splits;
-            boost::split(splits, pairs[i], boost::is_any_of("="));
+            std::vector<std::string> splits = Utils::splitString(pairs[i], "=");
 
             if(splits.size() != 2) {
                 // it means the argument line does not match the pattern name1=value1;name2=value2
@@ -213,5 +211,5 @@ int AgentArgs::parse_args(std::string options, std::string &errorMsg) {
 }
 
 bool AgentArgs::isRunningInLocalMode(){
-    return boost::starts_with(getArgValue(ARG_CONNECTION_STR), "ipc");
+    return Utils::startsWith(getArgValue(ARG_CONNECTION_STR), "ipc");
 }

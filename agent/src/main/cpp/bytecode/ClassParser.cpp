@@ -2,10 +2,10 @@
 // Created by Jakub Háva on 24/10/2016.
 //
 
-#include <boost/algorithm/string.hpp>
 #include "ClassParser.h"
 #include "JavaConst.h"
 #include "../utils/JavaUtils.h"
+#include "../utils/Utils.h"
 
 
 using namespace Logging;
@@ -75,8 +75,8 @@ void ClassParser::readInterfaces(){
 
 
 std::string ClassParser::classNameFromSignature(std::string typeSignature){
-    if(boost::starts_with(typeSignature, "L")){
-        std::string trimmed = typeSignature.substr(1, typeSignature.length()-2); // remove leading L and ; and the end
+    if(Utils::startsWith(typeSignature, "L")){
+        std::string trimmed = typeSignature.substr(1, typeSignature.length() - 2); // remove leading L and ; and the end
         return trimmed;
     }else{
         return "";
@@ -131,8 +131,7 @@ void ClassParser::readMethods(){
         // splits[0] is empty string  - we cut off first parentheses
         // splits[1] are arguments type signatures
         // splits[2] is return type signature
-        std::vector<std::string> splits;
-        boost::split(splits, signature, boost::is_any_of("()"));
+        std::vector<std::string> splits = Utils::splitString(signature, "()");
 
         parseAndSaveArguments(splits[1]);
         std::string ref = classNameFromSignature(splits[2]);
