@@ -8,6 +8,7 @@ import cz.cuni.mff.d3s.distrace.utils.ReflectionUtils;
 import cz.cuni.mff.d3s.distrace.utils.TransformerUtils;
 import javassist.ClassPool;
 import javassist.ClassPoolInterceptor;
+import jsr166y.ForkJoinPool;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
@@ -15,6 +16,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatchers;
 import water.*;
 import water.fvec.Frame;
+import water.jsr166y.ForkJoinPoolAdvice;
 
 import java.lang.reflect.Method;
 
@@ -56,6 +58,14 @@ public class Starter {
                             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
 
                                 return  builder.visit(Advice.to(H2OAdvices.submitTask.class).on(named("submitTask")));
+                            }
+                        })
+                        .type(is(ForkJoinPool.class))
+                        .transform(new AgentBuilder.Transformer() {
+                            @Override
+                            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
+
+                                return  builder.visit(Advice.to(ForkJoinPoolAdvice.poll.class).on(named("poll")));
                             }
                         });
             }
