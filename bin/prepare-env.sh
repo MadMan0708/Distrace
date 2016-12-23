@@ -8,8 +8,10 @@ VERSION=$( cat $TOPDIR/gradle.properties | grep version | grep -v '#' | sed -e "
 ATTACHER_JAR_NAME="distrace-agent-attacher-$VERSION.jar"
 ATTACHER_JAR_FILE="$TOPDIR/agent-attacher/build/libs/$ATTACHER_JAR_NAME"
 
-NATIVE_AGENT_LIB_NAME="lib-distrace-agent.dylib"
-NATIVE_AGENT_LIB_PATH="$TOPDIR/agent/build/$NATIVE_AGENT_LIB_NAME"
+NATIVE_AGENT_LIB_DIR="$TOPDIR/agent/build"
+
+NATIVE_AGENT_LIB_NAME=`basename $(ls $NATIVE_AGENT_LIB_DIR/lib-distrace-agent.*)`
+NATIVE_AGENT_LIB_PATH="$NATIVE_AGENT_LIB_DIR/$NATIVE_AGENT_LIB_NAME"
 
 
 SERVER_JAR_NAME="distrace-examples-$EXAMPLE_NAME-agent-$VERSION-all.jar"
