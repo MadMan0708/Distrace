@@ -9,7 +9,7 @@ printExamples () {
     echo
 }
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -le 0 ]; then
     echo "Example name is mandatory argument!"
     printExamples
     exit
