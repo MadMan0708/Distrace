@@ -40,14 +40,13 @@ echo "App JAR               : $APP_JAR_PATH"
 echo "Instrumentor lib JAR  : $SERVER_JAR_PATH"
 echo
 
-
 # For testing purposes we always expect main class to be this one
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
 LOG_LEVEL="error"
 CONNECTION_STR="ipc"
 INSTRUMETOR_CP="$APP_JAR_PATH"
-SAVER="directZipkin(localhost:9411)"
+SAVER="directZipkin(${ZIPKIN_IP:-localhost}:9411)"
 
 echo
 echo "Using following agent arguments:"
