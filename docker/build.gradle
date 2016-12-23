@@ -1,0 +1,97 @@
+apply plugin: 'base'
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+import org.apache.tools.ant.taskdefs.condition.Os
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+defaultTasks 'createDockerFile'
+description = "Distrace Docker Support"
+
+ext {
+    docker_file = file('distrace/base/Dockerfile')
+}
+
+task createDockerfile(type: Dockerfile) {
+    destFile = docker_file
+    from 'ubuntu:yakkety'
+
+    maintainer """Jakub Hava"""
+
+    // Install Java 8
+    runCommand """\\
+                |   apt-get -q -y update && \\
+                |   apt-get -y install software-properties-common && \\
+                |   add-apt-repository ppa:webupd8team/java && \\
+                |   apt-get -q -y update && \\
+                |   ( echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections ) && \\
+                |   apt-get -y install oracle-java8-installer && \\
+                |   apt-get -y install oracle-java8-set-default && \\
+                |   apt-get clean
+               """.stripMargin()
+
+
+    environmentVariable "JAVA_HOME", "/usr/lib/jvm/java-8-oracle"
+
+    runCommand "apt-get -y install git"
+
+    runCommand "apt-get -y install cmake"
+    runCommand "apt-get -y install gcc g++"
+    runCommand "apt-get -y install libboost-all-dev"
+
+    // clone, build and install nanomsg
+    runCommand "git clone https://github.com/nanomsg/nanomsg.git /opt/nanomsg"
+    workingDir "/opt/nanomsg"
+    runCommand "git checkout tags/1.0.0" // stable release
+    runCommand """\\
+                 |    mkdir build && \\
+                 |    cd build && \\
+                 |    cmake .. && \\
+                 |    cmake --build . && \\
+                 |    cmake --build . --target install
+                """.stripMargin()
+    runCommand "ldconfig"
+
+    // clone, build and install nanomsgxx
+    runCommand "git clone https://github.com/achille-roussel/nanomsgxx.git /opt/nanomsgxx"
+    workingDir "/opt/nanomsgxx"
+    runCommand "git checkout tags/0.2" // stable release
+    runCommand """\\
+                | ./waf configure && \\
+                | ./waf build && \\
+                | ./waf install
+               """.stripMargin()
+    runCommand "ldconfig"
+
+    // Clone Distrace repo
+    runCommand """git clone https://github.com/jakubhava/Distrace.git /opt/distrace"""
+    workingDir "/opt/distrace"
+
+    // build the repo
+    runCommand """./gradlew build -x check"""
+
+
+}
+
+task buildDockerImage(type: Exec, dependsOn: createDockerfile){
+    commandLine getOsSpecificCommandLine(["docker", "build", "-t", "distrace-base", "distrace/base/"])
+}
+
+def getOsSpecificCommandLine(args) {
+    return isWindowsBased() ? ['cmd', '/c'] + args : args
+}
+
+def isWindowsBased(){
+    return Os.isFamily(Os.FAMILY_WINDOWS)
+}
+
+
+task cleanDockerfile(type: Delete) {
+    delete docker_file
+}
+
+//
+// Configure execution graph
+//
+build.dependsOn createDockerfile
+clean.dependsOn cleanDockerfile

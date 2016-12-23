@@ -30,3 +30,5 @@ logs
 .gradle
 
 build
+
+docker/distrace

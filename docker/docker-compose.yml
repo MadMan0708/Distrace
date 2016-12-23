@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  distrace:
+    stdin_open: true
+    tty: true
+    build: ./distrace/base
+    depends_on:
+      - zipkin
+    command: bin/run-test.sh ${EXAMPLE_NAME} zipkin
+    links:
+       - zipkin
+  zipkin:
+    image: "openzipkin/zipkin"
+    ports:
+      - "9411:9411"
+    networks:
+      - default
