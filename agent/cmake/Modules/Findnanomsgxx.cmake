@@ -22,7 +22,7 @@ find_path(NANOMSGXX_INCLUDE_DIR
         )
 
 find_library(NANOMSGXX_LIBRARY
-        NAMES libnnxx.dylib
+        NAMES nnxx
         HINTS ${NANOMSGXX_ROOT_DIR}/lib
         )
 
