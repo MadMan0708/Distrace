@@ -81,12 +81,16 @@ http://localhost:9411
 
 ## How to start examples
 The easiest way how to start examples is to use ./run-test.sh script in docker sub-project.
+Requirements: JDK 7 and higher and docker installed
 
 The docker image in which Distrace and all dependencies are set up can be created by calling
 ./gradlew buildDockerImage. The ./run-test.sh script is then used to start examples. The
 only argument to this script is example name.  This script is is actually using docker-compose to start 
 to docker containers - one with Distrace and the example and another docker container for Zipkin UI service
 where we can see visual output.
+
+In case of testing on windows, instead of using ./gradlew use gradle.bat script and instead of ./run-test.sh
+please use run-test.cmd batch script.
 
 Available examples so far:
 
@@ -95,6 +99,7 @@ Available examples so far:
 * SingleJVMCallbackTest - communication using callbacks
 * SingleJVMThreadTest - communication between different threads within one app 
 
+The traces are by default sent directly to Zipkin UI available on host machine on http://localhost:9411
 
 ## Developing your own instrumentation library
 
