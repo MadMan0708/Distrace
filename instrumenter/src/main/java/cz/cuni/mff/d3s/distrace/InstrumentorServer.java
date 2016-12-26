@@ -54,7 +54,7 @@ public class InstrumentorServer {
             JSONDiskSaver.class
     };
 
-    private static ArrayList<Class<?>> saverClasses = ClassServiceLoader.load(SpanSaver.class);
+    private static ArrayList<Class<?>> customSaverClasses = ClassServiceLoader.load(SpanSaver.class);
 
     private void handleRegisterByteCode(){
         String classNameSlashes = sock.receiveString();
@@ -103,11 +103,11 @@ public class InstrumentorServer {
 
     private void handleSentPrepClasses(){
         try {
-            sock.send(helperClasses.length + saverClasses.size());
+            sock.send(helperClasses.length + customSaverClasses.size());
             for(Class clazz: helperClasses){
                 sendClazz(clazz);
             }
-            for(Class clazz: saverClasses){
+            for(Class clazz: customSaverClasses){
                 sendClazz(clazz);
             }
         } catch (java.io.IOException ignore) {
