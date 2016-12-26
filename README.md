@@ -80,25 +80,20 @@ https://github.com/openzipkin/zipkin
 http://localhost:9411
 
 ## How to start examples
-There are several scripts which makes starting example programs and attaching agent to it simpler - they set the arguments
-and prepare the environment so the test scenarios can be started just using one call in shell.
+The easiest way how to start examples is to use ./run-test.sh script in docker sub-project.
 
-To start the example with the agent attached prior the application start run:
-```
-./bin/run_with_agent.sh EXAMPLE_NAME
-```
-
-To start the example and attach the agent at runtime:
-
-```
-./bin/run_without_agent.sh EXAMPLE_NAME # starts the application
-./bin/attach_agent_to_example.sh EXAMPLE_NAME # attach the agent to the application
-```
+The docker image in which Distrace and all dependencies are set up can be created by calling
+./gradlew buildDockerImage. The ./run-test.sh script is then used to start examples. The
+only argument to this script is example name.  This script is is actually using docker-compose to start 
+to docker containers - one with Distrace and the example and another docker container for Zipkin UI service
+where we can see visual output.
 
 Available examples so far:
 
-* SimpleTest - this examples only creates new instance of class and instrumentor does simple instrumentation. It adds 
-additional print statement to the method.
+* DependencyInstrTest - simple example demonstrating DependencyInstrTest ting instrumentation of dependant classes
+* H2OSumMRTaskTest  - example instrumenting and monitoring H2O's MR Tasks
+* SingleJVMCallbackTest - communication using callbacks
+* SingleJVMThreadTest - communication between different threads within one app 
 
 
 ## Developing your own instrumentation library
