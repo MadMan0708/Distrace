@@ -64,12 +64,10 @@ task createDockerfile(type: Dockerfile) {
 
     // Clone Distrace repo
 
+    // don't cache following actions - always fetch the latest master
+    addFile "https://github.com/jakubhava/Distrace/compare/master...HEAD", "/dev/null"
     runCommand """git clone https://github.com/jakubhava/Distrace.git /opt/distrace"""
     workingDir "/opt/distrace"
-
-    // don't cache following actions - always fetch the latest master
-    arg "CACHEBUST=1"
-    runCommand "git pull"
 
     // build the repo
     runCommand """./gradlew build -x check"""
