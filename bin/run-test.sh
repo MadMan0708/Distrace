@@ -29,6 +29,3 @@ else
     printExamples
 fi
 
-# this is here in order to keep docker-compose running even after the instrumented program has finished
-# in order to be able to see the collected data in zipkin UI
-sleep infinity
