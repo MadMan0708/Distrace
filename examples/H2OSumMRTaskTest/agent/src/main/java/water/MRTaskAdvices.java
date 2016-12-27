@@ -1,6 +1,5 @@
 package water;
 
-import cz.cuni.mff.d3s.distrace.api.Span;
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
 import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
 import net.bytebuddy.asm.Advice;
@@ -74,12 +73,6 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o, @Advice.Return RPC ret){
             if (o instanceof SumMRTask) {
-               // InstrumentUtils.getOrCreateTraceContext(o)
-                 //       .openNestedSpan("Remote Compute Job")
-                   //     .add("ipPort", H2O.getIpPortString());
-
-                // store span associated with this request
-                // start a new span here
                 if(ret == null){
                     InstrumentUtils.getCurrentSpan().add("target", "local node");
                     System.out.println("No remote work");

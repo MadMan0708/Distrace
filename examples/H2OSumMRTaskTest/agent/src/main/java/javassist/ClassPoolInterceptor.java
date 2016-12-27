@@ -5,6 +5,10 @@ import cz.cuni.mff.d3s.distrace.Interceptor;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 
+/**
+ * Interceptor used to instrument javassist classpath so instrumented classes have
+ * higher priority
+ */
 @AutoService(Interceptor.class)
 public class ClassPoolInterceptor implements Interceptor {
 
