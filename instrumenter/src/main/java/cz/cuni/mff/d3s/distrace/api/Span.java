@@ -24,9 +24,15 @@ public class Span implements Serializable{
     private long spanId;
     private long timestamp;
     private long duration;
+    private String serviceName;
     private String name = "Unknown";
     public Span setName(String name){
         this.name = name;
+        return this;
+    }
+
+    public Span setServiceName(String serviceName){
+        this.serviceName = serviceName;
         return this;
     }
 
@@ -79,7 +85,10 @@ public class Span implements Serializable{
     private String singleAnnotationAsJSON(String key, String value){
         return "{\n" +
                 "\"key\":\"" + key + "\",\n" +
-                "\"value\":\"" + value + "\"\n" +
+                "\"value\":\"" + value + "\",\n" +
+                "\"endpoint\":{\n" +
+                    "\"serviceName\":\"" + serviceName + "\"\n" +
+                    "}\n" +
                 "}\n";
     }
 
