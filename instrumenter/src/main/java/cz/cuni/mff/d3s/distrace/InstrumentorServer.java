@@ -51,11 +51,12 @@ public class InstrumentorServer {
             Span.class,
             SpanSaver.class,
             DirectZipkinSaver.class,
-            JSONDiskSaver.class
+            JSONDiskSaver.class,
+            DirectZipkinSaver.DirectZipkinSaverTask.class,
+            JSONDiskSaver.JSONDiskSaverTask.class
     };
 
-    private static ArrayList<Class<?>> customSaverClasses = ClassServiceLoader.load(SpanSaver.class);
-
+    private static ArrayList<Class<?>> customSaverClasses = Utils.getCustomSpanSaverClasses();
     private void handleRegisterByteCode(){
         String classNameSlashes = sock.receiveString();
         String classNameDots = Utils.toNameWithDots(classNameSlashes);

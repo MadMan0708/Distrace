@@ -59,8 +59,5 @@ echo "Extra server classpath  : $INSTRUMETOR_CP"
 echo "Saver type              : $SAVER"
 echo
 
-
-AGENT_ARGS="$NATIVE_AGENT_LIB_PATH=instrumentor_server_cp=$INSTRUMETOR_CP;saver=$SAVER;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_server_jar=$SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;connection_str=$CONNECTION_STR"
-
 # Remove previous logs
 rm -rf $LOG_DIR

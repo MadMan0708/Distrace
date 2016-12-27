@@ -98,9 +98,6 @@ int AgentArgs::validateSaverType(std::string &errorMsg){
                 errorMsg = "Wrong format of disk saver type \"" + saverType + "\". It should be specified as disk(path)";
                 return JNI_ERR;
             }
-        }else{
-            errorMsg = "Unknown saver type \"" + saverType + "\" !";
-            return JNI_ERR;
         }
     }
     return JNI_OK;

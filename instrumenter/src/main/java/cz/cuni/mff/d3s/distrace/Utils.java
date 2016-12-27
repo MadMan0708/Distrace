@@ -2,7 +2,9 @@ package cz.cuni.mff.d3s.distrace;
 
 import com.rits.cloning.Cloner;
 import com.rits.cloning.ObjenesisInstantiationStrategy;
+import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 import cz.cuni.mff.d3s.distrace.utils.ClassServiceLoader;
+import nanomsg.pair.PairSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,7 +18,6 @@ import java.util.*;
  */
 public class Utils {
     private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
-
 
     private static Map<String, byte[]> getByteCodesFor(ArrayList<Class<?>> classes){
         Map<String, byte[]> byteCodes = new HashMap<>();
@@ -33,6 +34,18 @@ public class Utils {
 
     public static Map<String, byte[]> getInterceptorByteCodes(){
         return getByteCodesFor(ClassServiceLoader.load(Interceptor.class));
+    }
+
+    public static ArrayList<Class<?>> getCustomSpanSaverClasses(){
+        ArrayList<Class<?>> nestedClasses = new ArrayList<>();
+        ArrayList<Class<?>> load = ClassServiceLoader.load(SpanSaver.class);
+        for(Class<?> clazz : load){
+            nestedClasses.addAll(Arrays.asList(clazz.getDeclaredClasses()));
+        }
+
+        load.addAll(nestedClasses);
+
+        return load;
     }
 
     public static String toNameWithDots(String name){

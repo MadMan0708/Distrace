@@ -66,6 +66,10 @@ public class Span implements Serializable{
         }
     }
 
+    public long getTimestamp(){
+        return timestamp;
+    }
+
     public Span getParentSpan(){
         return parentSpan;
     }
