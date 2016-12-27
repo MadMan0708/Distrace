@@ -11,7 +11,7 @@
 #include "AgentArgs.h"
 #include "utils/Logging.h"
 #include "utils/Utils.h"
-
+#include <fstream>
 
 using namespace Distrace;
 using namespace Distrace::Logging;
@@ -24,6 +24,7 @@ const std::string AgentArgs::ARG_CONNECTION_STR = "connection_str";
 const std::string AgentArgs::ARG_LOG_LEVEL = "log_level";
 const std::string AgentArgs::ARG_LOG_DIR = "log_dir";
 const std::string AgentArgs::ARG_SAVER_TYPE = "saver";
+const std::string AgentArgs::ARG_CONFIG_FILE = "config_file";
 
 std::map<std::string, std::string> AgentArgs::getArgsMap() {
     return args;
@@ -167,33 +168,70 @@ void AgentArgs::fillMissingWithDefaults(){
     }
 }
 
-int AgentArgs::parse_args(std::string options, std::string &errorMsg) {
-    // we cannot use logging in this method since some arguments may alter the logging sybsystem
-    // ( log level, log dir ). Therefore we parse arguments and return the message in a inout argument which can be
-    // logged using the properly set up logger
-
+int AgentArgs::splitArgumentPair(std::string pair, std::string &errorMsg){
+    // Skip the empty pairs. For example, empty string is added to pairs vector of options ends with ;
+    if (!pair.empty()) {
+        std::vector<std::string> splits = Utils::splitString(pair, "=");
+        if (splits.size() != 2) {
+            // it means the argument line does not match the pattern name1=value1;name2=value2
+            errorMsg = "Wrong argument pair:" + pair + ", arguments have to have format name=value";
+            return JNI_ERR;
+        } else {
+            auto previous = args.insert({splits[0], splits[1]});
+            if (!previous.second) {
+                errorMsg = "Argument " + splits[0] + " is already defined. Every argument can be defined only once. In case of the same argument is "
+                                                             "set on the command line and in the config file the command line argument has the precedence !";
+                return JNI_ERR;
+            }
+        }
+    }
+    return JNI_OK;
+}
+int AgentArgs::parseCLI(std::string options, std::string &errorMsg){
     // first split to arguments pairs
     std::vector<std::string> pairs = Utils::splitString(options, ";", Utils::token_compress_on);
 
     for(int i = 0; i < pairs.size(); i++) {
-        // Skip the empty pairs. For example, empty string is added to pairs vector of options ends with ;
-        if (!pairs[i].empty()) {
-            std::vector<std::string> splits = Utils::splitString(pairs[i], "=");
+        if(splitArgumentPair(pairs[i], errorMsg) == JNI_ERR){
+            return JNI_ERR;
+        }
+    }
+    return JNI_OK;
+}
 
-            if(splits.size() != 2) {
-                // it means the argument line does not match the pattern name1=value1;name2=value2
-                errorMsg = "Wrong argument pair:" + pairs[i] + ", arguments have to have format name=value";
+int AgentArgs::parseConfigFile(std::string &errorMsg){
+    if(isArgSet(ARG_CONFIG_FILE)){
+        // load config file into options string
+        std::ifstream file(getArgValue(ARG_CONFIG_FILE));
+        std::string line;
+        while (std::getline(file, line))
+        {
+            if(Utils::splitString(line, "=")[0] == ARG_CONFIG_FILE){
+                errorMsg = "config_file option can not be set inside the configuration file!";
                 return JNI_ERR;
-            } else {
-                auto previous = args.insert({splits[0], splits[1]});
-                if (!previous.second) {
-                    errorMsg = "Argument " + splits[0] + " is already defined. Arguments can be defined only once!";
-                    return JNI_ERR;
-                }
+            }
+
+            if(splitArgumentPair(line, errorMsg) == JNI_ERR){
+                return JNI_ERR;
             }
         }
     }
+    return JNI_OK;
+}
+int AgentArgs::parseArgs(std::string options, std::string &errorMsg) {
+    // we cannot use logging in this method since some arguments may alter the logging sybsystem
+    // ( log level, log dir ). Therefore we parse arguments and return the message in a inout argument which can be
+    // logged using the properly set up logger
 
+    if(parseCLI(options, errorMsg) == JNI_ERR){
+        return JNI_ERR;
+    }
+
+    // process options defined in config file
+    if(parseConfigFile(errorMsg) == JNI_ERR){
+        return JNI_ERR;
+    }
+    
     if(checkForMandatoryArgs(errorMsg) == JNI_ERR) {
         return JNI_ERR;
     }

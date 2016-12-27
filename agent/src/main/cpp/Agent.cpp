@@ -39,7 +39,7 @@ JNIEXPORT jint JNICALL Agent_OnAttach(JavaVM *vm, char *options, void *reserved)
 
     // parse the arguments before we do other work since other methods depends on valid arguments
     std::string err_msg;
-    int res = Agent::globalData->args->parse_args(options, err_msg);
+    int res = Agent::globalData->args->parseArgs(options, err_msg);
 
     // loggers has to be registered after the arguments has been parsed
     register_loggers();
@@ -68,7 +68,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *jvm, char *options, void *reserved) 
 
     // parse the arguments before we do other work since other methods depends on valid arguments
     std::string err_msg;
-    int res = Agent::globalData->args->parse_args(options, err_msg);
+    int res = Agent::globalData->args->parseArgs(options, err_msg);
 
     // loggers has to be registered after the arguments has been parsed
     register_loggers();

@@ -23,6 +23,7 @@ namespace Distrace {
         static const std::string ARG_LOG_LEVEL;
         static const std::string ARG_LOG_DIR;
         static const std::string ARG_SAVER_TYPE;
+        static const std::string ARG_CONFIG_FILE;
 
         /**
          * Get the internal arguments map
@@ -45,7 +46,7 @@ namespace Distrace {
          * This method takes two arguments -  options string to be parsed and err_msg which is filled
          * with the error message in case of problem during the parsing
          */
-        int parse_args(std::string options, std::string &errorMsg);
+        int parseArgs(std::string options, std::string &errorMsg);
 
         /**
          * Return true if we run in IPC mode ( local mode ), false otherwise
@@ -57,6 +58,21 @@ namespace Distrace {
          * Internal arguments holder where key = arg name, value = arg value
          */
         std::map<std::string, std::string> args;
+
+        /**
+         * Split argument pair into argument name and argument value and perform check whether the argument
+         * has already been set
+         */
+        int splitArgumentPair(std::string pair, std::string &errorMsg);
+        /**
+         * Split and set arguments passed on cli without any further checks for validity
+         */
+        int parseCLI(std::string options, std::string &errorMsg);
+
+        /**
+        * Split and set arguments passed via config file without any further checks for validity
+        */
+        int parseConfigFile(std::string &errorMsg);
 
         /**
          * Fill missing arguments with missing values

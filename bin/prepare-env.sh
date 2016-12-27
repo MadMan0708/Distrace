@@ -40,6 +40,8 @@ echo "App JAR               : $APP_JAR_PATH"
 echo "Instrumentor lib JAR  : $SERVER_JAR_PATH"
 echo
 
+# Default values for agent configuration. It can be overloaded in test scripts.
+
 # For testing purposes we always expect main class to be this one
 INSTRUMENTOR_MAIN_CLASS="cz.cuni.mff.d3s.distrace.examples.Starter"
 LOG_DIR="logs"
@@ -48,16 +50,20 @@ CONNECTION_STR="ipc"
 INSTRUMETOR_CP="$APP_JAR_PATH"
 SAVER="directZipkin(${ZIPKIN_IP:-localhost}:9411)"
 
-echo
-echo "Using following agent arguments:"
-echo
-echo "Instrumentor main class : $INSTRUMENTOR_MAIN_CLASS"
-echo "Socket address          : $CONNECTION_STR"
-echo "Log dir                 : $LOG_DIR"
-echo "Log level               : $LOG_LEVEL"
-echo "Extra server classpath  : $INSTRUMETOR_CP"
-echo "Saver type              : $SAVER"
-echo
 
-# Remove previous logs
-rm -rf $LOG_DIR
+finalize_configuration(){
+    # Remove previous logs
+    rm -rf $LOG_DIR
+    AGENT_ARGS="instrumentor_server_cp=$INSTRUMETOR_CP;saver=$SAVER;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_server_jar=$SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;connection_str=$CONNECTION_STR"
+
+    echo
+    echo "Using following agent arguments:"
+    echo
+    echo "Instrumentor main class : $INSTRUMENTOR_MAIN_CLASS"
+    echo "Socket address          : $CONNECTION_STR"
+    echo "Log dir                 : $LOG_DIR"
+    echo "Log level               : $LOG_LEVEL"
+    echo "Extra server classpath  : $INSTRUMETOR_CP"
+    echo "Saver type              : $SAVER"
+    echo
+}
