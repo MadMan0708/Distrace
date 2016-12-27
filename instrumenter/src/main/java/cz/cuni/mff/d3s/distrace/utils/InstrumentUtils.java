@@ -48,7 +48,7 @@ public class InstrumentUtils {
             f.setAccessible(true);
             return (TraceContext)f.get(thizz);
         } catch (IllegalAccessException | NoSuchFieldException e1) {
-            throw new RuntimeException("Trace ID field should be part of the class");
+            throw new RuntimeException("No such field " + traceIdFieldName + " field should be part of the class " + thizz.getClass());
         }
     }
 
