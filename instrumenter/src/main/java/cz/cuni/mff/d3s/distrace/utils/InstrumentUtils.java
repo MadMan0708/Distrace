@@ -84,6 +84,12 @@ public class InstrumentUtils {
         return TraceContextManager.get(Thread.currentThread());
     }
 
+    public static TraceContext createTraceContext(Object o) {
+        TraceContextManager.registerTraceContext(Thread.currentThread(), new TraceContext());
+        setTraceIdOn(o, TraceContextManager.get(Thread.currentThread()));
+        return TraceContextManager.get(Thread.currentThread());
+    }
+
     public static TraceContext getOrCreateTraceContext(Object o) {
         if(getTraceContextFrom(o) == null){
             if(TraceContextManager.get(Thread.currentThread()) == null) {

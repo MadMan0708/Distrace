@@ -40,7 +40,7 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
-                InstrumentUtils.getOrCreateTraceContext(o)
+                InstrumentUtils.createTraceContext(o)
                         .openNestedSpan(H2O.getIpPortString() + " : MR Task Main Span")
                         .add("ipPort", H2O.getIpPortString());
 
