@@ -64,8 +64,8 @@ task createDockerfile(type: Dockerfile) {
 
     // Clone Distrace repo
 
-    // don't cache following actions - always fetch the latest master
-    addFile "https://github.com/jakubhava/Distrace/compare/master...HEAD", "/dev/null"
+    // clone the repo again only if there are new commits on the master branch
+    addFile "https://api.github.com/repos/jakubhava/distrace/compare/master...HEAD", "/dev/null"
     runCommand """git clone https://github.com/jakubhava/Distrace.git /opt/distrace"""
     workingDir "/opt/distrace"
 
