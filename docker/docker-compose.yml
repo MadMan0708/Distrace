@@ -4,13 +4,14 @@ services:
   distrace:
     stdin_open: true
     build: ./distrace/base
+    image: distrace/base
     depends_on:
       - zipkin
     command: bin/run-test.sh ${EXAMPLE_NAME} zipkin
     links:
        - zipkin
   zipkin:
-    image: "openzipkin/zipkin"
+    image: openzipkin/zipkin
     ports:
       - "9411:9411"
     networks:
