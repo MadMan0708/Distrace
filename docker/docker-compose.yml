@@ -3,7 +3,6 @@ version: '2'
 services:
   distrace:
     stdin_open: true
-    tty: true
     build: ./distrace/base
     depends_on:
       - zipkin
