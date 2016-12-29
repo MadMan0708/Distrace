@@ -5,8 +5,6 @@ import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 
 public class Span implements Serializable{
 
@@ -15,6 +13,96 @@ public class Span implements Serializable{
 
     static {
         saver = SpanSaver.fromString(getSaverType());
+    }
+
+    // The method jsonEscaped is based on
+    // https://github.com/openzipkin/zipkin/blob/master/zipkin/src/main/java/zipkin/internal/Buffer.java
+    // which is available under http://www.apache.org/licenses/LICENSE-2.0
+
+    /**
+     * From RFC 7159, "All Unicode characters may be placed within the
+     * quotation marks except for the characters that must be escaped:
+     * quotation mark, reverse solidus, and the control characters
+     * (U+0000 through U+001F)."
+     *
+     * We also escape '\u2028' and '\u2029', which JavaScript interprets as
+     * newline characters. This prevents eval() from failing with a syntax
+     * error. http://code.google.com/p/google-gson/issues/detail?id=341
+     */
+    private static final String[] REPLACEMENT_CHARS;
+
+    static {
+        REPLACEMENT_CHARS = new String[128];
+        for (int i = 0; i <= 0x1f; i++) {
+            REPLACEMENT_CHARS[i] = String.format("\\u%04x", (int) i);
+        }
+        REPLACEMENT_CHARS['"'] = "\\\"";
+        REPLACEMENT_CHARS['\\'] = "\\\\";
+        REPLACEMENT_CHARS['\t'] = "\\t";
+        REPLACEMENT_CHARS['\b'] = "\\b";
+        REPLACEMENT_CHARS['\n'] = "\\n";
+        REPLACEMENT_CHARS['\r'] = "\\r";
+        REPLACEMENT_CHARS['\f'] = "\\f";
+    }
+    private static final String U2028 = "\\u2028";
+    private static final String U2029 = "\\u2029";
+
+
+    String jsonEscaped(String v) {
+        int afterReplacement = 0;
+        int length = v.length();
+        StringBuilder builder = null;
+        for (int i = 0; i < length; i++) {
+            char c = v.charAt(i);
+            String replacement;
+            if (c < 0x80) {
+                replacement = REPLACEMENT_CHARS[c];
+                if (replacement == null) continue;
+            } else if (c == '\u2028') {
+                replacement = U2028;
+            } else if (c == '\u2029') {
+                replacement = U2029;
+            } else {
+                continue;
+            }
+            if (afterReplacement < i) { // write characters between the last replacement and now
+                if (builder == null) builder = new StringBuilder();
+                builder.append(v, afterReplacement, i);
+            }
+            if (builder == null) builder = new StringBuilder();
+            builder.append(replacement);
+            afterReplacement = i + 1;
+        }
+        if (builder == null) { // then we didn't escape anything
+            return v;
+        }
+        if (afterReplacement < length) {
+            builder.append(v, afterReplacement, length);
+        }
+        return builder.toString();
+    }
+
+
+    private String getStackTrace(Thread thread){
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+
+        // skip first 4 elements since they contain always calls to method getStackTrace an the rest of span related
+        // calls
+        StackTraceElement[] elements = thread.getStackTrace();
+        for(int i = 4; i<elements.length; i++){
+            sb.append("\"").append(elements[i].toString()).append("\"");
+            sb.append(",");
+        }
+        // remove tailing delimiter
+        sb.setLength(sb.length() - 1);
+        sb.append("]");
+
+        return sb.toString();
+    }
+
+    public void setStackTrace(Thread thread){
+        binaryAnnotations.put("stacktrace", getStackTrace(thread));
     }
 
     private static native String getSaverType();
@@ -89,7 +177,7 @@ public class Span implements Serializable{
     private String singleAnnotationAsJSON(String key, String value){
         return "{\n" +
                 "\"key\":\"" + key + "\",\n" +
-                "\"value\":\"" + value + "\",\n" +
+                "\"value\":\"" + jsonEscaped(value) + "\",\n" +
                 "\"endpoint\":{\n" +
                     "\"serviceName\":\"" + serviceName + "\"\n" +
                     "}\n" +

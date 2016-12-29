@@ -1,7 +1,5 @@
 package cz.cuni.mff.d3s.distrace.api;
 
-import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Random;
@@ -62,6 +60,7 @@ public class TraceContext implements Serializable{
                nextSpanId = nextSpanId + 1;
                span = Span.newNestedSpan(traceId, span, name, nextSpanId);
            }
+           span.setStackTrace(Thread.currentThread());
            System.out.println("Opening span, trace id" + traceId + " span id" + span.getSpanId() + " thread id " + Thread.currentThread().getId() + " TraceContext" + this);
 
            return span;
