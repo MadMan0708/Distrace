@@ -1,9 +1,11 @@
 package cz.cuni.mff.d3s.distrace.json;
 
+import java.io.Serializable;
+
 /**
  * This class represents all JSON types - JSON literal, number, string, object and array
  */
-public abstract class JSONValue {
+public abstract class JSONValue implements Serializable {
 
     public String toJSONString(){
         JSONStringBuilder writer = new JSONStringBuilder();
