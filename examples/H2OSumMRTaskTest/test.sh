@@ -11,7 +11,6 @@ finalize_configuration
 
 # First start h2o nodes with agents attached to them
 java -agentpath:"$NATIVE_AGENT_LIB_PATH=$AGENT_ARGS" -jar $APP_JAR_PATH -name kuba_cluster &
-java -agentpath:"$NATIVE_AGENT_LIB_PATH=$AGENT_ARGS" -jar $APP_JAR_PATH -name kuba_cluster &
 
 # Start h2o node which starts the MRTask
 java -agentpath:"$NATIVE_AGENT_LIB_PATH=$AGENT_ARGS" -cp $APP_JAR_PATH "cz.cuni.mff.d3s.distrace.examples.MainWithTask" -name kuba_cluster
