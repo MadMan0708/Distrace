@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import cz.cuni.mff.d3s.distrace.api.Span;
 import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
+import water.H2O;
 
 @AutoService(SpanSaver.class)
 public class H2OSpanSaver extends DirectZipkinSaver {
@@ -14,6 +15,7 @@ public class H2OSpanSaver extends DirectZipkinSaver {
 
     @Override
     public void saveSpan(Span span) {
-        submitSpanTask(new DirectZipkinSaverTask(span.setServiceName("MRTask")));
+        span.setIpPort(H2O.getIpPortString()).setServiceName("MRTask");
+        submitSpanTask(new DirectZipkinSaverTask(span));
     }
 }

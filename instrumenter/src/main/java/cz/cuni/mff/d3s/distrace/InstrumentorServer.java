@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.distrace;
 
 import cz.cuni.mff.d3s.distrace.api.Span;
 import cz.cuni.mff.d3s.distrace.api.TraceContext;
+import cz.cuni.mff.d3s.distrace.json.*;
 import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
 import cz.cuni.mff.d3s.distrace.storage.JSONDiskSaver;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
@@ -56,6 +57,17 @@ public class InstrumentorServer {
             JSONDiskSaver.JSONDiskSaverTask.class
     };
 
+    private static Class[] jsonClasses = {
+            JSON.class,
+            JSONArray.class,
+            JSONLiteral.class,
+            JSONNumber.class,
+            JSONObject.class,
+            JSONString.class,
+            JSONValue.class,
+            JSONStringBuilder.class
+    };
+
     private static ArrayList<Class<?>> customSaverClasses = Utils.getCustomSpanSaverClasses();
     private void handleRegisterByteCode(){
         String classNameSlashes = sock.receiveString();
@@ -104,11 +116,14 @@ public class InstrumentorServer {
 
     private void handleSentPrepClasses(){
         try {
-            sock.send(helperClasses.length + customSaverClasses.size());
+            sock.send(helperClasses.length + customSaverClasses.size() + jsonClasses.length);
             for(Class clazz: helperClasses){
                 sendClazz(clazz);
             }
             for(Class clazz: customSaverClasses){
+                sendClazz(clazz);
+            }
+            for(Class clazz: jsonClasses){
                 sendClazz(clazz);
             }
         } catch (java.io.IOException ignore) {
