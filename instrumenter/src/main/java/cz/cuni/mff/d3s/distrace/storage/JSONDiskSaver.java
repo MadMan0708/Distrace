@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.distrace.storage;
 
-import cz.cuni.mff.d3s.distrace.api.Span;
+import cz.cuni.mff.d3s.distrace.tracing.Span;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,8 +30,8 @@ public class JSONDiskSaver extends SpanSaver {
         }
         @Override
         public void run() {
-            try(PrintWriter out = new PrintWriter(new File(path, span.getTimestamp()+".json"))){
-                out.write(span.toJSON());
+            try(PrintWriter out = new PrintWriter(new File(path, span.getTimestamp() + ".json"))){
+                out.write(span.toJSON().toString());
             } catch (FileNotFoundException e) {
                 // span couldn't be saved to disk
                 e.printStackTrace();

@@ -19,9 +19,19 @@ namespace Distrace {
     public:
 
         /**
+         * Create JNINative Method
+         */
+        static JNINativeMethod toNative(std::string name, std::string signature, void* method);
+
+        /**
          * Get storage type from the arguments
          */
         static jstring getSaverType(JNIEnv *jni, jobject thiz);
+
+        /**
+         * Returns true if the agent is running in debugging mode
+         */
+        static jboolean isDebugging(JNIEnv *jni, jobject thiz);
 
         /**
         * List of all native methods we defined

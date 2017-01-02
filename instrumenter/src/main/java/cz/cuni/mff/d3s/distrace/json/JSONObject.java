@@ -14,7 +14,7 @@ public class JSONObject extends JSONValue {
      * Create empty JSON object
      */
     public JSONObject() {
-        values = new HashMap<>();
+        values = new LinkedHashMap<>();
     }
 
     public JSONObject add(String name, int value) {
@@ -97,7 +97,7 @@ public class JSONObject extends JSONValue {
             e.getValue().write(writer);
             writer.appendObjectSeparator();
         }
-        writer.removeTrailingSeparator();
+        writer.removeSingleTrailingChar();
         writer.appendObjectClose();
     }
 }

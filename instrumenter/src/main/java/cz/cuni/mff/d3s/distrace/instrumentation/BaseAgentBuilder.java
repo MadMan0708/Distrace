@@ -1,7 +1,7 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.instrumentation;
 
-import cz.cuni.mff.d3s.distrace.Utils;
-import nanomsg.pair.PairSocket;
+import cz.cuni.mff.d3s.distrace.utils.SocketWrapper;
+import cz.cuni.mff.d3s.distrace.utils.Utils;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -19,7 +19,6 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

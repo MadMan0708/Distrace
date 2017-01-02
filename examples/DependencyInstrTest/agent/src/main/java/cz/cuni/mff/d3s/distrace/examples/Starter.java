@@ -1,9 +1,9 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
 import cz.cuni.mff.d3s.distrace.Instrumentor;
-import cz.cuni.mff.d3s.distrace.utils.BaseAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
-import cz.cuni.mff.d3s.distrace.utils.TransformerUtils;
+import cz.cuni.mff.d3s.distrace.instrumentation.BaseAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.TransformerUtils;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;

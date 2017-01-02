@@ -5,7 +5,7 @@ package cz.cuni.mff.d3s.distrace.json;
  */
 public class JSONStringBuilder {
 
-    private final StringBuilder sb;
+    protected final StringBuilder sb;
 
     JSONStringBuilder() {
         sb = new StringBuilder();
@@ -46,10 +46,11 @@ public class JSONStringBuilder {
         return this;
     }
 
-    JSONStringBuilder removeTrailingSeparator(){
+    JSONStringBuilder removeSingleTrailingChar(){
         sb.setLength(sb.length() - 1);
         return this;
     }
+
     JSONStringBuilder appendObjectOpen() {
         sb.append('{');
         return this;

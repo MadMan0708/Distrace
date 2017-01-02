@@ -60,7 +60,7 @@ public class JSONArray extends JSONValue {
             value.write(writer);
             writer.appendArraySeparator();
         }
-        writer.removeTrailingSeparator();
+        writer.removeSingleTrailingChar();
         writer.appendArrayClose();
     }
 }

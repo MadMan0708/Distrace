@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
-import cz.cuni.mff.d3s.distrace.api.TraceContext;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 

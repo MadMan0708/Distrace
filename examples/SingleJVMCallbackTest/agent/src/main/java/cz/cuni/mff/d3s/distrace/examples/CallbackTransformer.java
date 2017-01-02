@@ -1,13 +1,9 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
-import cz.cuni.mff.d3s.distrace.api.TraceContext;
-import cz.cuni.mff.d3s.distrace.transformers.BaseTransformer;
-import net.bytebuddy.description.NamedElement;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
+import cz.cuni.mff.d3s.distrace.instrumentation.BaseTransformer;
 import net.bytebuddy.description.modifier.Visibility;
-import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.matcher.ElementMatchers;
 
 public class CallbackTransformer extends BaseTransformer {
     @Override

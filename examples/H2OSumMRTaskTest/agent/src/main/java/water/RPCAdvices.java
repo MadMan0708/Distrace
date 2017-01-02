@@ -1,7 +1,7 @@
 package water;
 
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
 import net.bytebuddy.asm.Advice;
 
 

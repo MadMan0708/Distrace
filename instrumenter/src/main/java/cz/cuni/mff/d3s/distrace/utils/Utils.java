@@ -1,12 +1,9 @@
-package cz.cuni.mff.d3s.distrace;
+package cz.cuni.mff.d3s.distrace.utils;
 
 import com.rits.cloning.Cloner;
 import com.rits.cloning.ObjenesisInstantiationStrategy;
+import cz.cuni.mff.d3s.distrace.instrumentation.Interceptor;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
-import cz.cuni.mff.d3s.distrace.utils.ClassServiceLoader;
-import nanomsg.pair.PairSocket;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,8 +14,6 @@ import java.util.*;
  * Various helper methods
  */
 public class Utils {
-    private static final Logger log = LogManager.getLogger(InstrumentorServer.class);
-
     private static Map<String, byte[]> getByteCodesFor(ArrayList<Class<?>> classes){
         Map<String, byte[]> byteCodes = new HashMap<>();
         for(Class cls: classes){
@@ -60,7 +55,7 @@ public class Utils {
     public static void triggerLoading(String className, ClassLoader cl){
         //IDEA: We could create deep copy of class loader cl and load the class with that copy
         // this would ensure that we don't change the original class loading mechanisms
-        // but we would be able to get the bytecode of the class
+        // but we would be able to getOrCreateTraceContext the bytecode of the class
         Cloner cloner =  new Cloner(new ObjenesisInstantiationStrategy());
         ClassLoader clone = cloner.deepClone(cl);
         try {

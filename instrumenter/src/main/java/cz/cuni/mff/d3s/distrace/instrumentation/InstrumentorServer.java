@@ -1,7 +1,8 @@
-package cz.cuni.mff.d3s.distrace;
+package cz.cuni.mff.d3s.distrace.instrumentation;
 
-import cz.cuni.mff.d3s.distrace.api.Span;
-import cz.cuni.mff.d3s.distrace.api.TraceContext;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContextManager;
+import cz.cuni.mff.d3s.distrace.tracing.Span;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import cz.cuni.mff.d3s.distrace.json.*;
 import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
 import cz.cuni.mff.d3s.distrace.storage.JSONDiskSaver;
@@ -34,7 +35,7 @@ public class InstrumentorServer {
     private String pathToClasses;
 
 
-    InstrumentorServer(String sockAddr, CustomAgentBuilder builder, String pathToClasses) {
+    public InstrumentorServer(String sockAddr, CustomAgentBuilder builder, String pathToClasses) {
         this.sockAddr = sockAddr;
         this.builder = builder;
         this.pathToClasses = pathToClasses;
@@ -65,8 +66,11 @@ public class InstrumentorServer {
             JSONObject.class,
             JSONString.class,
             JSONValue.class,
-            JSONStringBuilder.class
+            JSONStringBuilder.class,
+            JSONPrettyStringBuilder.class
     };
+
+
 
     private static ArrayList<Class<?>> customSaverClasses = Utils.getCustomSpanSaverClasses();
     private void handleRegisterByteCode(){
@@ -189,7 +193,7 @@ public class InstrumentorServer {
         }
     }
 
-    void start() {
+    public void start() {
         sock = new SocketWrapper(sockAddr);
         transformer = builder.createAgent(new BaseAgentBuilder(sock, instLoader), pathToClasses).makeRaw();
         //noinspection InfiniteLoopStatement

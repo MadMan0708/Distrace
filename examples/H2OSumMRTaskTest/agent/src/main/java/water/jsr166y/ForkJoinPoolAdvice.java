@@ -2,12 +2,9 @@ package water.jsr166y;
 
 
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
 import net.bytebuddy.asm.Advice;
-import water.H2O;
 import water.MRTask;
-
-import java.util.concurrent.ForkJoinTask;
 
 public class ForkJoinPoolAdvice {
 

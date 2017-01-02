@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.distrace.storage;
 
-import cz.cuni.mff.d3s.distrace.api.Span;
+import cz.cuni.mff.d3s.distrace.tracing.Span;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutorService;
@@ -9,7 +9,15 @@ import java.util.concurrent.Executors;
 
 public abstract class SpanSaver {
 
-    ExecutorService executor = Executors.newCachedThreadPool();
+    private ExecutorService executor = Executors.newCachedThreadPool();
+
+    protected static boolean debug = false;
+
+    static{
+        debug = isDebugging();
+    }
+
+    private static native boolean isDebugging();
 
     public abstract void saveSpan(Span span);
 
@@ -23,11 +31,11 @@ public abstract class SpanSaver {
      * custom.span.saver(args)
      *
      * If the saver doesn't have any arguments than ampty string is passes to this method
-     * @param args
+     * @param args saver arguments
      */
     public abstract void parseAndSetArgs(String args);
 
-    public final void submitSpanTask(Runnable spanSavingTask){
+    protected final void submitSpanTask(Runnable spanSavingTask){
         executor.submit(spanSavingTask);
     }
 

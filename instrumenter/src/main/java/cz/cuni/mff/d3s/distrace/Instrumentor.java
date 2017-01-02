@@ -1,13 +1,13 @@
 package cz.cuni.mff.d3s.distrace;
 
-import cz.cuni.mff.d3s.distrace.utils.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentorServer;
 import cz.cuni.mff.d3s.distrace.utils.InstrumentorConfFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 
 public class Instrumentor {
-    private static Logger log;
 
     /**
      * This method has to be called in a custom implementation of Instrumentor in order to start the Instrumentor.
@@ -34,7 +34,7 @@ public class Instrumentor {
         String logDir = args[2];
         String pathToClasses = args[3];
         ConfigurationFactory.setConfigurationFactory(new InstrumentorConfFactory(logLevel, logDir));
-        log = LogManager.getLogger(Instrumentor.class);
+        Logger log = LogManager.getLogger(Instrumentor.class);
         log.info("Running forked JVM \n" +
                 "   connection string : " + socketAddress + "\n" +
                 "   log level         : " + logLevel + "\n" +

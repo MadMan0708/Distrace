@@ -1,7 +1,5 @@
 package cz.cuni.mff.d3s.distrace.json;
 
-import cz.cuni.mff.d3s.distrace.Interceptor;
-
 /**
  * Helper class used to created valid JSON primitives based on Java primitives
  */

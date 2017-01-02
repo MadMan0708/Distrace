@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
-import cz.cuni.mff.d3s.distrace.Interceptor;
+import cz.cuni.mff.d3s.distrace.instrumentation.Interceptor;
 import net.bytebuddy.implementation.bind.annotation.SuperCall;
 
 import java.util.concurrent.Callable;

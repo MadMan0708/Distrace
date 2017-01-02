@@ -1,13 +1,15 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.instrumentation;
 
-import cz.cuni.mff.d3s.distrace.TraceContextManager;
-import cz.cuni.mff.d3s.distrace.api.Span;
-import cz.cuni.mff.d3s.distrace.api.TraceContext;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContextManager;
+import cz.cuni.mff.d3s.distrace.tracing.Span;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 
 import java.lang.reflect.Field;
 
 
 public class InstrumentUtils {
+
+    private static final TraceContextManager contextManager = TraceContextManager.getOrCreate();
     private static final String traceIdFieldName = "____traceId";
 
     public static TraceContext getTraceContext(Object thizz) {
@@ -53,8 +55,8 @@ public class InstrumentUtils {
     }
 
 
-    public static TraceContext storeCurrentSpan() {
-        return getTraceContext().storeCurrentSpan();
+    public static void storeCurrentSpan() {
+        getTraceContext().storeCurrentSpan();
     }
 
     public static Span getCurrentSpan() {
@@ -71,34 +73,34 @@ public class InstrumentUtils {
     }
 
     public static TraceContext injectTraceContextOn(Thread thread) {
-        return TraceContextManager.getOrCreate(thread, new TraceContext());
+        return contextManager.getOrCreateTraceContext(thread, new TraceContext());
     }
 
     public static void propagateTraceContext(Thread to) {
-        TraceContext context = TraceContextManager.get(Thread.currentThread());
+        TraceContext context = contextManager.getTraceContext(Thread.currentThread());
         context.openNestedSpan();
-        TraceContextManager.getOrCreate(to, context);
+        contextManager.getOrCreateTraceContext(to, context);
     }
 
     public static TraceContext getTraceContext() {
-        return TraceContextManager.get(Thread.currentThread());
+        return contextManager.getTraceContext(Thread.currentThread());
     }
 
     public static TraceContext createTraceContext(Object o) {
-        TraceContextManager.registerTraceContext(Thread.currentThread(), new TraceContext());
-        setTraceIdOn(o, TraceContextManager.get(Thread.currentThread()));
-        return TraceContextManager.get(Thread.currentThread());
+        contextManager.registerTraceContext(Thread.currentThread(), new TraceContext());
+        setTraceIdOn(o, contextManager.getTraceContext(Thread.currentThread()));
+        return contextManager.getTraceContext(Thread.currentThread());
     }
 
     public static TraceContext getOrCreateTraceContext(Object o) {
         if(getTraceContextFrom(o) == null){
-            if(TraceContextManager.get(Thread.currentThread()) == null) {
-                TraceContextManager.getOrCreate(Thread.currentThread());
+            if(contextManager.getTraceContext(Thread.currentThread()) == null) {
+                contextManager.getOrCreateTraceContext(Thread.currentThread());
             }
-            setTraceIdOn(o, TraceContextManager.get(Thread.currentThread()));
+            setTraceIdOn(o, contextManager.getTraceContext(Thread.currentThread()));
         } else {
-            TraceContextManager.registerTraceContext(Thread.currentThread(), getTraceContextFrom(o));
+            contextManager.registerTraceContext(Thread.currentThread(), getTraceContextFrom(o));
         }
-        return TraceContextManager.get(Thread.currentThread());
+        return contextManager.getTraceContext(Thread.currentThread());
     }
 }

@@ -1,8 +1,9 @@
-package cz.cuni.mff.d3s.distrace.api;
+package cz.cuni.mff.d3s.distrace.tracing;
 
 
 import cz.cuni.mff.d3s.distrace.json.JSONArray;
 import cz.cuni.mff.d3s.distrace.json.JSONObject;
+import cz.cuni.mff.d3s.distrace.json.JSONValue;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
 import java.io.Serializable;
@@ -29,7 +30,7 @@ public class Span implements Serializable {
     }
 
     public void setStackTrace(Thread thread){
-        binaryAnnotations.put("stacktrace", getStackTraceAsJSON(thread).toJSONString());
+        binaryAnnotations.put("stacktrace", getStackTraceAsJSON(thread).toString());
     }
 
     private static native String getSaverType();
@@ -110,6 +111,14 @@ public class Span implements Serializable {
         this.parentSpan = parentSpan;
         this.name = name;
         addOriginStartAnn(timestamp);
+    }
+
+    public long getTraceId(){
+        return traceId;
+    }
+
+    public String getName(){
+        return name;
     }
 
     public void store(){
@@ -212,7 +221,7 @@ public class Span implements Serializable {
         return this;
     }
 
-    public String toJSON() {
+    public JSONValue toJSON() {
         JSONObject jsonSpan = new JSONObject()
                 .add("traceId", traceId)
                 .add("name", name)
@@ -223,8 +232,10 @@ public class Span implements Serializable {
                 .add("annotations", getAnnotationsJSON())
                 .addIfNotNull("parentId", getParentSpanId());
 
-        return new JSONArray(jsonSpan).toJSONString();
+        return new JSONArray(jsonSpan);
     }
+
+
 
     public static Span newTopSpan(long traceId, String name, long nextSpanId) {
         return new Span(traceId, name, nextSpanId);

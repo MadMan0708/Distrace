@@ -1,11 +1,11 @@
 package water;
 
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
 import net.bytebuddy.asm.Advice;
 
-import static cz.cuni.mff.d3s.distrace.utils.InstrumentUtils.getTraceContext;
-import static cz.cuni.mff.d3s.distrace.utils.InstrumentUtils.getTraceContextFrom;
+import static cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils.getTraceContext;
+import static cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils.getTraceContextFrom;
 
 
 public abstract class MRTaskAdvices {
@@ -36,7 +36,20 @@ public abstract class MRTaskAdvices {
         }
     }
 
-    public static class doAll {
+    public static class getResult {
+        @Advice.OnMethodExit
+        public static void exit(@Advice.This Object o) {
+            if (o instanceof SumMRTask) {
+                MRTask tsk = (MRTask)o;
+                if(!((SumMRTask) o).isDone()) {
+                    System.out.println("getResult: Storing Span with ID: " + InstrumentUtils.getCurrentSpan().getSpanId());
+                    InstrumentUtils.storeCurrentSpan();
+                }
+            }
+        }
+    }
+
+    public static class dfork {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
@@ -45,15 +58,7 @@ public abstract class MRTaskAdvices {
                         .add("ipPort", H2O.getIpPortString());
 
                 System.out.println("doAll: Created Span with ID: " + InstrumentUtils.getCurrentSpan().getSpanId());
-                System.out.println("doAll: Method was called on node: " + H2O.getIpPortString() + " trace ID " + getTraceContext().getTraceId());
-            }
-        }
-
-        @Advice.OnMethodExit
-        public static void exit(@Advice.This Object o) {
-            if (o instanceof SumMRTask) {
-                System.out.println("doAll: Storing Span with ID: "+ InstrumentUtils.getCurrentSpan().getSpanId());
-                InstrumentUtils.storeCurrentSpan();
+                System.out.println("doAll: Method was called on node: " + H2O.getIpPortString() + " trace ID " + getTraceContext().getTraceId() + " thread id " + Thread.currentThread().getId());
             }
         }
     }

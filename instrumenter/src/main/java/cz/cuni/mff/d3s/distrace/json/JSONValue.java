@@ -7,10 +7,16 @@ import java.io.Serializable;
  */
 public abstract class JSONValue implements Serializable {
 
-    public String toJSONString(){
-        JSONStringBuilder writer = new JSONStringBuilder();
-        write(writer);
-        return writer.toString();
+    @Override
+    public String toString() {
+        JSONStringBuilder builder = new JSONStringBuilder();
+        write(builder);
+        return builder.toString();
+    }
+
+    public String toString(JSONStringBuilder stringBuilder){
+        write(stringBuilder);
+        return stringBuilder.toString();
     }
 
     abstract void write(JSONStringBuilder writer);

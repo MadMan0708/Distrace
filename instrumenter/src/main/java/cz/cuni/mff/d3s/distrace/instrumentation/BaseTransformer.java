@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.transformers;
+package cz.cuni.mff.d3s.distrace.instrumentation;
 
 
 import net.bytebuddy.agent.builder.AgentBuilder;

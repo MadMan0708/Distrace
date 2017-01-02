@@ -1,19 +1,20 @@
 package cz.cuni.mff.d3s.distrace.storage;
 
 
-import cz.cuni.mff.d3s.distrace.api.Span;
+import cz.cuni.mff.d3s.distrace.tracing.Span;
+import cz.cuni.mff.d3s.distrace.json.JSONPrettyStringBuilder;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class DirectZipkinSaver extends SpanSaver {
 
     private String serverIpPort;
-
 
     public DirectZipkinSaver(String args){
         parseAndSetArgs(args);
@@ -38,11 +39,13 @@ public class DirectZipkinSaver extends SpanSaver {
 
         @Override
         public void run() {
-            final String spanStr = span.toJSON();
+            final String spanStr = span.toJSON().toString();
             try {
-                URL url = new URL("http://"+serverIpPort+"/api/v1/spans");
-                System.out.println("\nSending 'POST' request to URL : " + url);
-                HttpURLConnection httpCon = (HttpURLConnection)url.openConnection();
+                URL url = new URL("http://" + serverIpPort + "/api/v1/spans");
+                if(debug) {
+                    System.out.println("Sending span: " + span.toJSON().toString(new JSONPrettyStringBuilder()));
+                }
+                HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
                 httpCon.setRequestMethod("POST");
                 httpCon.addRequestProperty("Content-Type", "application/json");
                 httpCon.setDoOutput(true);
@@ -51,12 +54,10 @@ public class DirectZipkinSaver extends SpanSaver {
                 osw.write(spanStr);
                 osw.flush();
                 os.flush();
-                System.out.println(spanStr);
-
-                System.out.println("Response Code : " + httpCon.getResponseCode());
-
+                httpCon.getResponseCode();
+            } catch (ConnectException e){
+                System.out.println("Couldn't connect to Zipkin Server, are you sure it is running on " + serverIpPort + "? Span " + span + " won't be sent!");
             } catch (IOException e) {
-                // log could not save span
                 e.printStackTrace();
             }
         }

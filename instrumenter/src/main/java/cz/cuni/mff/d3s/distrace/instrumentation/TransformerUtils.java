@@ -1,7 +1,6 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.instrumentation;
 
-import cz.cuni.mff.d3s.distrace.Interceptor;
-import cz.cuni.mff.d3s.distrace.api.TraceContext;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.modifier.Visibility;
@@ -81,8 +80,8 @@ public class TransformerUtils {
      tLocal.set(new TraceContext());
      traceContextField.set(that, tLocal);
      //noinspection unchecked
-     ThreadLocal<TraceContext> tLocalContext = (ThreadLocal<TraceContext>)traceContextField.get(that);
-     TraceContext traceContext = tLocalContext.get();
+     ThreadLocal<TraceContext> tLocalContext = (ThreadLocal<TraceContext>)traceContextField.getOrCreateTraceContext(that);
+     TraceContext traceContext = tLocalContext.getOrCreateTraceContext();
 
      */
 }

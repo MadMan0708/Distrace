@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.distrace.utils;
+package cz.cuni.mff.d3s.distrace.instrumentation;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 /**
  * Classloader used in the Instrumenter. This classloader caches all bytecode received from the native
- * agent. Byte buddy is using this class loader to create TypeDescriptions for each class and also to get
+ * agent. Byte buddy is using this class loader to create TypeDescriptions for each class and also to getOrCreateTraceContext
  * bytecode for class really being instrumented.
  */
 public class InstrumentorClassLoader extends ClassLoader{

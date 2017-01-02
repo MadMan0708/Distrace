@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
-import cz.cuni.mff.d3s.distrace.utils.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 
