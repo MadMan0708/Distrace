@@ -73,13 +73,13 @@ public class InstrumentUtils {
     }
 
     public static TraceContext injectTraceContextOn(Thread thread) {
-        return contextManager.getOrCreateTraceContext(thread, new TraceContext());
+        return contextManager.getOrCreateTraceContext(thread);
     }
 
     public static void propagateTraceContext(Thread to) {
         TraceContext context = contextManager.getTraceContext(Thread.currentThread());
         context.openNestedSpan();
-        contextManager.getOrCreateTraceContext(to, context);
+        contextManager.attachTraceContextTo(to, context);
     }
 
     public static TraceContext getTraceContext() {
@@ -87,7 +87,7 @@ public class InstrumentUtils {
     }
 
     public static TraceContext createTraceContext(Object o) {
-        contextManager.registerTraceContext(Thread.currentThread(), new TraceContext());
+        contextManager.attachTraceContextTo(Thread.currentThread(), new TraceContext());
         setTraceIdOn(o, contextManager.getTraceContext(Thread.currentThread()));
         return contextManager.getTraceContext(Thread.currentThread());
     }
@@ -99,7 +99,7 @@ public class InstrumentUtils {
             }
             setTraceIdOn(o, contextManager.getTraceContext(Thread.currentThread()));
         } else {
-            contextManager.registerTraceContext(Thread.currentThread(), getTraceContextFrom(o));
+            contextManager.attachTraceContextTo(Thread.currentThread(), getTraceContextFrom(o));
         }
         return contextManager.getTraceContext(Thread.currentThread());
     }

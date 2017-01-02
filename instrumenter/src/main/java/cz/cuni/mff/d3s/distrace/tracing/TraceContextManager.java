@@ -8,9 +8,13 @@ import java.util.HashMap;
 public class TraceContextManager {
 
     private static TraceContextManager instance;
-    private HashMap<Long,TraceContext> contexts = new HashMap<>();
+    private HashMap<Long, TraceContext> contexts = new HashMap<>();
     private TraceContextManager() { }
 
+    /**
+     * Static method to obtain singleton instance
+     * @return singleton instance
+     */
     public static TraceContextManager getOrCreate(){
         if(instance == null){
             instance = new TraceContextManager();
@@ -18,27 +22,28 @@ public class TraceContextManager {
         return instance;
     }
 
-    public void registerTraceContext(Thread thread, TraceContext context){
+    /**
+     * Attach {@link TraceContext} to the provided thread
+     * @param thread to which attach given trace context
+     * @param context trace context to be attached
+     */
+    public void attachTraceContextTo(Thread thread, TraceContext context){
         contexts.put(thread.getId(), context);
     }
 
+    /**
+     * Get trace context attached to the provided thread or throw NullPointerException if no such mapping
+     * can be found. Method {@code getOrCreateTraceContext} should be used to get or create new trace context.
+     * @param thread from which to get trace context
+     * @throws NullPointerException in case trace context doesn't contain the mapping
+     * @return trace context
+     */
     public TraceContext getTraceContext(Thread thread){
         if(hasTraceContext(thread)){
-            return contexts.get(thread.getId()); // we need to return new object
+            return contexts.get(thread.getId());
         }else{
-            return null;
+            throw new NullPointerException("Trace context needs to be available for thread " + thread);
         }
-    }
-
-    private boolean hasTraceContext(Thread thread){
-        return contexts.containsKey(thread.getId());
-    }
-
-    public TraceContext getOrCreateTraceContext(Thread thread, TraceContext context){
-        if(!hasTraceContext(thread)){
-            registerTraceContext(thread, context);
-        }
-        return getTraceContext(thread);
     }
 
     /**
@@ -48,11 +53,10 @@ public class TraceContextManager {
      */
     public TraceContext getOrCreateTraceContext(Thread thread){
         if(!hasTraceContext(thread)){
-            registerTraceContext(thread, new TraceContext());
+            attachTraceContextTo(thread, new TraceContext());
         }
         return getTraceContext(thread);
     }
-
 
     @Override
     public String toString() {
@@ -68,4 +72,9 @@ public class TraceContextManager {
         str.append("}");
         return str.toString();
     }
+    
+    private boolean hasTraceContext(Thread thread){
+        return contexts.containsKey(thread.getId());
+    }
+
 }
