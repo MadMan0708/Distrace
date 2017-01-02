@@ -15,7 +15,7 @@ public class H2OSpanSaver extends DirectZipkinSaver {
 
     @Override
     public void saveSpan(Span span) {
-        span.setIpPort(H2O.getIpPortString()).setServiceName("MRTask");
+        span.setServiceName("MRTask");
         submitSpanTask(new DirectZipkinSaverTask(span));
     }
 }

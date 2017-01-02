@@ -55,6 +55,7 @@ public abstract class MRTaskAdvices {
             if (o instanceof SumMRTask) {
                 InstrumentUtils.createTraceContext(o)
                         .openNestedSpan(H2O.getIpPortString() + " : MR Task Main Span")
+                        .setIpPort(H2O.getIpPortString())
                         .add("ipPort", H2O.getIpPortString());
 
                 System.out.println("doAll: Created Span with ID: " + InstrumentUtils.getCurrentSpan().getSpanId());
@@ -70,7 +71,9 @@ public abstract class MRTaskAdvices {
             if (o instanceof SumMRTask) {
                 // don't open nested span. Just start a new span
               InstrumentUtils.getOrCreateTraceContext(o)
-                      .openNestedSpan(H2O.getIpPortString() + " : Remote Compute");
+                      .openNestedSpan(H2O.getIpPortString() + " : Remote Compute")
+                      .setIpPort(H2O.getIpPortString())
+                      .add("ipPort", H2O.getIpPortString());
 
                 System.out.println("Remote compute: "+ getTraceContextFrom(o).getTraceId());
             }
@@ -101,7 +104,9 @@ public abstract class MRTaskAdvices {
         public static void enter(@Advice.This Object o){
             if( o instanceof SumMRTask) {
                 InstrumentUtils.getOrCreateTraceContext(o)
-                        .openNestedSpan(H2O.getIpPortString() + " : Local setup and splitting");
+                        .openNestedSpan(H2O.getIpPortString() + " : Local setup and splitting")
+                        .setIpPort(H2O.getIpPortString());
+
             }
         }
 
