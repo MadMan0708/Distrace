@@ -19,6 +19,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -73,9 +74,9 @@ public class BaseAgentBuilder {
                 sock.send(arr);
                 //serialize and send initializer over the network
             }else if(initializer instanceof LoadedTypeInitializer.Compound){
-                Field value = initializer.getClass().getDeclaredField("loadedTypeInitializer");
+                Field value = initializer.getClass().getDeclaredField("loadedTypeInitializers");
                 value.setAccessible(true);
-                LoadedTypeInitializer[] initializers = (LoadedTypeInitializer[]) value.get(initializer);
+                ArrayList<LoadedTypeInitializer> initializers = (ArrayList<LoadedTypeInitializer>) value.get(initializer);
                 for(LoadedTypeInitializer i: initializers){
                     process(i);
                 }

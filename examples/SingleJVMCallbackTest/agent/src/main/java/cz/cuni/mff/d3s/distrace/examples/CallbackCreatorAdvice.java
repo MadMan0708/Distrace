@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
 import cz.cuni.mff.d3s.distrace.api.TraceContext;
-import net.bytebuddy.asm.Advice.BoxedReturn;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 
 import java.lang.reflect.Field;
@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
 public class CallbackCreatorAdvice {
 
     @OnMethodExit
-    public static Object exit(@BoxedReturn Object value) {
+    public static Object exit(@Advice.Return Object value) {
         try {
             Field f = value.getClass().getDeclaredField("traceContext");
             f.setAccessible(true);
