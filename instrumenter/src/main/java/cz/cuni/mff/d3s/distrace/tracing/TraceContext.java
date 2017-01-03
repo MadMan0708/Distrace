@@ -62,7 +62,7 @@ public class TraceContext implements Serializable {
      * Store current span and move one level up in span hierarchy
      * @return trace context
      */
-    public TraceContext storeAndClose() {
+    public TraceContext storeAndCloseCurrentSpan() {
         System.out.println("Closing span, trace id" + traceId + " span id" + span + " thread id " + Thread.currentThread().getId() + " TraceContext" + this);
         span.store();
         span = span.getParentSpan();

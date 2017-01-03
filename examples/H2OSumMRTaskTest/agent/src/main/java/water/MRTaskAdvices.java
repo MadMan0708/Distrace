@@ -27,9 +27,9 @@ public abstract class MRTaskAdvices {
         public static void exit(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
                 // close span
-               // InstrumentUtils.storeCurrentSpan();
+               // InstrumentUtils.storeAndCloseCurrentSpan();
 
-                //InstrumentUtils.getTraceContext().storeCurrentSpan();
+                //InstrumentUtils.getTraceContext().storeAndCloseCurrentSpan();
                 //MRTask task = (MRTask) o;
                 //System.out.println("OnCompletition ( local reducing) was called on node: " + H2O.getIpPortString() + " trace ID "); // + getTraceContext().getTraceId());
             }
@@ -43,7 +43,7 @@ public abstract class MRTaskAdvices {
                 MRTask tsk = (MRTask)o;
                 if(!((SumMRTask) o).isDone()) {
                     System.out.println("getResult: Storing Span with ID: " + InstrumentUtils.getCurrentSpan().getSpanId());
-                    InstrumentUtils.storeCurrentSpan();
+                    InstrumentUtils.storeAndCloseCurrentSpan();
                 }
             }
         }
@@ -91,7 +91,7 @@ public abstract class MRTaskAdvices {
                     InstrumentUtils.getCurrentSpan().add("size of RPC", ret._dt.asBytes().length);
                 }
 
-                InstrumentUtils.getOrCreateTraceContext(o).storeCurrentSpan();
+                InstrumentUtils.getOrCreateTraceContext(o).storeAndCloseCurrentSpan();
 
                 System.out.println("Remote compute was called on node: " + H2O.getIpPortString() + " trace ID " +  getTraceContext().getTraceId());
             }
@@ -118,7 +118,7 @@ public abstract class MRTaskAdvices {
                         .add("left", task._nleft == null ? "local": task._nleft._target.getIpPortString())
                         .add("right", task._nrite == null ? "local": task._nrite._target.getIpPortString());
 
-                InstrumentUtils.getTraceContext().storeCurrentSpan();
+                InstrumentUtils.getTraceContext().storeAndCloseCurrentSpan();
                 System.out.println("SetupLocal0 ( dist prepare) was called on node: " + H2O.getIpPortString() + " trace ID " + getTraceContext().getTraceId());
             }
         }

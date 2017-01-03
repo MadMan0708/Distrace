@@ -55,8 +55,8 @@ public class InstrumentUtils {
     }
 
 
-    public static void storeCurrentSpan() {
-        getTraceContext().storeCurrentSpan();
+    public static void storeAndCloseCurrentSpan() {
+        getTraceContext().storeAndCloseCurrentSpan();
     }
 
     public static Span getCurrentSpan() {
