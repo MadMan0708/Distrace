@@ -8,6 +8,9 @@ import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.UUID;
+
+import static cz.cuni.mff.d3s.distrace.utils.NativeAgentUtils.getTypeOneUUID;
 
 public class Span implements Serializable {
 
@@ -59,8 +62,8 @@ public class Span implements Serializable {
         return this;
     }
 
-    private long traceId;
-    private long spanId;
+    private String traceId;
+    private String spanId;
     private long timestamp;
     private long duration;
     private String serviceName = "Unknown";
@@ -95,25 +98,25 @@ public class Span implements Serializable {
         return this;
     }
 
-    private Span(long traceId, String name, long nextSpanId) {
+    private Span(String traceId, String name) {
         this.traceId = traceId;
         this.parentSpan = null;
-        this.spanId = nextSpanId;
         this.name = name;
         this.timestamp = System.nanoTime() / 1000;
+        this.spanId = Long.toHexString(UUID.fromString(getTypeOneUUID()).getMostSignificantBits());
         addOriginStartAnn(timestamp);
     }
 
-    private Span(long traceId, Span parentSpan, String name, long nextSpanId) {
+    private Span(String traceId, Span parentSpan, String name) {
         this.traceId = traceId;
-        this.spanId = nextSpanId;
+        this.spanId = Long.toHexString(UUID.fromString(getTypeOneUUID()).getMostSignificantBits());
         this.timestamp = System.nanoTime() / 1000;
         this.parentSpan = parentSpan;
         this.name = name;
         addOriginStartAnn(timestamp);
     }
 
-    public long getTraceId(){
+    public String getTraceId(){
         return traceId;
     }
 
@@ -126,7 +129,7 @@ public class Span implements Serializable {
         saver.saveSpan(this);
     }
 
-    private Long getParentSpanId(){
+    private String getParentSpanId(){
         if(parentSpan == null){
             // parent span ID = 0 means no parent span ID
             return null;
@@ -143,11 +146,9 @@ public class Span implements Serializable {
         return parentSpan;
     }
 
-    public long getSpanId(){
+    public String getSpanId(){
         return spanId;
     }
-
-
 
     public Long getLongValue(String key){
         try{
@@ -226,23 +227,23 @@ public class Span implements Serializable {
                 .add("traceId", traceId)
                 .add("name", name)
                 .add("id", spanId)
+                .addIfNotNull("parentId", getParentSpanId())
                 .add("timestamp", timestamp)
                 .add("duration", duration)
                 .add("binaryAnnotations", getBinaryAnnotationsJSON())
-                .add("annotations", getAnnotationsJSON())
-                .addIfNotNull("parentId", getParentSpanId());
+                .add("annotations", getAnnotationsJSON());
 
         return new JSONArray(jsonSpan);
     }
 
 
 
-    public static Span newTopSpan(long traceId, String name, long nextSpanId) {
-        return new Span(traceId, name, nextSpanId);
+    public static Span newTopSpan(String traceId, String name) {
+        return new Span(traceId, name);
 
     }
 
-    public static Span newNestedSpan(long traceId, Span parentSpan, String name, long nextSpanId) {
-        return new Span(traceId, parentSpan, name, nextSpanId);
+    public static Span newNestedSpan(String traceId, Span parentSpan, String name) {
+        return new Span(traceId, parentSpan, name);
     }
 }

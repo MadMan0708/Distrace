@@ -43,7 +43,7 @@ public class DirectZipkinSaver extends SpanSaver {
             try {
                 URL url = new URL("http://" + serverIpPort + "/api/v1/spans");
                 if(debug) {
-                    System.out.println("Sending span: " + span.toJSON().toString(new JSONPrettyStringBuilder()));
+                    System.out.println("Sending span: " + span.toJSON().toString());
                 }
                 HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
                 httpCon.setRequestMethod("POST");

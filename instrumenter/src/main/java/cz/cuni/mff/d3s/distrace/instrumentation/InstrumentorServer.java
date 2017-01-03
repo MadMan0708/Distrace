@@ -55,7 +55,8 @@ public class InstrumentorServer {
             DirectZipkinSaver.class,
             JSONDiskSaver.class,
             DirectZipkinSaver.DirectZipkinSaverTask.class,
-            JSONDiskSaver.JSONDiskSaverTask.class
+            JSONDiskSaver.JSONDiskSaverTask.class,
+            NativeAgentUtils.class
     };
 
     private static Class[] jsonClasses = {

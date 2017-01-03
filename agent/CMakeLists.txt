@@ -13,6 +13,7 @@ find_package(Boost COMPONENTS system filesystem REQUIRED) #  Boost libraries
 find_package(nanomsg REQUIRED) # nanomsg library
 find_package(nanomsgxx REQUIRED) # nanomsg binding for c++
 
+# include all header libraries
 INCLUDE_DIRECTORIES("include")
 # include all necessary directories
 include_directories( ${JNI_INCLUDE_DIRS} )

@@ -34,6 +34,11 @@ namespace Distrace {
         static jboolean isDebugging(JNIEnv *jni, jobject thiz);
 
         /**
+         * Get type one uuid ( clock_seq, mac address, timestamp and version )
+         */
+        static jstring getTypeOneUUID(JNIEnv *jni, jobject thiz);
+
+        /**
         * List of all native methods we defined
         */
         static std::map<std::string, std::vector<JNINativeMethod>> nativesPerClass;
