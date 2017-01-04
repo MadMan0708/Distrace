@@ -5,7 +5,9 @@
 #include "Utils.h"
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include <sstream>
 
+namespace fs = boost::filesystem;
 
 namespace Distrace {
     namespace Utils {
@@ -36,6 +38,17 @@ namespace Distrace {
             return splits;
         }
 
+        std::string join(std::vector<std::string> tokens, std::string sep){
+            std::stringstream ss;
+            for(std::vector<std::string>::size_type i = 0; i < tokens.size(); i++) {
+                ss << tokens[i];
+                if(i < tokens.size() -1 ) {
+                    ss << sep;
+                }
+            }
+            return ss.str();
+        }
+
         bool startsWith(const std::string& input, const std::string& start){
             return input.find(start) == 0;
         }
@@ -53,16 +66,16 @@ namespace Distrace {
 
         std::string createUniqueTempDir() {
             int maxNumTries = 100;
-            std::string prefix = boost::filesystem::temp_directory_path().string();
+            fs::path tmpDir = boost::filesystem::temp_directory_path();
             int tries = 0;
             bool dirCreated = false;
             while (tries <= maxNumTries && !dirCreated) {
-                std::string path = prefix + boost::filesystem::unique_path().string()
-                                   + boost::filesystem::path::preferred_separator;
-                dirCreated = boost::filesystem::create_directories(path);
+                fs::path newTmpDir = tmpDir / boost::filesystem::unique_path();
+                std::cout << "CREATING" << newTmpDir << "  ";
+                dirCreated = boost::filesystem::create_directories(newTmpDir);
                 tries++;
                 if (dirCreated) {
-                    return path;
+                    return newTmpDir.string();
                 }
             }
             throw std::runtime_error("Tried creating tmp directory for " + std::to_string(maxNumTries) + " times without a success.");

@@ -1,95 +1,91 @@
 apply plugin: 'base'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
-import org.apache.tools.ant.taskdefs.condition.Os
+
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 
 defaultTasks 'createDockerFile'
 description = "Distrace Docker Support"
 
 ext {
-    docker_file = file('distrace/base/Dockerfile')
+    dockerFile = file('distrace/base/Dockerfile')
 }
 
 task createDockerfile(type: Dockerfile) {
-    destFile = docker_file
+    destFile = dockerFile
     from 'ubuntu:yakkety'
-
-    maintainer """Jakub Hava"""
-
-    // Install Java 8
-    runCommand """\\
-                |   apt-get -q -y update && \\
-                |   apt-get -y install software-properties-common && \\
-                |   add-apt-repository ppa:webupd8team/java && \\
-                |   apt-get -q -y update && \\
-                |   ( echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections ) && \\
-                |   apt-get -y install oracle-java8-installer && \\
-                |   apt-get -y install oracle-java8-set-default && \\
-                |   apt-get clean
-               """.stripMargin()
-
+    maintainer "Jakub Hava"
 
     environmentVariable "JAVA_HOME", "/usr/lib/jvm/java-8-oracle"
 
-    runCommand "apt-get -y install git"
-
-    runCommand "apt-get -y install cmake"
-    runCommand "apt-get -y install gcc g++"
-    runCommand "apt-get -y install libboost-all-dev"
-
-    // clone, build and install nanomsg
-    runCommand "git clone https://github.com/nanomsg/nanomsg.git /opt/nanomsg"
-    workingDir "/opt/nanomsg"
-    runCommand "git checkout tags/1.0.0" // stable release
+    // Install Java 8
     runCommand """\\
-                 |    mkdir build && \\
-                 |    cd build && \\
-                 |    cmake .. && \\
-                 |    cmake --build . && \\
-                 |    cmake --build . --target install
-                """.stripMargin()
-    runCommand "ldconfig"
+               apt-get -q -y update && \\
+               apt-get -y install --no-install-recommends software-properties-common && \\
+               add-apt-repository ppa:webupd8team/java && \\
+               apt-get -q -y update && \\
+               ( echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections ) && \\
+               apt-get -y install oracle-java8-installer && \\
+               apt-get -y install oracle-java8-set-default && \\
+               apt-get clean && \\
+               rm -rf \${JAVA_HOME}/*src.zip \\
+               \${JAVA_HOME}/lib/missioncontrol \\
+               \${JAVA_HOME}/lib/visualvm \\
+               \${JAVA_HOME}/lib/*javafx* \\
+               \${JAVA_HOME}/jre/lib/plugin.jar \\
+               \${JAVA_HOME}/jre/lib/ext/jfxrt.jar \\
+               \${JAVA_HOME}/jre/bin/javaws \\
+               \${JAVA_HOME}/jre/lib/javaws.jar \\
+               \${JAVA_HOME}/jre/lib/desktop \\
+               \${JAVA_HOME}/jre/plugin \\
+               \${JAVA_HOME}/jre/lib/deploy* \\
+               \${JAVA_HOME}/jre/lib/*javafx* \\
+               \${JAVA_HOME}/jre/lib/*jfx* \\
+               \${JAVA_HOME}/jre/lib/amd64/libdecora_sse.so \\
+               \${JAVA_HOME}/jre/lib/amd64/libprism_*.so \\
+               \${JAVA_HOME}/jre/lib/amd64/libfxplugins.so \\
+               \${JAVA_HOME}/jre/lib/amd64/libglass.so \\
+               \${JAVA_HOME}/jre/lib/amd64/libgstreamer-lite.so \\
+               \${JAVA_HOME}/jre/lib/amd64/libjavafx*.so \\
+               \${JAVA_HOME}/jre/lib/amd64/libjfx*.so""".stripMargin()
 
-    // clone, build and install nanomsgxx
-    runCommand "git clone https://github.com/achille-roussel/nanomsgxx.git /opt/nanomsgxx"
-    workingDir "/opt/nanomsgxx"
-    runCommand "git checkout tags/0.2" // stable release
+
+
+    // clone, build and install dependencies for distrace and distrace itself.
+    // we do it in one command to minimize the docker image size by removing dependencies
+    // required to build the libraries
     runCommand """\\
-                | ./waf configure && \\
-                | ./waf build && \\
-                | ./waf install
-               """.stripMargin()
-    runCommand "ldconfig"
+                apt-get -q -y --no-install-recommends install python \
+                git make cmake gcc g++ libboost-system-dev libboost-filesystem-dev && \\
+                \
+                git clone https://github.com/nanomsg/nanomsg.git /opt/nanomsg && \\
+                cd /opt/nanomsg && \\
+                git checkout tags/1.0.0 && \\
+                mkdir build && cd build && \\
+                cmake .. && \\
+                cmake --build . && \\
+                cmake --build . --target install && ldconfig && \\
+                \
+                git clone https://github.com/achille-roussel/nanomsgxx.git /opt/nanomsgxx && \\
+                cd /opt/nanomsgxx && \\
+                git checkout tags/0.2 && \\
+                ./waf configure && \\
+                ./waf build && \\
+                ./waf install && ldconfig && \\
+                \
+                git clone https://github.com/jakubhava/Distrace.git /opt/distrace && \\
+                cd /opt/distrace && \\
+                git checkout tags/${docker_tag} && \\
+                ./gradlew build -x check && \\
+                rm -rf /opt/nanomsg /opt/nanomsgxx  \$HOME/.gradle/caches/ && \\
+                apt-get -q -y remove --purge python git make cmake gcc g++ && \\
+                apt-get -q -y autoremove""".stripMargin()
 
-    // Clone Distrace repo
-
-    // clone the repo again only if there are new commits on the master branch
-    addFile "https://api.github.com/repos/jakubhava/distrace/compare/master...HEAD", "/dev/null"
-    runCommand """git clone https://github.com/jakubhava/Distrace.git /opt/distrace"""
     workingDir "/opt/distrace"
-
-    // build the repo
-    runCommand """./gradlew build -x check"""
-
-
 }
-
-task buildDockerImage(type: Exec, dependsOn: createDockerfile){
-    commandLine getOsSpecificCommandLine(["docker", "build", "-t", "distrace-base", "distrace/base/"])
-}
-
-def getOsSpecificCommandLine(args) {
-    return isWindowsBased() ? ['cmd', '/c'] + args : args
-}
-
-def isWindowsBased(){
-    return Os.isFamily(Os.FAMILY_WINDOWS)
-}
-
 
 task cleanDockerfile(type: Delete) {
-    delete docker_file
+    delete dockerFile
 }
 
 //

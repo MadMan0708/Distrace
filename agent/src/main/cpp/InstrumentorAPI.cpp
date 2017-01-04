@@ -9,8 +9,8 @@
 #include <jni.h>
 #include <nnxx/pair.h>
 #include <boost/filesystem.hpp>
-#include <boost/algorithm/string.hpp>
 #include <iostream>
+#include <boost/filesystem/path.hpp>
 #include "InstrumentorAPI.h"
 #include "utils/Utils.h"
 #include "Agent.h"
@@ -21,6 +21,7 @@
 
 using namespace Distrace;
 using namespace Distrace::Logging;
+namespace fs = boost::filesystem;
 
 byte InstrumentorAPI::REQ_TYPE_INSTRUMENT = 0;
 byte InstrumentorAPI::REQ_TYPE_STOP = 1;
@@ -140,23 +141,24 @@ void InstrumentorAPI::saveClassOnDisk(std::string className, byte* classBytes, i
     std::vector<std::string> tokens = Utils::splitString(className, "/", Utils::token_compress_on);
     auto fullName = tokens.back() + ".class";
     tokens.pop_back();
-
     // create path out of packages hierarchy
     std::string sep(1, boost::filesystem::path::preferred_separator);
-    auto class_path = boost::algorithm::join(tokens, sep);
-    auto path = pathToClassDir + class_path + sep;
-    auto fullPath = path + fullName;
+    auto classPath = Utils::join(tokens, sep);
+    auto path = fs::path(pathToClassDir) / fs::path(classPath);
+    auto fullPath = path / fullName;
 
     // create directory structure same as the packages hierarchy in which is this class located
-    boost::filesystem::create_directories(path);
-    FILE* file = fopen(fullPath.c_str(), "wb" );
+    boost::system::error_code errcode;
+    fs::create_directories(path, errcode);
+    FILE* file = fopen(fullPath.c_str(), "wb");
     if(file!=NULL){
-        log(LOGGER_INSTRUMENTOR_API)->info("Writing to file {}", fullPath);
+        log(LOGGER_INSTRUMENTOR_API)->info("Writing to file {}", fullPath.string());
 
         fwrite(classBytes, sizeof(classBytes[0]), classBytesLength, file);
         fclose(file);
     }else{
-        log(LOGGER_INSTRUMENTOR_API)->error("Error opening the file {}", fullPath);
+        log(LOGGER_INSTRUMENTOR_API)->error("Error opening the file {}, original error {}", fullPath.string(), std::strerror(errno));
+
     }
 }
 

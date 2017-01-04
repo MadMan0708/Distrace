@@ -22,6 +22,11 @@ namespace Distrace {
         std::vector<std::string> splitString(const std::string& input, const std::string& delimiters, bool compressDelimiters = token_compress_off);
 
         /**
+         * join vector elements by separator
+         */
+        std::string join(std::vector<std::string> tokens, std::string sep);
+
+        /**
          * Check if string starts with specified string
          */
         bool startsWith(const std::string& input, const std::string& start);

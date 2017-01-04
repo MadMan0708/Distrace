@@ -9,7 +9,7 @@
 #include "Logging.h"
 #include "../AgentArgs.h"
 #include "../Agent.h"
-
+namespace fs = boost::filesystem;
 namespace Distrace {
     namespace Logging {
 
@@ -51,10 +51,10 @@ namespace Distrace {
                 boost::filesystem::path full_current_path(log_dir);
                 boost::filesystem::create_directories(full_current_path);
 
-                std::string path_to_log_file = log_dir + boost::filesystem::path::preferred_separator + "distrace_agent.log";
+                auto logFilePath = full_current_path / fs::path("distrace_agent.log");
 
                 // create shared log using both sinks created above
-                sinks.push_back(std::make_shared<spdlog::sinks::simple_file_sink_mt>(path_to_log_file, true));
+                sinks.push_back(std::make_shared<spdlog::sinks::simple_file_sink_mt>(logFilePath.string(), true));
                 return sinks;
             }
         } // anonymous namespace to hide functions in it

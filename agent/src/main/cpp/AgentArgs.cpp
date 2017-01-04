@@ -11,11 +11,10 @@
 #include "AgentArgs.h"
 #include "utils/Logging.h"
 #include "utils/Utils.h"
-#include <fstream>
 
 using namespace Distrace;
 using namespace Distrace::Logging;
-
+namespace fs = boost::filesystem;
 // instantiate argument names
 const std::string AgentArgs::ARG_INSTRUMENTOR_SERVER_JAR = "instrumentor_server_jar";
 const std::string AgentArgs::ARG_INSTRUMENTOR_SERVER_CP = "instrumentor_server_cp";
@@ -46,7 +45,8 @@ void AgentArgs::connectionStrToNanomsgAddr(){
     std::string connectionStr = getArgValue(ARG_CONNECTION_STR);
     // this function expects already validated connectionStr
     if(connectionStr=="ipc"){
-        connectionStr = "ipc://" + Utils::createUniqueTempDir() + boost::filesystem::unique_path().string();
+        fs::path ipcPath = fs::path(Utils::createUniqueTempDir()) / boost::filesystem::unique_path();
+        connectionStr = "ipc://" + ipcPath.string();
     }else{
         connectionStr = "tcp://" + connectionStr;
     }

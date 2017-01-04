@@ -2,7 +2,6 @@
 // Created by Jakub Háva on 13/05/16.
 //
 
-#include <boost/algorithm/string.hpp>
 #include "JavaUtils.h"
 #include "ByteReader.h"
 
