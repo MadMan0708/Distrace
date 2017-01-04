@@ -26,14 +26,16 @@ public class TraceContextManager {
      * Attach {@link TraceContext} to the provided thread
      * @param thread to which attach given trace context
      * @param context trace context to be attached
+     * @return context attached context
      */
-    public void attachTraceContextTo(Thread thread, TraceContext context){
+    public TraceContext attachTraceContextTo(Thread thread, TraceContext context){
         contexts.put(thread.getId(), context);
+        return context;
     }
 
     /**
      * Get trace context attached to the provided thread or throw NullPointerException if no such mapping
-     * can be found. Method {@code getOrCreateTraceContext} should be used to get or create new trace context.
+     * can be found. Method {@code getOrCreateFrom} should be used to get or create new trace context.
      * @param thread from which to get trace context
      * @throws NullPointerException in case trace context doesn't contain the mapping
      * @return trace context

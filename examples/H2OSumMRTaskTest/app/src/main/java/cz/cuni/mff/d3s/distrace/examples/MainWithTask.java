@@ -19,18 +19,22 @@ public class MainWithTask {
         // Wait for rest of the cloud, for 10 seconds max
         H2O.waitForCloudSize(2, 10000);
         // Create frame with numbers we want to count
-        Vec numVec = Vec.makeSeq(3, 10000000);
+        Vec numVec = Vec.makeSeq(3, 100);
         Frame frame = new Frame(numVec);
         printFrameInfo(frame);
 
-        // Start Sum MR task 3 times
-        for(int i = 0; i<3; i++){
-            SumMRTask mrTask = new SumMRTask().doAll(frame);
-            System.out.println("Computed sum is " + mrTask.getSum());
-        }
+        // Start Sum MR task n times
+        startTask(frame, 1);
         
         // Shutdown the cluster once we have the result
         H2O.shutdown(0);
+    }
+
+    private static void startTask(Frame frame, int howManyTimes){
+        for(int i = 0; i<howManyTimes; i++){
+            SumMRTask mrTask = new SumMRTask().doAll(frame);
+            System.out.println("Computed sum is " + mrTask.getSum());
+        }
     }
 
     private static void printFrameInfo(Frame fr){

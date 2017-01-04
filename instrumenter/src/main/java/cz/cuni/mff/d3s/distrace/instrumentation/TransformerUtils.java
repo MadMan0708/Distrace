@@ -80,8 +80,8 @@ public class TransformerUtils {
      tLocal.set(new TraceContext());
      traceContextField.set(that, tLocal);
      //noinspection unchecked
-     ThreadLocal<TraceContext> tLocalContext = (ThreadLocal<TraceContext>)traceContextField.getOrCreateTraceContext(that);
-     TraceContext traceContext = tLocalContext.getOrCreateTraceContext();
+     ThreadLocal<TraceContext> tLocalContext = (ThreadLocal<TraceContext>)traceContextField.getOrCreateFrom(that);
+     TraceContext traceContext = tLocalContext.getOrCreateFrom();
 
      */
 }

@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.distrace.examples;
 
 import cz.cuni.mff.d3s.distrace.instrumentation.Interceptor;
 import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 /**
@@ -16,7 +17,7 @@ public class DependantTaskInterceptor implements Interceptor{
 
     public void run(){
         System.out.printf("Method run on dependant task was called. Thread id = %d, trace id = %d, span id = %d\n",
-                Thread.currentThread().getId(), InstrumentUtils.getTraceContext().getTraceId(), InstrumentUtils.getCurrentSpan().getSpanId());
-        InstrumentUtils.getCurrentSpan().setName("Dependant task").store();
+                Thread.currentThread().getId(), TraceContext.getCurrent().getTraceId(), InstrumentUtils.getCurrentSpan().getSpanId());
+        InstrumentUtils.getCurrentSpan().setName("Dependant task").save();
     }
 }

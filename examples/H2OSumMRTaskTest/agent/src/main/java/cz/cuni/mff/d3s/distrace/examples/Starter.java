@@ -41,6 +41,7 @@ public class Starter {
                                             visit(Advice.to(MRTaskAdvices.setupLocal0.class).on(named("setupLocal0"))).
                                             visit(Advice.to(MRTaskAdvices.remote_compute.class).on(named("remote_compute"))).
                                             visit(Advice.to(MRTaskAdvices.compute2.class).on(named("compute2"))).
+                                           // visit(Advice.to(MRTaskAdvices.onCompletion.class).on(named("onCompletion"))).
                                             visit(Advice.to(MRTaskAdvices.dfork.class).on(anyOf(dfork, dfork2))).
                                             visit(Advice.to(MRTaskAdvices.getResult.class).on(is(getResult)));
 

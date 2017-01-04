@@ -1,8 +1,10 @@
 package cz.cuni.mff.d3s.distrace.tracing;
 
+import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
 import cz.cuni.mff.d3s.distrace.utils.NativeAgentUtils;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 
 /**
  * Per thread context containing information about the trace, span and parent span id
@@ -62,9 +64,9 @@ public class TraceContext implements Serializable {
      * Store current span and move one level up in span hierarchy
      * @return trace context
      */
-    public TraceContext storeAndCloseCurrentSpan() {
+    public TraceContext closeCurrentSpan() {
         System.out.println("Closing span, trace id" + traceId + " span id" + span + " thread id " + Thread.currentThread().getId() + " TraceContext" + this);
-        span.store();
+        span.save();
         span = span.getParentSpan();
         return this;
     }
@@ -76,6 +78,34 @@ public class TraceContext implements Serializable {
      */
     public static TraceContext from(TraceContext traceContext) {
         return new TraceContext(traceContext);
+    }
+
+    public static TraceContext createAndAttachTo(Object o) {
+        InstrumentUtils.contextManager.attachTraceContextTo(Thread.currentThread(), new TraceContext());
+        InstrumentUtils.attachTraceContextOn(o, InstrumentUtils.contextManager.getTraceContext(Thread.currentThread()));
+        return InstrumentUtils.contextManager.getTraceContext(Thread.currentThread());
+    }
+
+    public static TraceContext getFrom(Object traceContextHolder) {
+        try {
+            Field f = traceContextHolder.getClass().getDeclaredField(InstrumentUtils.traceIdFieldName);
+            f.setAccessible(true);
+            return (TraceContext)f.get(traceContextHolder);
+        } catch (IllegalAccessException | NoSuchFieldException e1) {
+            return null;
+        }
+    }
+
+    public static TraceContext getOrCreateFrom(Object traceContextHolder) {
+        if(getFrom(traceContextHolder) == null){
+            throw new RuntimeException("No such field " + InstrumentUtils.traceIdFieldName + " field should be part of the class " + traceContextHolder.getClass());
+        }
+        InstrumentUtils.contextManager.attachTraceContextTo(Thread.currentThread(), getFrom(traceContextHolder));
+        return InstrumentUtils.contextManager.getTraceContext(Thread.currentThread());
+    }
+
+    public static TraceContext getCurrent() {
+        return InstrumentUtils.contextManager.getTraceContext(Thread.currentThread());
     }
 
 }

@@ -1,8 +1,8 @@
 package water;
 
-import cz.cuni.mff.d3s.distrace.tracing.Span;
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.tracing.Span;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import net.bytebuddy.asm.Advice;
 
 
@@ -13,11 +13,12 @@ public class H2OAdvices {
         public static void enter(@Advice.Argument(0) Object o) {
             H2O.H2OCountedCompleter dt = (H2O.H2OCountedCompleter) o;
             if(dt instanceof SumMRTask) {
-                Span s = InstrumentUtils.getOrCreateTraceContext(dt).getCurrentSpan();
-                s.add("RPC Task Submitted", (System.nanoTime() / 1000) + "")
-                        .add("Frame key", ((SumMRTask) dt)._fr + "");
-                if (s.getLongValue("RPC Called") != null) {
-                    s.add("Transmission time", s.getLongValue("RPC Task Submitted") - s.getLongValue("RPC Called"));
+                MRTask tsk = (SumMRTask)dt;
+                Span span = TraceContext.getOrCreateFrom(dt).getCurrentSpan();
+                if (span.hasAnnotation("RPC Called")) {
+                    span.add("RPC Submitted", System.nanoTime() / 1000)
+                            .add("Frame key", tsk._fr + "")
+                            .add("Transmission time", span.getLongValue("RPC Submitted") - span.getLongValue("RPC Called"));
                 }
             }
         }
@@ -26,7 +27,8 @@ public class H2OAdvices {
         public static void exit(@Advice.Argument(0) Object o) {
             H2O.H2OCountedCompleter dt = (H2O.H2OCountedCompleter) o;
             if(dt instanceof SumMRTask){
-                InstrumentUtils.getCurrentSpan().store(); // store without going one level up
+                // save current span without going one level up
+                TraceContext.getOrCreateFrom(o).getCurrentSpan().save();
             }
         }
     }

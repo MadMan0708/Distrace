@@ -1,7 +1,7 @@
 package water;
 
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import net.bytebuddy.asm.Advice;
 
 
@@ -12,7 +12,9 @@ public class RPCAdvices {
         public static void enter(@Advice.This Object o) {
             RPC rpc = (RPC) o;
             if(rpc._dt instanceof SumMRTask){
-                InstrumentUtils.getCurrentSpan().add("RPC Called", (System.nanoTime() / 1000));
+                TraceContext.getOrCreateFrom(rpc._dt)
+                        .getCurrentSpan()
+                        .add("RPC Called", System.nanoTime() / 1000);
             }
         }
     }

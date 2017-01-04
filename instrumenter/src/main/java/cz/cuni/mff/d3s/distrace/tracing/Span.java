@@ -8,6 +8,7 @@ import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 import static cz.cuni.mff.d3s.distrace.utils.NativeAgentUtils.getTypeOneUUID;
@@ -103,13 +104,13 @@ public class Span implements Serializable {
         this.parentSpan = null;
         this.name = name;
         this.timestamp = System.nanoTime() / 1000;
-        this.spanId = Long.toHexString(UUID.fromString(getTypeOneUUID()).getMostSignificantBits());
+        this.spanId = Long.toHexString(new Random().nextLong());
         addOriginStartAnn(timestamp);
     }
 
     private Span(String traceId, Span parentSpan, String name) {
         this.traceId = traceId;
-        this.spanId = Long.toHexString(UUID.fromString(getTypeOneUUID()).getMostSignificantBits());
+        this.spanId = Long.toHexString(new Random().nextLong());
         this.timestamp = System.nanoTime() / 1000;
         this.parentSpan = parentSpan;
         this.name = name;
@@ -124,7 +125,7 @@ public class Span implements Serializable {
         return name;
     }
 
-    public void store(){
+    public void save(){
         duration = System.nanoTime() / 1000 - timestamp / 1000;
         saver.saveSpan(this);
     }
@@ -162,6 +163,9 @@ public class Span implements Serializable {
         }
     }
 
+    public boolean hasAnnotation(String key){
+        return binaryAnnotations.containsKey(key);
+    }
     private JSONObject cachedEndpoint = null;
     private JSONObject getEndpointJSON(){
         if( cachedEndpoint == null) {
