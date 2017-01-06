@@ -33,4 +33,4 @@ echo "Building and pushing distrace/base docker image to docker hub..."
 $TOPDIR/gradlew createDockerFile
 docker login
 docker build -t distrace/base:$TAG $TOPDIR/docker/distrace/base
-docker push distrace/base
+docker push distrace/base:$TAG
