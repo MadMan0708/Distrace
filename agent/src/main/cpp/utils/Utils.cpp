@@ -71,7 +71,6 @@ namespace Distrace {
             bool dirCreated = false;
             while (tries <= maxNumTries && !dirCreated) {
                 fs::path newTmpDir = tmpDir / boost::filesystem::unique_path();
-                std::cout << "CREATING" << newTmpDir << "  ";
                 dirCreated = boost::filesystem::create_directories(newTmpDir);
                 tries++;
                 if (dirCreated) {
