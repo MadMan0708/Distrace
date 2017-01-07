@@ -97,17 +97,17 @@ public abstract class MRTaskAdvices {
             if (o instanceof SumMRTask) {
                 MRTask tsk = (MRTask) o;
 
-                TraceContext.getOrCreateFrom(o)
-                        .openNestedSpan("MRTask local work : " + (tsk._hi - tsk._lo));
-                System.out.println("Compute2 (= Local Work) entered. Node: " + H2O.getIpPortString() + " trace ID: " + getCurrent().getTraceId());
+               // TraceContext.getOrCreateFrom(o)
+               //         .openNestedSpan("MRTask local work : " + (tsk._hi - tsk._lo));
+               // System.out.println("Compute2 (= Local Work) entered. Node: " + H2O.getIpPortString() + " trace ID: " + getCurrent().getTraceId());
             }
         }
 
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
-                TraceContext.getOrCreateFrom(o).closeCurrentSpan();
-                System.out.println("Compute2 (= Local Work) exit. Node: " + H2O.getIpPortString() + " trace ID: " + getCurrent().getTraceId());
+               // TraceContext.getOrCreateFrom(o).closeCurrentSpan();
+               // System.out.println("Compute2 (= Local Work) exit. Node: " + H2O.getIpPortString() + " trace ID: " + getCurrent().getTraceId());
             }
         }
 
