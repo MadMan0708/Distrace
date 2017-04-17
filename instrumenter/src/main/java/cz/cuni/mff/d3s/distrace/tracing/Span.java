@@ -79,13 +79,15 @@ public class Span implements Serializable {
     private long duration;
     private String serviceName = "Unknown";
     private String name = "Unknown";
+    private int port = 0;
+    private String ipv4;
+
     public Span setName(String name){
         this.name = name;
         return this;
     }
 
-    int port = 0;
-    String ipv4;
+
 
     public Span setServiceName(String serviceName){
         this.serviceName = serviceName;
@@ -170,7 +172,7 @@ public class Span implements Serializable {
     public String getParentSpanId(){
         if(parentSpan == null){
             // parent span ID = 0 means no parent span ID
-            return null;
+            return "0";
         }else{
             return parentSpan.getSpanId();
         }
@@ -277,7 +279,7 @@ public class Span implements Serializable {
                 .add("traceId", traceId)
                 .add("name", name)
                 .add("id", spanId)
-                .addIfNotNull("parentId", getParentSpanId())
+                .add("parentId", getParentSpanId())
                 .add("timestamp", timestamp)
                 .add("duration", duration)
                 .add("binaryAnnotations", getBinaryAnnotationsJSON())
