@@ -161,7 +161,9 @@ public class Span implements Serializable {
     }
 
     public void save(){
-        duration = System.nanoTime() / 1000 - timestamp / 1000;
+        long time = System.nanoTime() / 1000;
+        addTargetReceivedAnn(time);
+        duration = time - (timestamp / 1000);
         saver.saveSpan(this);
     }
 
