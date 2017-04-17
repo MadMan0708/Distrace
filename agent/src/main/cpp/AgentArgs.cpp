@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <regex>
 #include <iostream>
+#include <fstream>
 #include "AgentArgs.h"
 #include "utils/Logging.h"
 #include "utils/Utils.h"
