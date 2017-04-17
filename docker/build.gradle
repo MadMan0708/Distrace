@@ -55,7 +55,7 @@ task createDockerfile(type: Dockerfile) {
     // we do it in one command to minimize the docker image size by removing dependencies
     // required to build the libraries
     runCommand """\\
-                apt-get -q -y --no-install-recommends install python \
+                apt-get --fix-missing -q -y --no-install-recommends install python \
                 git make cmake gcc g++ libboost-system-dev libboost-filesystem-dev && \\
                 \
                 git clone https://github.com/nanomsg/nanomsg.git /opt/nanomsg && \\
