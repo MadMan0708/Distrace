@@ -35,7 +35,7 @@ public class TraceContextManager {
 
     /**
      * Get trace context attached to the provided thread or throw NullPointerException if no such mapping
-     * can be found. Method {@code getOrCreateFrom} should be used to get or create new trace context.
+     * can be found. Method {@code getAndAttachFrom} should be used to get or create new trace context.
      * @param thread from which to get trace context
      * @throws NullPointerException in case trace context doesn't contain the mapping
      * @return trace context

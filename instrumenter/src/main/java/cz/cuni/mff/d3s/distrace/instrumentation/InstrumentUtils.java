@@ -5,16 +5,22 @@ import cz.cuni.mff.d3s.distrace.tracing.Span;
 import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 
 public class InstrumentUtils {
+    public static HashSet<Object> storage = new HashSet<>();
+    public static HashSet<Object> storage2 = new HashSet<>();
+    public static HashSet<Object> storage3 = new HashSet<>();
+
 
     public static final TraceContextManager contextManager = TraceContextManager.getOrCreate();
-    public static final String traceIdFieldName = "____traceId";
+    public static final String traceContextFieldName = "____traceId";
 
     public static TraceContext getTraceContext(Object thizz) {
         try {
-            Field f = thizz.getClass().getDeclaredField(traceIdFieldName);
+            Field f = thizz.getClass().getDeclaredField(traceContextFieldName);
             f.setAccessible(true);
             return (TraceContext) f.get(thizz);
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -25,7 +31,7 @@ public class InstrumentUtils {
 
     public static Span getCurrentSpan(Object o) {
         try {
-            Field f = o.getClass().getDeclaredField(traceIdFieldName);
+            Field f = o.getClass().getDeclaredField(traceContextFieldName);
             f.setAccessible(true);
             return ((TraceContext) f.get(o)).getCurrentSpan();
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -36,7 +42,7 @@ public class InstrumentUtils {
 
     public static void attachTraceContextOn(Object thizz, TraceContext context) {
         try {
-            Field f = thizz.getClass().getDeclaredField(traceIdFieldName);
+            Field f = thizz.getClass().getDeclaredField(traceContextFieldName);
             f.setAccessible(true);
             f.set(thizz, context);
         } catch (NoSuchFieldException | IllegalAccessException e) {

@@ -18,7 +18,7 @@ public class ClassPoolInterceptor implements Interceptor {
     public ClassPoolInterceptor(String pathToClasses){
         if(pathToClasses.endsWith("/")){
             // trim the ending slash
-            pathToInstrumentedClasses = pathToClasses.substring(0, pathToClasses.length()-1);
+            pathToInstrumentedClasses = pathToClasses.substring(0, pathToClasses.length() - 1);
         }else{
             pathToInstrumentedClasses = pathToClasses;
         }
@@ -30,8 +30,7 @@ public class ClassPoolInterceptor implements Interceptor {
             try {
                 classPool.insertClassPath(pathToInstrumentedClasses);
                 alreadyInserted = true;
-            } catch (NotFoundException ignore) {
-            }
+            } catch (NotFoundException ignore) {}
             System.out.println("GET was called, class path: " + classPool.source);
         }
     }

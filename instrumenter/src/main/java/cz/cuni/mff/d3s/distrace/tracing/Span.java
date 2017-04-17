@@ -8,6 +8,7 @@ import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -33,9 +34,18 @@ public class Span implements Serializable {
         return stackTrace;
     }
 
-    public void setStackTrace(Thread thread){
-        binaryAnnotations.put("stacktrace", getStackTraceAsJSON(thread).toString());
+    private void setStackTrace(String type, Thread thread){
+        binaryAnnotations.put(type+" stacktrace", getStackTraceAsJSON(thread).toString());
     }
+
+    public void setOpenStackTrace(Thread thread){
+        setStackTrace("opening", thread);
+    }
+
+    public void setCloseStackTrace(Thread thread){
+        setStackTrace("closing", thread);
+    }
+
 
     private static native String getSaverType();
 
@@ -99,6 +109,11 @@ public class Span implements Serializable {
         return this;
     }
 
+    public Span appendToName(String append){
+        this.name = this.name + append;
+        return this;
+    }
+
     private Span(String traceId, String name) {
         this.traceId = traceId;
         this.parentSpan = null;
@@ -106,6 +121,26 @@ public class Span implements Serializable {
         this.timestamp = System.nanoTime() / 1000;
         this.spanId = Long.toHexString(new Random().nextLong());
         addOriginStartAnn(timestamp);
+    }
+
+    Span(Span span){
+        this.traceId = span.traceId;
+        this.spanId = span.spanId;
+        this.timestamp = span.timestamp;
+        // it is not required to copy this field as the nested spans should not
+        // go above the level of thi span
+        this.parentSpan = span.parentSpan == null ? null :  new Span(span.parentSpan);
+        this.name = span.name;
+        this.annotations = annotationCopy(span.annotations);
+        this.binaryAnnotations = annotationCopy(span.binaryAnnotations);
+    }
+
+    private static <K,V> HashMap<K, V> annotationCopy(HashMap<K, V> annotations){
+        HashMap<K, V> map = new HashMap<>();
+        for(Map.Entry<K, V> entry : annotations.entrySet()){
+            map.put(entry.getKey(), entry.getValue());
+        }
+        return map;
     }
 
     private Span(String traceId, Span parentSpan, String name) {
@@ -130,7 +165,7 @@ public class Span implements Serializable {
         saver.saveSpan(this);
     }
 
-    private String getParentSpanId(){
+    public String getParentSpanId(){
         if(parentSpan == null){
             // parent span ID = 0 means no parent span ID
             return null;
@@ -149,6 +184,10 @@ public class Span implements Serializable {
 
     public String getSpanId(){
         return spanId;
+    }
+
+    public String getStringValue(String key){
+        return binaryAnnotations.get(key);
     }
 
     public Long getLongValue(String key){
@@ -213,6 +252,11 @@ public class Span implements Serializable {
 
     public Span add(String key, String value){
         binaryAnnotations.put(key, value);
+        return this;
+    }
+
+    public Span add(String key, boolean value){
+        binaryAnnotations.put(key, value ? "true" : "false");
         return this;
     }
 

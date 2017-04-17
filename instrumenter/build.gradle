@@ -6,8 +6,8 @@ dependencies {
     testCompile "junit:junit:4.12"
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6'
-    compile 'net.bytebuddy:byte-buddy:1.6.0'
-    compile 'net.bytebuddy:byte-buddy-agent:1.6.0'
+    compile 'net.bytebuddy:byte-buddy:1.6.12'
+    compile 'net.bytebuddy:byte-buddy-agent:1.6.12'
     compile "jnanomsg:jnanomsg:0.4.3"
 
     // for deep cloning
@@ -33,8 +33,8 @@ shadowJar{
         include(dependency("com.google.guava:guava:20.0"))
         include(dependency("org.objenesis:objenesis:2.1"))
         include(dependency("uk.com.robust-it:cloning:1.9.3"))
-        include(dependency("net.bytebuddy:byte-buddy-agent:1.6.0"))
-        include(dependency("net.bytebuddy:byte-buddy:1.6.0"))
+        include(dependency("net.bytebuddy:byte-buddy-agent:1.6.12"))
+        include(dependency("net.bytebuddy:byte-buddy:1.6.12"))
         include(dependency("jnanomsg:jnanomsg:0.4.3"))
         include(dependency("net.java.dev.jna:jna:4.2.1"))
         include(dependency("org.apache.logging.log4j:log4j-api:2.6"))

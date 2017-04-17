@@ -37,6 +37,7 @@ public class BaseAgentBuilder {
         this.sock = sock;
         agentBuilder = initBuilder();
     }
+
     public AgentBuilder getAgentBuilder(){
         return agentBuilder;
     }
@@ -89,8 +90,7 @@ public class BaseAgentBuilder {
         return new AgentBuilder.Default()
                 .with(new AgentBuilder.Listener() {
                     @Override
-                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule
-                            module, DynamicType dynamicType) {
+                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
                         log.info("Following type will be instrumented: " + typeDescription);
                         for(Map.Entry<TypeDescription, byte[]> entry : dynamicType.getAuxiliaryTypes().entrySet()){
                             sock.send("auxiliary_types");
@@ -110,7 +110,7 @@ public class BaseAgentBuilder {
                     }
 
                     @Override
-                    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+                    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
                         log.info("Following type won't be instrumented: " + typeDescription);
                         sock.send("no_more_aux_classes");
                         sock.send("no_more_initializers");
@@ -118,12 +118,12 @@ public class BaseAgentBuilder {
                     }
 
                     @Override
-                    public void onError(String typeName, ClassLoader classLoader, JavaModule module, Throwable throwable) {
+                    public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
                         log.error("Error whilst instrumenting: " + typeName, throwable);
                     }
 
                     @Override
-                    public void onComplete(String typeName, ClassLoader classLoader, JavaModule module) {
+                    public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
                         log.info("Finished processing of: " + typeName);
                     }
                 })

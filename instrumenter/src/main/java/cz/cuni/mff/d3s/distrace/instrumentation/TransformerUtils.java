@@ -10,6 +10,7 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.implementation.SuperMethodCall;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -21,15 +22,16 @@ public class TransformerUtils {
     public static AgentBuilder.Transformer withTraceIdForMethodsIn(final Interceptor interceptor){
         return new AgentBuilder.Transformer() {
             @Override
-            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
+            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
                 return TransformerUtils.forMethodsInInterceptor(TransformerUtils.defineTraceId(builder), interceptor);
             }
+
         };
     }
     public static AgentBuilder.Transformer forMethodsIn(final Interceptor interceptor){
         return new AgentBuilder.Transformer(){
             @Override
-            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader) {
+            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
                 return forMethodsInInterceptor(builder, interceptor);
             }
         };

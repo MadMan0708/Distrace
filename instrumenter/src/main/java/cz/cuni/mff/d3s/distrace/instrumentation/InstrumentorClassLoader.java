@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 /**
  * Classloader used in the Instrumenter. This classloader caches all bytecode received from the native
- * agent. Byte buddy is using this class loader to create TypeDescriptions for each class and also to getOrCreateFrom
+ * agent. Byte buddy is using this class loader to create TypeDescriptions for each class and also to getAndAttachFrom
  * bytecode for class really being instrumented.
  */
 public class InstrumentorClassLoader extends ClassLoader{

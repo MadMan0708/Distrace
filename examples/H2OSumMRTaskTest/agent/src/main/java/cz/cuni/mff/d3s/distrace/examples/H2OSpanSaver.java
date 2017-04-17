@@ -4,7 +4,6 @@ import com.google.auto.service.AutoService;
 import cz.cuni.mff.d3s.distrace.tracing.Span;
 import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
-import water.H2O;
 
 @AutoService(SpanSaver.class)
 public class H2OSpanSaver extends DirectZipkinSaver {
