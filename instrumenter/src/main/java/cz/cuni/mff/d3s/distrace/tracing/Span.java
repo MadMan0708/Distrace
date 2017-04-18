@@ -120,7 +120,7 @@ public class Span implements Serializable {
         this.traceId = traceId;
         this.parentSpan = null;
         this.name = name;
-        this.timestamp = System.nanoTime() / 1000;
+        this.timestamp = System.currentTimeMillis()*1000;
         this.spanId = Long.toHexString(new Random().nextLong());
         addOriginStartAnn(timestamp);
     }
@@ -148,7 +148,7 @@ public class Span implements Serializable {
     private Span(String traceId, Span parentSpan, String name) {
         this.traceId = traceId;
         this.spanId = Long.toHexString(new Random().nextLong());
-        this.timestamp = System.nanoTime() / 1000;
+        this.timestamp = System.currentTimeMillis()*1000;
         this.parentSpan = parentSpan;
         this.name = name;
         addOriginStartAnn(timestamp);
@@ -163,16 +163,16 @@ public class Span implements Serializable {
     }
 
     public void save(){
-        long time = System.nanoTime() / 1000;
+        long time = System.currentTimeMillis()*1000;
         addOriginReceivedAnn(time);
-        duration = time - (timestamp / 1000);
+        duration = time - timestamp;
         saver.saveSpan(this);
     }
 
     public String getParentSpanId(){
         if(parentSpan == null){
             // parent span ID = 0 means no parent span ID
-            return "0";
+            return null;
         }else{
             return parentSpan.getSpanId();
         }
@@ -279,7 +279,7 @@ public class Span implements Serializable {
                 .add("traceId", traceId)
                 .add("name", name)
                 .add("id", spanId)
-                .add("parentId", getParentSpanId())
+                .addIfNotNull("parentId", getParentSpanId())
                 .add("timestamp", timestamp)
                 .add("duration", duration)
                 .add("binaryAnnotations", getBinaryAnnotationsJSON())
