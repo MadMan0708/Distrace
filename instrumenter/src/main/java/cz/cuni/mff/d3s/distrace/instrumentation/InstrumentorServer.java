@@ -47,7 +47,7 @@ public class InstrumentorServer {
             LoadedTypeInitializer.Compound.class,
             LoadedTypeInitializer.ForStaticField.class,
             SetAccessibleAction.class,
-            InstrumentUtils.class,
+            StorageUtils.class,
             StackTraceUtils.class,
             TraceContextManager.class,
             TraceContext.class,

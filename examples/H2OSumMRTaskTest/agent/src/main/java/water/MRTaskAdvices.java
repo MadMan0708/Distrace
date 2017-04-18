@@ -1,7 +1,7 @@
 package water;
 
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentUtils;
+import cz.cuni.mff.d3s.distrace.instrumentation.StorageUtils;
 import cz.cuni.mff.d3s.distrace.instrumentation.StackTraceUtils;
 import cz.cuni.mff.d3s.distrace.tracing.Span;
 import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
@@ -44,8 +44,8 @@ public abstract class MRTaskAdvices {
                 tc.openNestedSpan( "H2O Node"+H2O.SELF.index() + " - Setting and Splitting on " + H2O.getIpPortString())
                         .setIpPort(H2O.getIpPortString());
                 tc.getCurrentSpan().add("setupLocal0 entry", o.toString());
-                tc.attachOn(o);
-                InstrumentUtils.storage.add(o);
+                tc.attachOnObject(o);
+                StorageUtils.getList("setupLocal").add(o);
                 System.out.println("SETUPLOCAL0 " + o.hashCode() + " span id = " + tc.getCurrentSpan().getSpanId() + " parent id = " + tc.getCurrentSpan().getParentSpan().getSpanId());
 
             }
@@ -69,7 +69,7 @@ public abstract class MRTaskAdvices {
                     tc.openNestedSpan("H2O Node"+H2O.SELF.index() + " - Remote Work - none")
                             .setIpPort(H2O.getIpPortString());
 
-                    tc.attachOn(o);
+                    tc.attachOnObject(o);
                 }
             }
         }
@@ -94,9 +94,9 @@ public abstract class MRTaskAdvices {
                 TraceContext tc = TraceContext.getCopyWithoutAttachFrom(o);
                 tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Local work - chunks : " + (tsk._hi - tsk._lo));
                 tc.getCurrentSpan().add("compute2 entry", o.toString());
-                tc.attachOn(o);
+                tc.attachOnObject(o);
                 System.out.println("ADDING " + o + " to Storage2");
-                InstrumentUtils.storage2.add(o);
+                StorageUtils.getList("compute2").add(o);
                 System.out.println("Compute2 (= Local Work) entered. Node: " + H2O.getIpPortString() + " trace ID: " + tc.getTraceId());
 
                 if (StackTraceUtils.numMethodCalls("compute2") >= 2) {
@@ -167,18 +167,15 @@ public abstract class MRTaskAdvices {
                 MRTask task = (MRTask) o;
                 TraceContext tc = TraceContext.getWithoutAttachFrom(task);
 
-
-
-                if(InstrumentUtils.storage2.contains(task)){
-                    InstrumentUtils.storage2.remove(task);
+                if(StorageUtils.getList("compute2").contains(task)){
+                    StorageUtils.getList("compute2").remove(task);
                     tc.getCurrentSpan().add("compute2 exit", task.toString());
                     tc.closeCurrentSpan();
                     System.out.println("OnCompletion exit compute2: " + H2O.getIpPortString() + " trace ID " +tc.getTraceId() + " task id " + task.hashCode());
                 }
                 // setupLocal0 span finishes when there are no more pending task on this node for this MRTask
-                if(InstrumentUtils.storage.contains(task)){
-
-                    InstrumentUtils.storage.remove(task);
+                if(StorageUtils.getList("setupLocal").contains(task)){
+                    StorageUtils.getList("setupLocal").remove(task);
                     tc.getCurrentSpan()
                             .add("left", task._nleft == null ? "local" : task._nleft._target.getIpPortString())
                             .add("right", task._nrite == null ? "local" : task._nrite._target.getIpPortString());
