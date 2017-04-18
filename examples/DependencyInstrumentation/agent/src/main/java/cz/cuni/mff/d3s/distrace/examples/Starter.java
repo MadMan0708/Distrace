@@ -14,7 +14,8 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 
 /**
- * Starter of the instrumentation server
+ * Starter of the instrumentation server. This example does not use the user interface however it just demonstrates
+ * the instrumentation of dependent classes
  */
 public class Starter {
     public static void main(String[] args) {
