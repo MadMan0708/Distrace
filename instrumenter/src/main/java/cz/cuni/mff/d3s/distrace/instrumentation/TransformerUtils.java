@@ -16,9 +16,19 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
+import static net.bytebuddy.matcher.ElementMatchers.named;
+
 
 public class TransformerUtils {
 
+    public static AgentBuilder.Transformer forMethod(String methodName, final Interceptor interceptor){
+        return new AgentBuilder.Transformer() {
+            @Override
+            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+                return builder.method(named("toString")).intercept(MethodDelegation.to(interceptor));
+            }
+        };
+    }
     public static AgentBuilder.Transformer withTraceIdForMethodsIn(final Interceptor interceptor){
         return new AgentBuilder.Transformer() {
             @Override

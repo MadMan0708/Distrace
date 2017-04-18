@@ -5,16 +5,21 @@ import net.bytebuddy.implementation.bind.annotation.SuperCall;
 
 import java.util.concurrent.Callable;
 
+import com.google.auto.service.AutoService;
 
+/**
+ * Example interceptor
+ */
+@AutoService(Interceptor.class)
 public class TaskInterceptor implements Interceptor {
 
-    String prefix;
+    private String prefix;
 
-    public TaskInterceptor(String prefix){
+    public TaskInterceptor(String prefix) {
         this.prefix = prefix;
     }
 
-    public String instrument(@SuperCall(serializableProxy=true) Callable<String> value) throws Exception{
+    public String toString(@SuperCall(serializableProxy = true) Callable<String> value) throws Exception {
         return prefix + " (" + value.call() + ")";
     }
 }

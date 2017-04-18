@@ -6,4 +6,4 @@ source $TOPDIR/bin/prepare-env.sh
 
 finalize_configuration
 
-java -agentpath:$AGENT_ARGS -jar $APP_JAR_PATH
+java -agentpath:"$NATIVE_AGENT_LIB_PATH=$AGENT_ARGS" -jar $APP_JAR_PATH

@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
 
-public class ExtendedTask{
+public class ExtendedTask {
 
     @Override
     public String toString() {

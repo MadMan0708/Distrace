@@ -5,17 +5,18 @@ description = "Instrumentation agent"
 dependencies {
     // use functionality provided by core-instrumentor
     compile project(path: ':distrace-instrumenter', configuration: 'shadow')
-    compile project(path: ':distrace-examples-DependencyInstrTest-app', configuration: 'archives')
+    compile project(path: ':distrace-examples-DependencyInstrumentation-app', configuration: 'archives')
+    compile group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc2'
 }
 
 artifacts {
     archives shadowJar
 }
 
-shadowJar{
+shadowJar {
     dependencies {
         include(project(path: ':distrace-instrumenter', configuration: 'shadow'))
         // exclude application classes from the final jar
-        exclude(project(path: ':distrace-examples-DependencyInstrTest-app', configuration: 'archives'))
+        exclude(project(path: ':distrace-examples-DependencyInstrumentation-app', configuration: 'archives'))
     }
 }
