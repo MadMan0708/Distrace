@@ -121,7 +121,6 @@ public abstract class MRTaskAdvices {
                     }
                     TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
                     tc.openNestedSpan("H2O Node"+H2O.SELF.index() + " - Reducing " + str);
-                    tc.getCurrentSpan().add("start", System.nanoTime() / 1000);
                 }
 
             }
@@ -131,9 +130,7 @@ public abstract class MRTaskAdvices {
         public static void exit(@Advice.This MRTask thizz, @Advice.Argument(0) MRTask mrt){
             if(mrt != null) {
                 TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
-                tc.getCurrentSpan().add("end", System.nanoTime() / 1000);
                 Span s = tc.getCurrentSpan();
-                tc.getCurrentSpan().appendToName(" - lasted - " + (s.getLongValue("end")-s.getLongValue("start")) + " ms");
                 tc.closeCurrentSpan();
             }
         }
@@ -146,16 +143,13 @@ public abstract class MRTaskAdvices {
             if (thizz instanceof SumMRTask) {
                     TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
                     tc.openNestedSpan("H2O Node"+H2O.SELF.index() + " - mapping ");
-                    tc.getCurrentSpan().add("start", System.nanoTime() / 1000);
             }
         }
 
         @Advice.OnMethodExit
         public static void exit(@Advice.This MRTask thizz){
                 TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
-                tc.getCurrentSpan().add("end", System.nanoTime() / 1000);
                 Span s = tc.getCurrentSpan();
-                tc.getCurrentSpan().appendToName(" - lasted - " + (s.getLongValue("end")-s.getLongValue("start")) + " ms");
                 tc.closeCurrentSpan();
         }
     }
