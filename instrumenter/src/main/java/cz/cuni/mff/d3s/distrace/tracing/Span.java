@@ -135,6 +135,8 @@ public class Span implements Serializable {
         this.name = span.name;
         this.annotations = annotationCopy(span.annotations);
         this.binaryAnnotations = annotationCopy(span.binaryAnnotations);
+        this.ipv4 = span.ipv4;
+        this.port = span.port;
     }
 
     private static <K,V> HashMap<K, V> annotationCopy(HashMap<K, V> annotations){

@@ -15,15 +15,12 @@ public class RPCAdvices {
             if (StackTraceUtils.containsMethodCall("remote_compute")) {
                 if (thizz._dt instanceof SumMRTask) {
                     TraceContext tc = TraceContext.getCopyWithoutAttachFrom(thizz._dt);
-                    tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Remote work")
+                    tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Remote work - rpc")
                             .setIpPort(H2O.getIpPortString())
-                            .add("ipPort", H2O.getIpPortString())
-                            .add("RPC Called", System.nanoTime() / 1000);
+                            .add("ipPort", H2O.getIpPortString());
                     StorageUtils.getList("remote_compute").add(thizz._dt);
 
-                    System.out.println("CALLED " + thizz._dt + " ");
                     tc.attachOnObject(thizz._dt);
-                    System.out.println("ADDING" + thizz._dt + "TO storage3");
                     System.out.println("Remote compute enter: " + H2O.getIpPortString() + " trace ID " + tc.getTraceId());
                 }
             }
@@ -36,15 +33,10 @@ public class RPCAdvices {
             if (thizz._dt instanceof SumMRTask) {
                 if ( StorageUtils.getList("remote_compute").contains(thizz._dt)) {
                     StorageUtils.getList("remote_compute").remove(thizz._dt);
-                    TraceContext tc = TraceContext.getWithoutAttachFrom(thizz._dt);
-                        System.out.println("TRY COMPLETE CALLED STORAGE 333" + thizz._dt) ;
-                        tc.getCurrentSpan().appendToName(" __try_complete called");
-                        tc.closeCurrentSpan();
+                    TraceContext.getWithoutAttachFrom(thizz._dt).closeCurrentSpan();
                     }
             }
         }
     }
-
-
 
 }

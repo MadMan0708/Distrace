@@ -8,7 +8,6 @@ import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import jsr166y.CountedCompleter;
 import net.bytebuddy.asm.Advice;
 
-
 public abstract class MRTaskAdvices {
 
     public static class dfork {
@@ -41,7 +40,7 @@ public abstract class MRTaskAdvices {
         public static void enter(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
                 TraceContext tc = TraceContext.getWithoutAttachFrom(o);
-                tc.openNestedSpan( "H2O Node"+H2O.SELF.index() + " - Setting and Splitting on " + H2O.getIpPortString())
+                tc.openNestedSpan( "H2O Node"+H2O.SELF.index() + " - Setting and Splitting")
                         .setIpPort(H2O.getIpPortString());
                 tc.getCurrentSpan().add("setupLocal0 entry", o.toString());
                 tc.attachOnObject(o);
