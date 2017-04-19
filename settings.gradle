@@ -17,9 +17,8 @@ def includeAllTestProjects(File startPath) {
     }
 }
 
-
 // include all test projects in the examples directory
-// that includes agent and application for each example
+// which includes agent and application for each example
 includeAllTestProjects(new File(rootDir, "examples"))
 
 // Prefix all projects with project name
