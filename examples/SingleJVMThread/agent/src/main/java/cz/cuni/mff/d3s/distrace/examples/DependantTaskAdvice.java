@@ -11,7 +11,6 @@ public class DependantTaskAdvice {
     public static class start {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Thread thizz) {
-            System.out.println("THREAD NESTED" + thizz);
             TraceContext tc = TraceContext.getFromCurrentThread().deepCopy();
             tc.attachOnTread(thizz);
             tc.openNestedSpan("Nested Span");
@@ -21,11 +20,11 @@ public class DependantTaskAdvice {
 
     public static class run {
         @Advice.OnMethodExit
-        public static void exit(@Advice.This Thread thizz) {
-
+        public static void exit() {
+            TraceContext tc = TraceContext.getFromCurrentThread();
             System.out.printf("Method run on dependant task was called. Thread id = %d, trace id = %s, span id = %s\n",
-                    Thread.currentThread().getId(), TraceContext.getFromCurrentThread().getTraceId(), TraceContext.getFromCurrentThread().getCurrentSpan().getSpanId());
-            TraceContext.getFromCurrentThread().closeCurrentSpan();
+                    Thread.currentThread().getId(), tc.getTraceId(), tc.getCurrentSpan().getSpanId());
+            tc.closeCurrentSpan();
         }
     }
 }

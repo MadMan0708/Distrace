@@ -1,7 +1,5 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
-import org.omg.CORBA.SystemException;
-
 /**
  * This test shows the propagation of trace contexts between different tasks.
  */

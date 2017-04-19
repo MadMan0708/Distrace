@@ -167,10 +167,6 @@ public class TraceContext implements Serializable {
         return getWithoutAttachFrom(traceContextHolder).deepCopy();
     }
 
-    public static TraceContext getCurrent() {
-        return contextManager.getTraceContext(Thread.currentThread());
-    }
-
     private static  void attachTraceContextOn(Object thizz, TraceContext context) {
         try {
             Field f = thizz.getClass().getDeclaredField(traceContextFieldName);

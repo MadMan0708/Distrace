@@ -22,8 +22,6 @@ public class Starter {
                                 .transform(new StarterTaskTransformer())
                                 .type(named("cz.cuni.mff.d3s.distrace.examples.DependantTask"))
                                 .transform(new DependantTaskTransformer());
-
-
                     }
                 });
     }
