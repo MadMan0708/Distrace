@@ -13,7 +13,7 @@ public abstract class SpanSaver {
 
     protected static boolean debug = false;
 
-    static{
+    static {
         debug = isDebugging();
     }
 
@@ -24,18 +24,19 @@ public abstract class SpanSaver {
     /**
      * This method parses and sets arguments passed to saver on corresponding saver class
      * Expects arguments passes to saver type.
-     *
+     * <p>
      * Saver type is always specified as saverType(args). In case of distrace saver types
      * it's ok to just specify saver name - directZipkin(args) or disk(args). In case of
      * custom saver type it is necessary to specify full class name of saver, such as
      * custom.span.saver(args)
-     *
+     * <p>
      * If the saver doesn't have any arguments than ampty string is passes to this method
+     *
      * @param args saver arguments
      */
     public abstract void parseAndSetArgs(String args);
 
-    protected final void submitSpanTask(Runnable spanSavingTask){
+    protected final void submitSpanTask(Runnable spanSavingTask) {
         executor.submit(spanSavingTask);
     }
 
@@ -48,7 +49,7 @@ public abstract class SpanSaver {
             String customSaverClass = saverType.substring(0, saverType.indexOf('('));
             try {
                 final Class<?> customSaverClazz = Class.forName(customSaverClass);
-                return (SpanSaver)customSaverClazz
+                return (SpanSaver) customSaverClazz
                         .getConstructor(String.class).newInstance(getArgs(saverType));
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("Custom saver class " + customSaverClass + " does" +
@@ -62,7 +63,7 @@ public abstract class SpanSaver {
         throw new RuntimeException("Should not happen since this check should have been performed by native agent");
     }
 
-    private static String getArgs(String saverTypeStr){
-        return saverTypeStr.substring(saverTypeStr.indexOf('(')+1, saverTypeStr.lastIndexOf(')'));
+    private static String getArgs(String saverTypeStr) {
+        return saverTypeStr.substring(saverTypeStr.indexOf('(') + 1, saverTypeStr.lastIndexOf(')'));
     }
 }

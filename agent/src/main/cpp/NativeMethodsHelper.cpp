@@ -24,6 +24,9 @@ jstring NativeMethodsHelper::getTypeOneUUID(JNIEnv *jni, jobject thiz){
     return JavaUtils::asJavaString(jni, sole::uuid0().str());
 }
 
+jstring NativeMethodsHelper::getClassOutputDir(JNIEnv *jni, jobject thiz){
+    return JavaUtils::asJavaString(jni, Agent::getArgs()->getArgValue(AgentArgs::ARG_CLASS_OUTPUT_DIR));
+}
 
 std::map<std::string, std::vector<JNINativeMethod>> NativeMethodsHelper::nativesPerClass = {
     {
@@ -43,6 +46,12 @@ std::map<std::string, std::vector<JNINativeMethod>> NativeMethodsHelper::natives
             "cz.cuni.mff.d3s.distrace.utils.NativeAgentUtils",
             {
                     toNative("getTypeOneUUID", "()Ljava/lang/String;", (void *) getTypeOneUUID)
+            }
+        ),
+        std::make_pair<std::string, std::vector<JNINativeMethod>>(
+            "cz.cuni.mff.d3s.distrace.tracing.TraceContext",
+            {
+                    toNative("getClassOutputDir", "()Ljava/lang/String;", (void *) getClassOutputDir)
             }
         )
     }

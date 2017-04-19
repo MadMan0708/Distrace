@@ -18,6 +18,10 @@ public class JSONArray extends JSONValue {
         values = new ArrayList<>();
     }
 
+    public int size(){
+        return values.size();
+    }
+
     public JSONArray add(int value){
         values.add(JSON.valueOf(value));
         return this;

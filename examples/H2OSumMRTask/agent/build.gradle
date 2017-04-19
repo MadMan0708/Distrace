@@ -1,0 +1,32 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+description = "Instrumentation agent for Simple MR task in H2O"
+
+
+//
+// Configure project properties
+//
+ext {
+    h2oVersion = "3.10.4.3"
+}
+
+dependencies {
+    // use functionality provided by core-instrumentor
+    compile project(path: ':distrace-instrumenter', configuration: 'shadow')
+    compile "ai.h2o:h2o-core:${h2oVersion}"
+    compile project(":distrace-examples-H2OSumMRTask-app")
+    compile group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc2'
+}
+
+artifacts {
+    archives shadowJar
+}
+
+shadowJar{
+    dependencies {
+        include(project(path: ':distrace-instrumenter', configuration: 'shadow'))
+        // exclude application classes from the final jar
+        exclude(dependency("ai.h2o:h2o-core:${h2oVersion}"))
+        exclude(project(":distrace-examples-H2OSumMRTask-app"))
+    }
+}

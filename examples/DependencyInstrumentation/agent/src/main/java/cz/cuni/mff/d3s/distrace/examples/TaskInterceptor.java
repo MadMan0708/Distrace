@@ -19,7 +19,7 @@ public class TaskInterceptor implements Interceptor {
         this.prefix = prefix;
     }
 
-    public String toString(@SuperCall(serializableProxy = true) Callable<String> value) throws Exception {
+    public String instrument(@SuperCall(serializableProxy = true) Callable<String> value) throws Exception {
         return prefix + " (" + value.call() + ")";
     }
 }

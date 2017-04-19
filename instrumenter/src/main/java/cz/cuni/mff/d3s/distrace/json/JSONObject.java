@@ -54,6 +54,13 @@ public class JSONObject extends JSONValue {
         return this;
     }
 
+    public JSONObject addIfNotEmpty(String name, JSONArray value){
+        if(value.size() != 0){
+            add(name, value);
+        }
+        return this;
+    }
+
     public JSONObject addIfNotNull(String name, Integer value){
         if(value != null){
             add(name, value);

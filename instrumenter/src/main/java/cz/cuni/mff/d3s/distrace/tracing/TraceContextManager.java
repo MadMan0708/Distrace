@@ -55,7 +55,7 @@ public class TraceContextManager {
      */
     public TraceContext getOrCreateTraceContext(Thread thread){
         if(!hasTraceContext(thread)){
-            attachTraceContextTo(thread, new TraceContext());
+            attachTraceContextTo(thread, TraceContext.create());
         }
         return getTraceContext(thread);
     }
@@ -75,7 +75,7 @@ public class TraceContextManager {
         return str.toString();
     }
     
-    private boolean hasTraceContext(Thread thread){
+    public boolean hasTraceContext(Thread thread){
         return contexts.containsKey(thread.getId());
     }
 

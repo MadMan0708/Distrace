@@ -32,13 +32,10 @@ public class InstrumentorServer {
     private ClassFileTransformer transformer;
     private CustomAgentBuilder builder;
     private InstrumentorClassLoader instLoader = new InstrumentorClassLoader();
-    private String pathToClasses;
 
-
-    public InstrumentorServer(String sockAddr, CustomAgentBuilder builder, String pathToClasses) {
+    public InstrumentorServer(String sockAddr, CustomAgentBuilder builder) {
         this.sockAddr = sockAddr;
         this.builder = builder;
-        this.pathToClasses = pathToClasses;
     }
 
     private static Class[] helperClasses = {
@@ -197,7 +194,7 @@ public class InstrumentorServer {
 
     public void start() {
         sock = new SocketWrapper(sockAddr);
-        transformer = builder.createAgent(new BaseAgentBuilder(sock, instLoader), pathToClasses).makeRaw();
+        transformer = builder.createAgent(new BaseAgentBuilder(sock, instLoader)).makeRaw();
         //noinspection InfiniteLoopStatement
         while (true) {
 

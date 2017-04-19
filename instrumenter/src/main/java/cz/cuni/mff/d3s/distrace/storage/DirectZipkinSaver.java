@@ -55,6 +55,7 @@ public class DirectZipkinSaver extends SpanSaver {
                 osw.flush();
                 os.flush();
                 httpCon.getResponseCode();
+
             } catch (ConnectException e){
                 System.out.println("Couldn't connect to Zipkin Server, are you sure it is running on " + serverIpPort + "? Span " + span + " won't be sent!");
             } catch (IOException e) {

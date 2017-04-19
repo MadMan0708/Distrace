@@ -1,0 +1,21 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+description = "Instrumentation agent"
+
+dependencies {
+    // use functionality provided by core-instrumentor
+    compile project(path: ':distrace-instrumenter', configuration: 'shadow')
+    compile project(path: ':distrace-examples-SingleJVMCallback-app', configuration: 'archives')
+}
+
+artifacts {
+    archives shadowJar
+}
+
+shadowJar{
+    dependencies {
+        include(project(path: ':distrace-instrumenter', configuration: 'shadow'))
+        // exclude application classes from the final jar
+        exclude(project(path: ':distrace-examples-SingleJVMCallback-app', configuration: 'archives'))
+    }
+}

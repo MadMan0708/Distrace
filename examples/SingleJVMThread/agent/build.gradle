@@ -1,0 +1,19 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+description = "Instrumentation agent"
+
+dependencies {
+    // use functionality provided by core instrumentation server
+    compile project(path: ':distrace-instrumenter', configuration: 'shadow')
+    compile group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc2'
+}
+
+artifacts {
+    archives shadowJar
+}
+
+shadowJar {
+    dependencies {
+        include(project(path: ':distrace-instrumenter', configuration: 'shadow'))
+    }
+}

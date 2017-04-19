@@ -24,6 +24,7 @@ namespace Distrace {
         static const std::string ARG_LOG_DIR;
         static const std::string ARG_SAVER_TYPE;
         static const std::string ARG_CONFIG_FILE;
+        static const std::string ARG_CLASS_OUTPUT_DIR;
 
         /**
          * Get the internal arguments map

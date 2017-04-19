@@ -50,9 +50,10 @@ std::vector<std::string> InstrumentorAPI::ignoredLoaders =  {
         // see http://stackoverflow.com/questions/6505274/what-for-sun-jvm-creates-instances-of-sun-reflect-delegatingclassloader-at-runti
 };
 
-InstrumentorAPI::InstrumentorAPI(nnxx::socket socket, std::string pathToClassDir) {
+InstrumentorAPI::InstrumentorAPI(nnxx::socket socket) {
     this->socket = std::move(socket);
-    this->pathToClassDir = pathToClassDir;
+    this->pathToClassDir = Agent::getArgs()->getArgValue(AgentArgs::ARG_CLASS_OUTPUT_DIR);
+
     log(LOGGER_INSTRUMENTOR_API)->info("Adding directory for helper classes sent from Instrumentor JVM"
                                                " to classpath : {}", this->pathToClassDir);
     Agent::globalData->jvmti->AddToSystemClassLoaderSearch(this->pathToClassDir.c_str());
@@ -259,7 +260,6 @@ void InstrumentorAPI::loadInterceptor(JNIEnv *jni, jobject loader, std::string c
 
 int InstrumentorAPI::init() {
     const std::string connectionStr = Agent::getArgs()->getArgValue(AgentArgs::ARG_CONNECTION_STR);
-    auto classDir = Utils::createUniqueTempDir();
     // launch Instrumentor JVM only in case of ipc, when tcp is set, the instrumentor JVM should be already running.
     if(Agent::getArgs()->isRunningInLocalMode()){
         // fork instrumentor JVM
@@ -277,15 +277,13 @@ int InstrumentorAPI::init() {
 
         std::string launchCommand =
                 "java -cp " + instrumentorServerJar + ":" + instrumentorServerCP + " " + instrumentorMainClass + " " + connectionStr + " " +
-                logLevel + " " + logDir  + " " + classDir + " &";
+                logLevel + " " + logDir + " &";
         log(LOGGER_INSTRUMENTOR_API)->info("Starting Instrumentor JVM with the command: {}", launchCommand);
         int result = system(Utils::stringToCharPointer(launchCommand));
         if (result < 0) {
             log(LOGGER_INSTRUMENTOR_API)->error("Instrumentor JVM couldn't be forked because of error: {}", strerror(errno));
             return JNI_ERR;
         }
-    }else{
-        //TODO: check the connection
     }
     // create socket which is used to connect to the Instrumentor JVM
     nnxx::socket socket{nnxx::SP, nnxx::PAIR};
@@ -299,7 +297,7 @@ int InstrumentorAPI::init() {
         log(LOGGER_INSTRUMENTOR_API)->info("Connection to the instrumentor JVM established. Assigned endpoint ID is = {}", endpoint);
     }
 
-    Agent::globalData->instApi = new InstrumentorAPI(std::move(socket), classDir);
+    Agent::globalData->instApi = new InstrumentorAPI(std::move(socket));
     return JNI_OK;
 }
 

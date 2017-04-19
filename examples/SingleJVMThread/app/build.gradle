@@ -1,0 +1,10 @@
+description = "Simple application demostrating instrumentation of threads in one JVM"
+
+// example application does not need to have any dependency on the instrumentation platform at all
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'cz.cuni.mff.d3s.distrace.examples.Main'
+        )
+    }
+}

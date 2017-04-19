@@ -25,6 +25,7 @@ const std::string AgentArgs::ARG_LOG_LEVEL = "log_level";
 const std::string AgentArgs::ARG_LOG_DIR = "log_dir";
 const std::string AgentArgs::ARG_SAVER_TYPE = "saver";
 const std::string AgentArgs::ARG_CONFIG_FILE = "config_file";
+const std::string AgentArgs::ARG_CLASS_OUTPUT_DIR = "class_output_dir";
 
 std::map<std::string, std::string> AgentArgs::getArgsMap() {
     return args;
@@ -166,6 +167,10 @@ void AgentArgs::fillMissingWithDefaults(){
     if(!isArgSet(ARG_SAVER_TYPE)){
         // the default saver is directly to Zipkin where we expect that zipkin is running on localhost on default port
         args.insert({ARG_SAVER_TYPE, "directZipkin(localhost:9411)"});
+    }
+
+    if(!isArgSet(ARG_CLASS_OUTPUT_DIR)){
+        args.insert({ARG_CLASS_OUTPUT_DIR, Utils::createUniqueTempDir()});
     }
 }
 

@@ -10,9 +10,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
-
-import static cz.cuni.mff.d3s.distrace.utils.NativeAgentUtils.getTypeOneUUID;
 
 public class Span implements Serializable {
 
@@ -284,8 +281,8 @@ public class Span implements Serializable {
                 .addIfNotNull("parentId", getParentSpanId())
                 .add("timestamp", timestamp)
                 .add("duration", duration)
-                .add("binaryAnnotations", getBinaryAnnotationsJSON())
-                .add("annotations", getAnnotationsJSON());
+                .addIfNotEmpty("binaryAnnotations", getBinaryAnnotationsJSON())
+                .addIfNotEmpty("annotations", getAnnotationsJSON());
 
         return new JSONArray(jsonSpan);
     }

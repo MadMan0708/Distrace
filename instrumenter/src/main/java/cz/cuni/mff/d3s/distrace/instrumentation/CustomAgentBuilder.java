@@ -4,5 +4,5 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 
 public abstract class CustomAgentBuilder {
 
-    public abstract AgentBuilder createAgent(BaseAgentBuilder builder, String pathToGeneratedClasses);
+    public abstract AgentBuilder createAgent(BaseAgentBuilder builder);
 }

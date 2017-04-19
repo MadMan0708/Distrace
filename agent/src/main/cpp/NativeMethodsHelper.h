@@ -39,8 +39,13 @@ namespace Distrace {
         static jstring getTypeOneUUID(JNIEnv *jni, jobject thiz);
 
         /**
-        * List of all native methods we defined
-        */
+         * Get class output directory for interceptors and auxiliary classes
+         */
+        static jstring getClassOutputDir(JNIEnv *jni, jobject thiz);
+
+        /**
+         * List of all native defined native methods
+         */
         static std::map<std::string, std::vector<JNINativeMethod>> nativesPerClass;
 
         /**

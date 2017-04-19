@@ -11,17 +11,20 @@ import java.lang.reflect.Field;
 public class TraceContext implements Serializable {
     private Span span;
     private String traceId;
-    private static final String traceContextFieldName = "____traceId";
+    private static final String traceContextFieldName = "____traceContext";
     private static final TraceContextManager contextManager = TraceContextManager.getOrCreate();
 
     private TraceContext(TraceContext context) {
-        this.span = new Span(context.getCurrentSpan());
+        this.span = context.getCurrentSpan() == null ? null : new Span(context.getCurrentSpan());
         this.traceId = context.traceId;
     }
 
-    public TraceContext() {
+
+    private TraceContext() {
         traceId = NativeAgentUtils.getTypeOneUUIDHex();
     }
+
+    public static native String getClassOutputDir();
 
     public String getTraceId() {
         return traceId;
@@ -56,7 +59,7 @@ public class TraceContext implements Serializable {
         } else {
             span = Span.newNestedSpan(traceId, span, name);
         }
-        span.setOpenStackTrace(Thread.currentThread());
+        //span.setOpenStackTrace(Thread.currentThread());
         printSpanInfo("Opening");
         return span;
     }
@@ -67,7 +70,7 @@ public class TraceContext implements Serializable {
      */
     public TraceContext closeCurrentSpan() {
         printSpanInfo("Closing");
-        span.setCloseStackTrace(Thread.currentThread());
+        //span.setCloseStackTrace(Thread.currentThread());
         span.save();
         span = span.getParentSpan();
         return this;
@@ -99,14 +102,18 @@ public class TraceContext implements Serializable {
      * Create new Trace context from existing trace context
      * @return new trace context
      */
-    private TraceContext deepCopy() {
+    public TraceContext deepCopy() {
         return new TraceContext(this);
     }
 
     public static TraceContext createAndAttachTo(Object o) {
-        contextManager.attachTraceContextTo(Thread.currentThread(), new TraceContext());
+        contextManager.attachTraceContextTo(Thread.currentThread(), TraceContext.create());
         attachTraceContextOn(o, contextManager.getTraceContext(Thread.currentThread()));
         return contextManager.getTraceContext(Thread.currentThread());
+    }
+
+    public static TraceContext create(){
+        return new TraceContext();
     }
 
     private static TraceContext getFromHolder(Object traceContextHolder) {
@@ -124,8 +131,26 @@ public class TraceContext implements Serializable {
         return this;
     }
 
+    public static TraceContext getFromObject(Object traceContextHolder){
+        return getFromHolder(traceContextHolder);
+    }
+
+    public static TraceContext getFromThread(Thread thread){
+        return contextManager.getTraceContext(thread);
+    }
+
+    public static TraceContext getFromCurrentThread(){
+        return contextManager.getTraceContext(Thread.currentThread());
+    }
+
     public TraceContext attachOnTread(Thread thread){
-        return contextManager.getOrCreateTraceContext(thread);
+        return contextManager.attachTraceContextTo(thread, this);
+    }
+
+
+
+    public TraceContext attachOnCurrentThread(){
+        return contextManager.attachTraceContextTo(Thread.currentThread(), this);
     }
 
     public static TraceContext getAndAttachFrom(Object traceContextHolder) {

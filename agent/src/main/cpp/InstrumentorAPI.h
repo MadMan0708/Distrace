@@ -25,7 +25,7 @@ namespace Distrace {
         /**
          * Constructor which creates instance of this class based on the socket connection to the instrumentor JVM
          */
-        InstrumentorAPI(nnxx::socket socket, std::string pathToClassDir);
+        InstrumentorAPI(nnxx::socket socket);
 
         /**
          * Sends class data to the instrumentor JVM. The caller might check if the instrumentor already contains the class
