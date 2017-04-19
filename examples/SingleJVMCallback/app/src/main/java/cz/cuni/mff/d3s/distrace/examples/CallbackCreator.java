@@ -5,7 +5,7 @@ package cz.cuni.mff.d3s.distrace.examples;
  */
 public class CallbackCreator {
 
-    public static  Callback createCallback(final String callbackMsg){
+    public static Callback createCallback(final String callbackMsg) {
         return new Callback() {
             @Override
             public void call() {

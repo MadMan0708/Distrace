@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Main example class demonstrating how to instrument callbacks
+ * Main example class on which we show how to instrument callbacks
  */
 public class Main {
 
@@ -21,8 +21,5 @@ public class Main {
         executorService.execute(taskB);
 
         executorService.shutdown();
-
-
-
     }
 }
