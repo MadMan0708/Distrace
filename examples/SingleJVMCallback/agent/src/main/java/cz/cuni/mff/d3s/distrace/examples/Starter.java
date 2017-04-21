@@ -26,7 +26,6 @@ public class Starter {
                                 .transform(new CallbackTransformer())
                                 .type(is(Executor.class))
                                 .transform(new ExecutorTransformer());
-
                     }
                 });
 
