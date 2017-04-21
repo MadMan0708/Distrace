@@ -5,6 +5,9 @@ import cz.cuni.mff.d3s.distrace.tracing.Span;
 import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
+/**
+ * Custom H2O span saver which overrides default service name
+ */
 @AutoService(SpanSaver.class)
 public class H2OSpanSaver extends DirectZipkinSaver {
 
