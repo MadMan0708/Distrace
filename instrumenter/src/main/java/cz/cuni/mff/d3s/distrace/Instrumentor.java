@@ -10,14 +10,17 @@ import org.apache.logging.log4j.core.config.ConfigurationFactory;
 public class Instrumentor {
 
     /**
-     * This method has to be called in a custom implementation of Instrumentor in order to start the Instrumentor.
-     * Usually before this method is called the programmer should register all classes which should be instrumented
-     * using TransformerManager
-     * @param args command line arguments of the instrumentor
+     * This method has to be called in the extended instrumentation server in order to start the server.
+     * Usually before this method is called, the programmer needs to register all classes which should be instrumented
+     * using the provided builder
+     *
+     * @param args    command line arguments of the instrumentor
+     * @param builder builder for the instrumentation
      */
-    public void start(String[] args, CustomAgentBuilder builder){
-        assert args.length == 3; // we always start instrumentation server from native agent and 3 parameters should be
-        // always passed to it
+    public void start(String[] args, CustomAgentBuilder builder) {
+        assert args.length == 3;
+        // instrumentation server from native agent is always started with the
+        // following 3 arguments:
         // - socket address
         // - log level
         // - log dir
@@ -25,8 +28,8 @@ public class Instrumentor {
         String socketAddress = args[0];
 
         // when starting instrumentation server externally, it make only sense to pass it ip:port as connection string
-        if(!socketAddress.startsWith("tcp") && !socketAddress.startsWith("ipc")){
-            socketAddress = "tcp://"+socketAddress;
+        if (!socketAddress.startsWith("tcp") && !socketAddress.startsWith("ipc")) {
+            socketAddress = "tcp://" + socketAddress;
         }
 
         String logLevel = args[1];
