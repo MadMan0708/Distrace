@@ -14,7 +14,7 @@ import java.io.IOException;
  * This class is used to attach native agent to already running JVM. It requires two arguments:
  * 1) Process ID of the running JVM
  * 2) Path to the native agent library
- *
+ * <p>
  * If these two arguments are not set or are not valid, attaching is terminated.
  */
 class Attacher {
@@ -30,8 +30,8 @@ class Attacher {
         String pid = args[0];
         String pathToAgentLib = args[1];
         File f = new File(pathToAgentLib);
-        if(!f.exists() || f.isDirectory()) {
-            log.error("The path "+pathToAgentLib+" does not exist!");
+        if (!f.exists() || f.isDirectory()) {
+            log.error("The path " + pathToAgentLib + " does not exist!");
             System.exit(-2);
         }
         try {
@@ -39,14 +39,9 @@ class Attacher {
             vm.loadAgentPath(pathToAgentLib);
             vm.detach();
             log.info("Attached to target JVM and loaded Java Agent successfully");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (AgentInitializationException e) {
-            e.printStackTrace();
-        } catch (AttachNotSupportedException e) {
-            e.printStackTrace();
-        } catch (AgentLoadException e) {
-            e.printStackTrace();
+        } catch (IOException | AgentInitializationException | AgentLoadException | AttachNotSupportedException e) {
+            log.error(e.getMessage());
+            System.exit(-2);
         }
 
     }

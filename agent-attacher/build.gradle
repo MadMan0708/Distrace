@@ -1,4 +1,4 @@
-description = "Attacher which allows to attach jvmti agent lib to running JVM"
+description = "Attacher allowing us to attach jvmti agent lib to a running JVM."
 
 import org.gradle.internal.jvm.Jvm
 
