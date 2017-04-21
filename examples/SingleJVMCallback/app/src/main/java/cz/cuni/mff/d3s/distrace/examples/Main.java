@@ -1,25 +1,29 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * Main example class on which we show how to instrument callbacks
  */
 public class Main {
 
     public static void main(String[] args) {
-        ExecutorService executorService = Executors.newCachedThreadPool();
-
+        Executor executor = new Executor();
         Callback callbackA = CallbackCreator.createCallback("Callback A");
         Callback callbackB = CallbackCreator.createCallback("Callback B");
+
+        // artificial delay before we process the call back
+        try {
+            Thread.sleep(1111);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         Task taskA = new Task(callbackA);
         Task taskB = new Task(callbackB);
 
-        executorService.execute(taskA);
-        executorService.execute(taskB);
+        executor.submitTask(taskA);
+        executor.submitTask(taskB);
 
-        executorService.shutdown();
+        executor.stop();
+        System.exit(0);
     }
 }

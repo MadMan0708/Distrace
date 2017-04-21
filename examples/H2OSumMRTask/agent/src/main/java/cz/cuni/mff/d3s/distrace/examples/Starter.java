@@ -33,7 +33,7 @@ public class Starter {
                         .transform(new AgentBuilder.Transformer() {
                             @Override
                             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-                                Method __tryComplete = ReflectionUtils.findMethod(CountedCompleter.class, "__tryComplete", CountedCompleter.class);
+                                Method __tryComplete = ReflectionUtils.getMethod(CountedCompleter.class, "__tryComplete", CountedCompleter.class);
                                 return builder; //.visit(Advice.to(CountedCompleterAdvice.__tryComplete.class).on(is(__tryComplete)));
                             }
 
@@ -42,12 +42,12 @@ public class Starter {
                         .transform(new AgentBuilder.Transformer() {
                             @Override
                             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-                                Method dfork = ReflectionUtils.findMethod(MRTask.class, "dfork", byte[].class, Frame.class, boolean.class);
-                                Method dfork2 = ReflectionUtils.findMethod(MRTask.class, "dfork", Key[].class);
-                                Method getResult = ReflectionUtils.findMethod(MRTask.class, "getResult", boolean.class);
-                                Method remote_compute = ReflectionUtils.findMethod(MRTask.class, "remote_compute", int.class, int.class);
-                                Method onCompletion = ReflectionUtils.findMethod(MRTask.class, "onCompletion", CountedCompleter.class);
-                                Method reduce2 = ReflectionUtils.findMethod(MRTask.class, "reduce2", MRTask.class);
+                                Method dfork = ReflectionUtils.getMethod(MRTask.class, "dfork", byte[].class, Frame.class, boolean.class);
+                                Method dfork2 = ReflectionUtils.getMethod(MRTask.class, "dfork", Key[].class);
+                                Method getResult = ReflectionUtils.getMethod(MRTask.class, "getResult", boolean.class);
+                                Method remote_compute = ReflectionUtils.getMethod(MRTask.class, "remote_compute", int.class, int.class);
+                                Method onCompletion = ReflectionUtils.getMethod(MRTask.class, "onCompletion", CountedCompleter.class);
+                                Method reduce2 = ReflectionUtils.getMethod(MRTask.class, "reduce2", MRTask.class);
                                 return  TransformerUtils.defineTraceContextField(builder).
                                             visit(Advice.to(MRTaskAdvices.setupLocal0.class).on(named("setupLocal0"))).
                                             visit(Advice.to(MRTaskAdvices.remote_compute.class).on(is(remote_compute))).
@@ -64,7 +64,7 @@ public class Starter {
                         .transform(new AgentBuilder.Transformer() {
                             @Override
                             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-                                Method call = ReflectionUtils.findMethod(RPC.class, "call");
+                                Method call = ReflectionUtils.getMethod(RPC.class, "call");
 
                                 return  builder.visit(Advice.to(RPCAdvices.call.class).on(is(call))).
                                         visit(Advice.to(RPCAdvices.response.class).on(named("response")));

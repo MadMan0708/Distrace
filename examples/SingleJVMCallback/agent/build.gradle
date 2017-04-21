@@ -6,16 +6,20 @@ dependencies {
     // use functionality provided by core-instrumentor
     compile project(path: ':distrace-instrumenter', configuration: 'shadow')
     compile project(path: ':distrace-examples-SingleJVMCallback-app', configuration: 'archives')
+    compile group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc2'
 }
 
 artifacts {
     archives shadowJar
 }
 
-shadowJar{
+shadowJar {
     dependencies {
         include(project(path: ':distrace-instrumenter', configuration: 'shadow'))
-        // exclude application classes from the final jar
-        exclude(project(path: ':distrace-examples-SingleJVMCallback-app', configuration: 'archives'))
+        // include application classes from the final jar
+        // that means we can use the classes inside the agent
+        // and the native agent does not need to send the classes to the instrumentation server
+        // for the instrumentation
+        include(project(path: ':distrace-examples-SingleJVMCallback-app', configuration: 'archives'))
     }
 }
