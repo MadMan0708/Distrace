@@ -7,6 +7,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 
+/**
+ * Main entry point for the instrumentation. The extensions build on top of this library are using this class for
+ * registering the classes for instrumentation.
+ */
 public class Instrumentor {
 
     /**
