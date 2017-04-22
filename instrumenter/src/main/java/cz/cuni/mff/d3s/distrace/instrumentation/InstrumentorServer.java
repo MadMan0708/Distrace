@@ -7,6 +7,7 @@ import cz.cuni.mff.d3s.distrace.json.*;
 import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
 import cz.cuni.mff.d3s.distrace.storage.JSONDiskSaver;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
+import cz.cuni.mff.d3s.distrace.tracing.TraceContextManager;
 import cz.cuni.mff.d3s.distrace.utils.*;
 import nanomsg.exceptions.IOException;
 import net.bytebuddy.implementation.LoadedTypeInitializer;
@@ -95,6 +96,7 @@ public class InstrumentorServer {
             StackTraceUtils.class,
             TraceContext.class,
             Span.class,
+            TraceContextManager.class,
             TraceContext.SpanEvent.class,
             SpanSaver.class,
             DirectZipkinSaver.class,
@@ -247,7 +249,7 @@ public class InstrumentorServer {
 
     /**
      * Dispatcher methods for the incoming requests from the native agent
-     * @param requestType
+     * @param requestType request type from the native agent
      */
     private void handleRequest(byte requestType) {
         switch (requestType) {

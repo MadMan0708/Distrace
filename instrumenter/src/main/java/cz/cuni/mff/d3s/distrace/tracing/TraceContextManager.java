@@ -5,7 +5,7 @@ import java.util.HashMap;
 /**
  * This class is used to connect a thread with a trace context without using thread local variables.
  */
-class TraceContextManager {
+public class TraceContextManager {
 
     private HashMap<Long, TraceContext> contexts = new HashMap<>();
 
