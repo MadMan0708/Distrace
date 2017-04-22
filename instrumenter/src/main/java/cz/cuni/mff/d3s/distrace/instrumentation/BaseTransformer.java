@@ -6,6 +6,9 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
+/**
+ * Simple abstract wrapper around the byte buddy {@link AgentBuilder.Transformer}
+ */
 public abstract class BaseTransformer implements AgentBuilder.Transformer {
 
     public abstract DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder);

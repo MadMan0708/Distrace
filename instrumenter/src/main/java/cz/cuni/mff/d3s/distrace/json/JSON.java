@@ -20,26 +20,26 @@ public final class JSON {
      */
     public static final JSONValue FALSE = new JSONLiteral("false");
 
-    public static JSONValue valueOf(int value){
+    public static JSONValue valueOf(int value) {
         return new JSONNumber(Integer.toString(value, 10));
     }
 
-    public static JSONValue valueOfOrNull(Integer value){
+    public static JSONValue valueOfOrNull(Integer value) {
         return value == null ? NULL : valueOf(value);
     }
 
-    static JSONValue valueOf(long value){
+    static JSONValue valueOf(long value) {
         return new JSONNumber(Long.toString(value, 10));
     }
 
-    static JSONValue valueOf(float value){
+    static JSONValue valueOf(float value) {
         if (Float.isInfinite(value) || Float.isNaN(value)) {
             throw new IllegalArgumentException("Infinite and NaN values not permitted in JSON");
         }
         return new JSONNumber(Float.toString(value));
     }
 
-    static JSONValue valueOf(double value){
+    static JSONValue valueOf(double value) {
         if (Double.isInfinite(value) || Double.isNaN(value)) {
             throw new IllegalArgumentException("Infinite and NaN values not permitted in JSON");
         }
@@ -50,7 +50,7 @@ public final class JSON {
         return value == null ? NULL : new JSONString(value);
     }
 
-    static JSONValue valueOf(boolean value){
+    static JSONValue valueOf(boolean value) {
         return value ? TRUE : FALSE;
     }
 }

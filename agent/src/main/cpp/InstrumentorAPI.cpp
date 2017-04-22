@@ -274,10 +274,11 @@ int InstrumentorAPI::init() {
         const std::string instrumentorServerCP = Agent::getArgs()->getArgValue(AgentArgs::ARG_INSTRUMENTOR_SERVER_CP);
         const std::string logLevel = Agent::getArgs()->getArgValue(AgentArgs::ARG_LOG_LEVEL);
         const std::string logDir = Agent::getArgs()->getArgValue(AgentArgs::ARG_LOG_DIR);
+        const std::string classOutputDir = Agent::getArgs()->getArgValue(AgentArgs::ARG_CLASS_OUTPUT_DIR);
 
         std::string launchCommand =
                 "java -cp " + instrumentorServerJar + ":" + instrumentorServerCP + " " + instrumentorMainClass + " " + connectionStr + " " +
-                logLevel + " " + logDir + " &";
+                logLevel + " " + logDir + " " + classOutputDir + " &";
         log(LOGGER_INSTRUMENTOR_API)->info("Starting Instrumentor JVM with the command: {}", launchCommand);
         int result = system(Utils::stringToCharPointer(launchCommand));
         if (result < 0) {

@@ -14,12 +14,12 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
-                TraceContext.createAndAttachTo(o)
-                        .openNestedSpan("H2O Node"+H2O.SELF.index() + " - Complete MRTask Computation")
+                TraceContext tc = TraceContext.create().attachOnCurrentThread().attachOnObject(o);
+                tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Complete MRTask Computation")
                         .setIpPort(H2O.getIpPortString())
                         .add("ipPort", H2O.getIpPortString());
 
-                System.out.println("doAll: Method was called on node: " + H2O.getIpPortString() + " trace ID " + TraceContext.getAndAttachFrom(o).getTraceId() + " thread id " + Thread.currentThread().getId() + " Span id = "+ TraceContext.getAndAttachFrom(o).getCurrentSpan().getSpanId());
+                System.out.println("doAll: Method was called on node: " + H2O.getIpPortString() + " trace ID " + tc.getTraceId() + " thread id " + Thread.currentThread().getId() + " Span id = " + tc.getCurrentSpan().getSpanId());
             }
         }
     }
@@ -28,7 +28,7 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
-                TraceContext tc = TraceContext.getAndAttachFrom(o);
+                TraceContext tc = TraceContext.getFromObject(o).attachOnCurrentThread();
                 System.out.println("getResult: Storing Span with ID: " + tc.getCurrentSpan().getSpanId());
                 tc.closeCurrentSpan();
             }
@@ -39,8 +39,8 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
-                TraceContext tc = TraceContext.getWithoutAttachFrom(o);
-                tc.openNestedSpan( "H2O Node"+H2O.SELF.index() + " - Setting and Splitting")
+                TraceContext tc = TraceContext.getFromObject(o);
+                tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Setting and Splitting")
                         .setIpPort(H2O.getIpPortString());
                 tc.getCurrentSpan().add("setupLocal0 entry", o.toString());
                 tc.attachOnObject(o);
@@ -53,7 +53,7 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
-                System.out.println("SetupLocal0 ( dist prepare) was called on node: " + H2O.getIpPortString() + " trace ID " + TraceContext.getAndAttachFrom(o).getTraceId());
+                System.out.println("SetupLocal0 ( dist prepare) was called on node: " + H2O.getIpPortString() + " trace ID " + TraceContext.getFromObject(o).getTraceId());
             }
         }
     }
@@ -61,11 +61,11 @@ public abstract class MRTaskAdvices {
     public static class remote_compute {
 
         @Advice.OnMethodEnter
-        public static void enter(@Advice.This Object o,  @Advice.Argument(0) Integer nlo,  @Advice.Argument(1) Integer nhi) {
+        public static void enter(@Advice.This Object o, @Advice.Argument(0) Integer nlo, @Advice.Argument(1) Integer nhi) {
             if (o instanceof SumMRTask) {
-                if(nlo >= nhi){
-                    TraceContext tc = TraceContext.getCopyWithoutAttachFrom(o);
-                    tc.openNestedSpan("H2O Node"+H2O.SELF.index() + " - Remote Work - none")
+                if (nlo >= nhi) {
+                    TraceContext tc = TraceContext.getFromObject(o).deepCopy();
+                    tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Remote Work - none")
                             .setIpPort(H2O.getIpPortString());
 
                     tc.attachOnObject(o);
@@ -77,9 +77,8 @@ public abstract class MRTaskAdvices {
         public static void exit(@Advice.This Object o, @Advice.Return RPC ret) {
             if (o instanceof SumMRTask) {
                 if (ret == null) {
-                    TraceContext.getWithoutAttachFrom(o).closeCurrentSpan();
+                    TraceContext.getFromObject(o).closeCurrentSpan();
                 }
-
             }
         }
     }
@@ -89,12 +88,10 @@ public abstract class MRTaskAdvices {
         public static void enter(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
                 MRTask tsk = (MRTask) o;
-                System.out.println("COMPUTE2 " + o.hashCode());
-                TraceContext tc = TraceContext.getCopyWithoutAttachFrom(o);
+                TraceContext tc = TraceContext.getFromObject(o).deepCopy();
                 tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Local work - chunks : " + (tsk._hi - tsk._lo));
                 tc.getCurrentSpan().add("compute2 entry", o.toString());
                 tc.attachOnObject(o);
-                System.out.println("ADDING " + o + " to Storage2");
                 StorageUtils.getList("compute2").add(o);
                 System.out.println("Compute2 (= Local Work) entered. Node: " + H2O.getIpPortString() + " trace ID: " + tc.getTraceId());
 
@@ -107,28 +104,28 @@ public abstract class MRTaskAdvices {
 
     public static class reduce2 {
         @Advice.OnMethodEnter
-        public static void enter(@Advice.This MRTask thizz, @Advice.Argument(0) MRTask mrt){
+        public static void enter(@Advice.This MRTask thizz, @Advice.Argument(0) MRTask mrt) {
             if (thizz instanceof SumMRTask) {
-                if(mrt != null){
+                if (mrt != null) {
                     String str;
-                    if(thizz._left == null){
+                    if (thizz._left == null) {
                         str = "right";
-                    }else if(thizz._rite == null){
+                    } else if (thizz._rite == null) {
                         str = "left";
-                    }else{
+                    } else {
                         str = thizz._left.equals(mrt) ? "left" : "right";
                     }
-                    TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
-                    tc.openNestedSpan("H2O Node"+H2O.SELF.index() + " - Reducing " + str);
+                    TraceContext tc = TraceContext.getFromObject(thizz);
+                    tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Reducing " + str);
                 }
 
             }
         }
 
         @Advice.OnMethodExit
-        public static void exit(@Advice.This MRTask thizz, @Advice.Argument(0) MRTask mrt){
-            if(mrt != null) {
-                TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
+        public static void exit(@Advice.This MRTask thizz, @Advice.Argument(0) MRTask mrt) {
+            if (mrt != null) {
+                TraceContext tc = TraceContext.getFromObject(thizz);
                 Span s = tc.getCurrentSpan();
                 tc.closeCurrentSpan();
             }
@@ -138,18 +135,18 @@ public abstract class MRTaskAdvices {
 
     public static class map {
         @Advice.OnMethodEnter
-        public static void enter(@Advice.This MRTask thizz){
+        public static void enter(@Advice.This MRTask thizz) {
             if (thizz instanceof SumMRTask) {
-                    TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
-                    tc.openNestedSpan("H2O Node"+H2O.SELF.index() + " - mapping ");
+                TraceContext tc = TraceContext.getFromObject(thizz);
+                tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - mapping ");
             }
         }
 
         @Advice.OnMethodExit
-        public static void exit(@Advice.This MRTask thizz){
-                TraceContext tc = TraceContext.getWithoutAttachFrom(thizz);
-                Span s = tc.getCurrentSpan();
-                tc.closeCurrentSpan();
+        public static void exit(@Advice.This MRTask thizz) {
+            TraceContext tc = TraceContext.getFromObject(thizz);
+            Span s = tc.getCurrentSpan();
+            tc.closeCurrentSpan();
         }
     }
 
@@ -158,16 +155,16 @@ public abstract class MRTaskAdvices {
         public static void exit(@Advice.This Object o, @Advice.Argument(0) CountedCompleter caller) {
             if (o instanceof SumMRTask) {
                 MRTask task = (MRTask) o;
-                TraceContext tc = TraceContext.getWithoutAttachFrom(task);
+                TraceContext tc = TraceContext.getFromObject(task);
 
-                if(StorageUtils.getList("compute2").contains(task)){
+                if (StorageUtils.getList("compute2").contains(task)) {
                     StorageUtils.getList("compute2").remove(task);
                     tc.getCurrentSpan().add("compute2 exit", task.toString());
                     tc.closeCurrentSpan();
-                    System.out.println("OnCompletion exit compute2: " + H2O.getIpPortString() + " trace ID " +tc.getTraceId() + " task id " + task.hashCode());
+                    System.out.println("OnCompletion exit compute2: " + H2O.getIpPortString() + " trace ID " + tc.getTraceId() + " task id " + task.hashCode());
                 }
                 // setupLocal0 span finishes when there are no more pending task on this node for this MRTask
-                if(StorageUtils.getList("setupLocal").contains(task)){
+                if (StorageUtils.getList("setupLocal").contains(task)) {
                     StorageUtils.getList("setupLocal").remove(task);
                     tc.getCurrentSpan()
                             .add("left", task._nleft == null ? "local" : task._nleft._target.getIpPortString())
@@ -177,7 +174,6 @@ public abstract class MRTaskAdvices {
                             .add("caller", caller.toString());
                     tc.closeCurrentSpan();
                     System.out.println("OnCompletion exit setupLocal0: " + H2O.getIpPortString() + " trace ID " + tc.getTraceId() + " task id " + task.hashCode());
-
                 }
 
             }

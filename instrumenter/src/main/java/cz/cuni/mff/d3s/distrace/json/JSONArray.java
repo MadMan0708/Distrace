@@ -4,12 +4,15 @@ package cz.cuni.mff.d3s.distrace.json;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class representing JSON Array
+ */
 public class JSONArray extends JSONValue {
     private final List<JSONValue> values;
 
-    public JSONArray(JSONObject... values){
+    public JSONArray(JSONObject... values) {
         this();
-        for(JSONObject value : values){
+        for (JSONObject value : values) {
             add(value);
         }
     }
@@ -18,41 +21,41 @@ public class JSONArray extends JSONValue {
         values = new ArrayList<>();
     }
 
-    public int size(){
+    public int size() {
         return values.size();
     }
 
-    public JSONArray add(int value){
+    public JSONArray add(int value) {
         values.add(JSON.valueOf(value));
         return this;
     }
 
-    public JSONArray add(long value){
+    public JSONArray add(long value) {
         values.add(JSON.valueOf(value));
         return this;
     }
 
-    public JSONArray add(float value){
+    public JSONArray add(float value) {
         values.add(JSON.valueOf(value));
         return this;
     }
 
-    public JSONArray add(double value){
+    public JSONArray add(double value) {
         values.add(JSON.valueOf(value));
         return this;
     }
 
-    public JSONArray add(boolean value){
+    public JSONArray add(boolean value) {
         values.add(JSON.valueOf(value));
         return this;
     }
 
-    public JSONArray add(String value){
+    public JSONArray add(String value) {
         values.add(JSON.valueOf(value));
         return this;
     }
 
-    public JSONArray add(JSONValue value){
+    public JSONArray add(JSONValue value) {
         values.add(value);
         return this;
     }

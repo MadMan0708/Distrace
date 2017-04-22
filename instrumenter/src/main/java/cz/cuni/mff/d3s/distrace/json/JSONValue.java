@@ -14,7 +14,7 @@ public abstract class JSONValue implements Serializable {
         return builder.toString();
     }
 
-    public String toString(JSONStringBuilder stringBuilder){
+    public String toString(JSONStringBuilder stringBuilder) {
         write(stringBuilder);
         return stringBuilder.toString();
     }

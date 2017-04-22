@@ -14,7 +14,7 @@ public class RPCAdvices {
         public static void enter(@Advice.This RPC thizz) {
             if (StackTraceUtils.containsMethodCall("remote_compute")) {
                 if (thizz._dt instanceof SumMRTask) {
-                    TraceContext tc = TraceContext.getCopyWithoutAttachFrom(thizz._dt);
+                    TraceContext tc = TraceContext.getFromObject(thizz._dt).deepCopy();
                     tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Remote work - rpc")
                             .setIpPort(H2O.getIpPortString())
                             .add("ipPort", H2O.getIpPortString());
@@ -33,7 +33,7 @@ public class RPCAdvices {
             if (thizz._dt instanceof SumMRTask) {
                 if ( StorageUtils.getList("remote_compute").contains(thizz._dt)) {
                     StorageUtils.getList("remote_compute").remove(thizz._dt);
-                    TraceContext.getWithoutAttachFrom(thizz._dt).closeCurrentSpan();
+                    TraceContext.getFromObject(thizz._dt).closeCurrentSpan();
                     }
             }
         }

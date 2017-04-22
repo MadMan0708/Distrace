@@ -6,10 +6,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
+/**
+ * Implementation of Span saver which saves the Span data in a JSON format into the provided directory
+ */
 public class JSONDiskSaver extends SpanSaver {
     private String path;
 
-    public JSONDiskSaver(String args){
+    public JSONDiskSaver(String args) {
         parseAndSetArgs(args);
     }
 
@@ -23,14 +26,19 @@ public class JSONDiskSaver extends SpanSaver {
         this.path = args;
     }
 
-    public class JSONDiskSaverTask implements Runnable{
+    /**
+     * Span saving task used to save span on disk into the specified directory
+     */
+    public class JSONDiskSaverTask implements Runnable {
         private Span span;
-        private JSONDiskSaverTask(Span span){
+
+        private JSONDiskSaverTask(Span span) {
             this.span = span;
         }
+
         @Override
         public void run() {
-            try(PrintWriter out = new PrintWriter(new File(path, span.getTimestamp() + ".json"))){
+            try (PrintWriter out = new PrintWriter(new File(path, span.getTimestamp() + ".json"))) {
                 out.write(span.toJSON().toString());
             } catch (FileNotFoundException e) {
                 // span couldn't be saved to disk

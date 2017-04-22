@@ -1,5 +1,8 @@
 package cz.cuni.mff.d3s.distrace.json;
 
+/**
+ * Class representing JSON String
+ */
 public class JSONString extends JSONValue {
     private final String value;
 

@@ -6,32 +6,32 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
- * Per thread context containing information about the trace, span and parent span id
+ * Trace context is a class which contains information about the
+ * currently monitored trace. It allows us to create and close spans within this trace.
  */
 public class TraceContext implements Serializable {
     private Span span;
     private String traceId;
     private static final String traceContextFieldName = "____traceContext";
-    private static final TraceContextManager contextManager = TraceContextManager.getOrCreate();
+    private static final TraceContextManager contextManager = new TraceContextManager();
 
     private TraceContext(TraceContext context) {
         this.span = context.getCurrentSpan() == null ? null : new Span(context.getCurrentSpan());
         this.traceId = context.traceId;
     }
 
-
-    private TraceContext() {
-        traceId = NativeAgentUtils.getTypeOneUUIDHex();
-    }
-
-    public static native String getClassOutputDir();
-
+    /**
+     * Get trace identifier
+     *
+     * @return id
+     */
     public String getTraceId() {
         return traceId;
     }
 
     /**
      * Get current span
+     *
      * @return current span
      */
     public Span getCurrentSpan() {
@@ -40,6 +40,7 @@ public class TraceContext implements Serializable {
 
     /**
      * Create a new span and move one level down in span hierarchy
+     *
      * @return created span
      */
     public Span openNestedSpan() {
@@ -48,46 +49,159 @@ public class TraceContext implements Serializable {
 
     /**
      * Create a new span and move one level down in span hierarchy
+     *
      * @param name span name
      * @return trace context
      */
     public Span openNestedSpan(String name) {
-        if (span == null) {
-            // parent span
-            // create new Span when a new Trace is created
+        if (span == null) { // if current span is null, then we need to open top-level span first
+            // create new top level with the specified trace id and name
             span = Span.newTopSpan(traceId, name);
         } else {
+            // create a new nested span
             span = Span.newNestedSpan(traceId, span, name);
         }
-        //span.setOpenStackTrace(Thread.currentThread());
-        printSpanInfo("Opening");
+        span.setOpenStackTrace(Thread.currentThread());
+        printSpanInfo(SpanEvent.OPENING);
         return span;
     }
 
     /**
-     * Store current span and move one level up in span hierarchy
+     * Process current span using the set {@link cz.cuni.mff.d3s.distrace.storage.SpanSaver} and move
+     * one level up in the span hierarchy.
+     * If no span saver is, the default {@link cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver} is used.
+     *
      * @return trace context
      */
     public TraceContext closeCurrentSpan() {
-        printSpanInfo("Closing");
-        //span.setCloseStackTrace(Thread.currentThread());
+        printSpanInfo(SpanEvent.CLOSING);
+        span.setCloseStackTrace(Thread.currentThread());
         span.save();
         span = span.getParentSpan();
         return this;
     }
 
-    private void printSpanInfo(String opType){
+
+    public static TraceContext create() {
+        return new TraceContext();
+    }
+
+
+    /**
+     * Get trace context from the specified holder object.
+     * A holder object is used to transfer the trace information between different application nodes.
+     *
+     * @param traceContextHolder holder object
+     * @return trace context attached to the specified holder object
+     */
+    public static TraceContext getFromObject(Object traceContextHolder) {
+        try {
+            Field f = traceContextHolder.getClass().getDeclaredField(traceContextFieldName);
+            f.setAccessible(true);
+            return (TraceContext) f.get(traceContextHolder);
+        } catch (IllegalAccessException | NoSuchFieldException e1) {
+            throw new RuntimeException("No such field " + traceContextFieldName + " field should be part of the class " + traceContextHolder.getClass());
+        }
+    }
+
+    /**
+     * Get trace context from the specified thread
+     *
+     * @param thread thread from which to get trace context
+     * @return trace context attached to the specified thread
+     */
+    public static TraceContext getFromThread(Thread thread) {
+        return contextManager.getTraceContext(thread);
+    }
+
+    /**
+     * Get trace context from the current thread
+     *
+     * @return current trace context
+     */
+    public static TraceContext getFromCurrentThread() {
+        return contextManager.getTraceContext(Thread.currentThread());
+    }
+
+    /**
+     * Attach trace context on the specified holder object.
+     * A holder object is used to transfer the trace information between different application nodes.
+     *
+     * @param traceContextHolder holder
+     * @return trace context
+     */
+    public TraceContext attachOnObject(Object traceContextHolder) {
+        try {
+            Field f = traceContextHolder.getClass().getDeclaredField(traceContextFieldName);
+            f.setAccessible(true);
+            f.set(traceContextHolder, this);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    /**
+     * Attach trace context to a specified thread
+     *
+     * @param thread thread
+     * @return trace context
+     */
+    public TraceContext attachOnTread(Thread thread) {
+        return contextManager.attachTraceContextTo(thread, this);
+    }
+
+    /**
+     * Attach trace context to a current thread
+     *
+     * @return trace context
+     */
+    public TraceContext attachOnCurrentThread() {
+        return contextManager.attachTraceContextTo(Thread.currentThread(), this);
+    }
+
+    /**
+     * Create new Trace context from existing trace context.
+     * This method should be used in cases where a trace context is passes to a different thread within
+     * the same node to avoid multiple threads accessing the same context
+     *
+     * @return new trace context
+     */
+    public TraceContext deepCopy() {
+        return new TraceContext(this);
+    }
+
+    /**
+     * Internal constructor to create trace context with its unique id.
+     * Users should use TraceContext.create() method
+     */
+    private TraceContext() {
+        traceId = NativeAgentUtils.getTypeOneUUIDHex();
+    }
+
+    /**
+     * Internal method used for debugging of spans creation
+     *
+     * @param event Span event, can be either closing or opening
+     */
+    private void printSpanInfo(SpanEvent event) {
+
+        if (!NativeAgentUtils.isDebugging()) {
+            // don't print the span info if we are not in the debug mode
+            return;
+        }
+
         String parentSpanId = span.getParentSpanId() == null ? "none" : span.getParentSpanId();
 
         String parentSpan = span.getParentSpan() == null ? "none" : span.getParentSpan().toString();
 
         StringBuilder stringBuilder = new StringBuilder();
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-        for(int i = 3; i<elements.length; i++){
+        for (int i = 3; i < elements.length; i++) {
             stringBuilder.append(elements[i].toString()).append("\n");
         }
 
-        System.out.println("\n" + opType + " span:  \n" +
+        System.out.println("\n" + event.toString() + " span:  \n" +
                 "        trace id    = " + traceId + "\n" +
                 "        parent id   = " + parentSpanId + "\n" +
                 "        span id     = " + span.getSpanId() + "\n" +
@@ -99,82 +213,20 @@ public class TraceContext implements Serializable {
     }
 
     /**
-     * Create new Trace context from existing trace context
-     * @return new trace context
+     * Small enum representing span events
      */
-    public TraceContext deepCopy() {
-        return new TraceContext(this);
-    }
+    public enum SpanEvent {
+        OPENING, CLOSING;
 
-    public static TraceContext createAndAttachTo(Object o) {
-        contextManager.attachTraceContextTo(Thread.currentThread(), TraceContext.create());
-        attachTraceContextOn(o, contextManager.getTraceContext(Thread.currentThread()));
-        return contextManager.getTraceContext(Thread.currentThread());
-    }
-
-    public static TraceContext create(){
-        return new TraceContext();
-    }
-
-    private static TraceContext getFromHolder(Object traceContextHolder) {
-        try {
-            Field f = traceContextHolder.getClass().getDeclaredField(traceContextFieldName);
-            f.setAccessible(true);
-            return (TraceContext)f.get(traceContextHolder);
-        } catch (IllegalAccessException | NoSuchFieldException e1) {
-                throw new RuntimeException("No such field " + traceContextFieldName + " field should be part of the class " + traceContextHolder.getClass());
+        @Override
+        public String toString() {
+            if (this.equals(OPENING)) {
+                return "opening";
+            } else if (this.equals(CLOSING)) {
+                return "closing";
+            } else {
+                throw new RuntimeException("Unknown SpanEvent ");
+            }
         }
     }
-
-    public TraceContext attachOnObject(Object traceContextHolder){
-        attachTraceContextOn(traceContextHolder, this);
-        return this;
-    }
-
-    public static TraceContext getFromObject(Object traceContextHolder){
-        return getFromHolder(traceContextHolder);
-    }
-
-    public static TraceContext getFromThread(Thread thread){
-        return contextManager.getTraceContext(thread);
-    }
-
-    public static TraceContext getFromCurrentThread(){
-        return contextManager.getTraceContext(Thread.currentThread());
-    }
-
-    public TraceContext attachOnTread(Thread thread){
-        return contextManager.attachTraceContextTo(thread, this);
-    }
-
-
-
-    public TraceContext attachOnCurrentThread(){
-        return contextManager.attachTraceContextTo(Thread.currentThread(), this);
-    }
-
-    public static TraceContext getAndAttachFrom(Object traceContextHolder) {
-        TraceContext tc = getWithoutAttachFrom(traceContextHolder);
-        contextManager.attachTraceContextTo(Thread.currentThread(), tc);
-        return tc;
-    }
-
-    public static TraceContext getWithoutAttachFrom(Object traceContextHolder){
-        return getFromHolder(traceContextHolder);
-    }
-
-    public static TraceContext getCopyWithoutAttachFrom(Object traceContextHolder) {
-        return getWithoutAttachFrom(traceContextHolder).deepCopy();
-    }
-
-    private static  void attachTraceContextOn(Object thizz, TraceContext context) {
-        try {
-            Field f = thizz.getClass().getDeclaredField(traceContextFieldName);
-            f.setAccessible(true);
-            f.set(thizz, context);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

@@ -46,7 +46,7 @@ public class JSONStringBuilder {
         return this;
     }
 
-    JSONStringBuilder removeSingleTrailingChar(){
+    JSONStringBuilder removeSingleTrailingChar() {
         sb.setLength(sb.length() - 1);
         return this;
     }
@@ -62,10 +62,10 @@ public class JSONStringBuilder {
     }
 
     JSONStringBuilder appendMemberName(String name) {
-       return appendString(name);
+        return appendString(name);
     }
 
-    JSONStringBuilder appendMemberSeparator()  {
+    JSONStringBuilder appendMemberSeparator() {
         sb.append(':');
         return this;
     }
@@ -85,7 +85,7 @@ public class JSONStringBuilder {
      * quotation marks except for the characters that must be escaped:
      * quotation mark, reverse solidus, and the control characters
      * (U+0000 through U+001F)."
-     *
+     * <p>
      * We also escape '\u2028' and '\u2029', which JavaScript interprets as
      * newline characters. This prevents eval() from failing with a syntax
      * error. http://code.google.com/p/google-gson/issues/detail?id=341
@@ -105,11 +105,13 @@ public class JSONStringBuilder {
         REPLACEMENT_CHARS['\r'] = "\\r";
         REPLACEMENT_CHARS['\f'] = "\\f";
     }
+
     private static final String U2028 = "\\u2028";
     private static final String U2029 = "\\u2029";
 
     /**
      * Escape string so it can be saved into JSON
+     *
      * @param original string to escape
      * @return escaped string
      */

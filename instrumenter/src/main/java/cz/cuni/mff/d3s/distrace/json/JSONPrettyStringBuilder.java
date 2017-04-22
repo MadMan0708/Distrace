@@ -1,5 +1,8 @@
 package cz.cuni.mff.d3s.distrace.json;
 
+/**
+ * JSON printer which prints the JSON in the human readable format
+ */
 public class JSONPrettyStringBuilder extends JSONStringBuilder {
 
     private static final String indentStr = "  ";
@@ -59,7 +62,7 @@ public class JSONPrettyStringBuilder extends JSONStringBuilder {
     }
 
     @Override
-    protected JSONStringBuilder removeSingleTrailingChar(){
+    protected JSONStringBuilder removeSingleTrailingChar() {
         super.removeSingleTrailingChar(); // for separator
         super.removeSingleTrailingChar(); // for new line character
         return this;

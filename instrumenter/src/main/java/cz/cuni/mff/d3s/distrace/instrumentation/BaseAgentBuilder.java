@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Base agent builder exposing relevant method on ByteBuddy's agent builder
+ * Base agent builder is builder for creating instrumentation points. This builder
+ * is just wrapper around ByteBuddy's {@link AgentBuilder} and exposes relevant methods. Please read
+ * Byte Buddy documentation for the relevant methods mentioned in this class
  */
 public class BaseAgentBuilder {
     private static final Logger log = LogManager.getLogger(BaseAgentBuilder.class);
@@ -31,138 +33,24 @@ public class BaseAgentBuilder {
     private Map<String, byte[]> interceptorsByteCodes = Utils.getInterceptorByteCodes();
     private InstrumentorClassLoader instrumentorClassLoader;
     private SocketWrapper sock;
+    private AgentBuilder agentBuilder;
 
+    /**
+     * Create builder based on the socket information and the instrumentor class loader
+     *
+     * @param sock socket used for communication with the native agent
+     * @param cl   instrumentor class loader
+     */
     public BaseAgentBuilder(SocketWrapper sock, InstrumentorClassLoader cl) {
         this.instrumentorClassLoader = cl;
         this.sock = sock;
         agentBuilder = initBuilder();
     }
 
-    public AgentBuilder getAgentBuilder(){
+    public AgentBuilder getAgentBuilder() {
         return agentBuilder;
     }
 
-    private void process(LoadedTypeInitializer initializer){
-        try {
-            if(initializer instanceof LoadedTypeInitializer.ForStaticField){
-                Field value = initializer.getClass().getDeclaredField("value");
-                value.setAccessible(true);
-                Object type = value.get(initializer);
-
-                sock.send("initializers");
-                // send name of interceptor
-                log.info("Interceptor name " +   type.getClass().getName());
-                String name = Utils.toNameWithSlashes(type.getClass().getName());
-                sock.send(name);
-                if(!sendInterceptors.contains(name)){
-                    if(interceptorsByteCodes.get(name)==null){
-                        throw new RuntimeException("Byte code for interceptor class "+ name +" not found! Are you sure your interceptor is implementing the Interceptor interface ?");
-                    }
-                    sock.send(interceptorsByteCodes.get(name).length + "");
-                    sock.send(interceptorsByteCodes.get(name));
-                    sendInterceptors.add(name);
-                }
-
-                // then send loaded type initializer
-                log.info("Initializer name " + initializer.getClass().getName());
-                sock.send(initializer.getClass().getName());
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(initializer);
-                byte[] arr = baos.toByteArray();
-                sock.send(arr.length + "");
-                sock.send(arr);
-                //serialize and send initializer over the network
-            }else if(initializer instanceof LoadedTypeInitializer.Compound){
-                Field value = initializer.getClass().getDeclaredField("loadedTypeInitializers");
-                value.setAccessible(true);
-                ArrayList<LoadedTypeInitializer> initializers = (ArrayList<LoadedTypeInitializer>) value.get(initializer);
-                for(LoadedTypeInitializer i: initializers){
-                    process(i);
-                }
-            }
-
-        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private AgentBuilder initBuilder(){
-        return new AgentBuilder.Default()
-                .with(new AgentBuilder.Listener() {
-                    @Override
-                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-                        log.info("Following type will be instrumented: " + typeDescription);
-                        for(Map.Entry<TypeDescription, byte[]> entry : dynamicType.getAuxiliaryTypes().entrySet()){
-                            sock.send("auxiliary_types");
-                            log.info("Sending auxiliary class " + entry.getKey());
-                            sock.send(Utils.toNameWithSlashes(entry.getKey().getName()));
-                            sock.send(entry.getValue().length + "");
-                            sock.send(entry.getValue());
-                        }
-                        sock.send("no_more_aux_classes");
-
-                        // send loaded type initializers
-                        for(Map.Entry<TypeDescription, LoadedTypeInitializer> entry : dynamicType.getLoadedTypeInitializers().entrySet()){
-                           process(entry.getValue());
-                        }
-                        sock.send("no_more_initializers");
-                        sock.send("ack_req_int_yes");
-                    }
-
-                    @Override
-                    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-                        log.info("Following type won't be instrumented: " + typeDescription);
-                        sock.send("no_more_aux_classes");
-                        sock.send("no_more_initializers");
-                        sock.send("ack_req_int_no");
-                    }
-
-                    @Override
-                    public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
-                        log.error("Error whilst instrumenting: " + typeName, throwable);
-                    }
-
-                    @Override
-                    public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-                        log.info("Finished processing of: " + typeName);
-                    }
-                })
-                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
-                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .with(AgentBuilder.PoolStrategy.ClassLoading.EXTENDED)
-                .with(new AgentBuilder.PoolStrategy() {
-                    @Override
-                    public TypePool typePool(ClassFileLocator classFileLocator, final ClassLoader classLoader) {
-                        return new TypePool() {
-                            private HashMap<String, TypeDescription> cache = new HashMap<>();
-                            @Override
-                            public Resolution describe(String name) {
-                                try {
-                                    if(!cache.containsKey(name)) {
-                                        Class<?> clazz = instrumentorClassLoader.loadClass(name);
-                                        TypeDescription typeDescription = new TypeDescription.ForLoadedType(clazz);
-                                        cache.put(name, typeDescription);
-                                    }
-                                    log.info("Created TypeDescription for class " + name);
-                                    return new Resolution.Simple(cache.get(name));
-                                } catch (ClassNotFoundException e) {
-                                        assert false; //can't happen
-                                    return null;
-                                }
-                            }
-
-                            @Override
-                            public void clear() {
-                                // no need to implement
-                            }
-                        };
-                    }
-                })
-                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(instrumentorClassLoader)));
-
-    }
-
-    private AgentBuilder agentBuilder;
     public AgentBuilder.Identified.Narrowable type(ElementMatcher<? super TypeDescription> typeMatcher) {
         return agentBuilder.type(typeMatcher);
     }
@@ -194,4 +82,138 @@ public class BaseAgentBuilder {
     public AgentBuilder.Ignored ignore(AgentBuilder.RawMatcher rawMatcher) {
         return agentBuilder.ignore(rawMatcher);
     }
+
+    /**
+     * Send loaded type initializers for the class which is currently instrumented
+     *
+     * @param initializer initializer to process
+     */
+    private void handleLoadedTypeInitializers(LoadedTypeInitializer initializer) {
+        try {
+            if (initializer instanceof LoadedTypeInitializer.ForStaticField) {
+                Field value = initializer.getClass().getDeclaredField("value");
+                value.setAccessible(true);
+                Object type = value.get(initializer);
+
+                sock.send("initializers");
+                // send name of interceptor
+                log.info("Interceptor name " + type.getClass().getName());
+                String name = Utils.toNameWithSlashes(type.getClass().getName());
+                sock.send(name);
+                if (!sendInterceptors.contains(name)) {
+                    if (interceptorsByteCodes.get(name) == null) {
+                        throw new RuntimeException("Byte code for interceptor class " + name + " not found! Are you sure your interceptor is implementing the Interceptor interface ?");
+                    }
+                    sock.send(interceptorsByteCodes.get(name).length + "");
+                    sock.send(interceptorsByteCodes.get(name));
+                    sendInterceptors.add(name);
+                }
+
+                // then send loaded type initializer
+                log.info("Initializer name " + initializer.getClass().getName());
+                sock.send(initializer.getClass().getName());
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(initializer);
+                byte[] arr = baos.toByteArray();
+                sock.send(arr.length + "");
+                sock.send(arr);
+                //serialize and send initializer over the network
+            } else if (initializer instanceof LoadedTypeInitializer.Compound) {
+                Field value = initializer.getClass().getDeclaredField("loadedTypeInitializers");
+                value.setAccessible(true);
+                ArrayList<LoadedTypeInitializer> initializers = (ArrayList<LoadedTypeInitializer>) value.get(initializer);
+                for (LoadedTypeInitializer i : initializers) {
+                    handleLoadedTypeInitializers(i);
+                }
+            }
+
+        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Initialize the builder with the necessary listeners and correct configuration
+     *
+     * @return
+     */
+    private AgentBuilder initBuilder() {
+        return new AgentBuilder.Default()
+                .with(new AgentBuilder.Listener() {
+                    @Override
+                    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
+                        log.info("Following type will be instrumented: " + typeDescription);
+                        for (Map.Entry<TypeDescription, byte[]> entry : dynamicType.getAuxiliaryTypes().entrySet()) {
+                            sock.send("auxiliary_types");
+                            log.info("Sending auxiliary class " + entry.getKey());
+                            sock.send(Utils.toNameWithSlashes(entry.getKey().getName()));
+                            sock.send(entry.getValue().length + "");
+                            sock.send(entry.getValue());
+                        }
+                        sock.send("no_more_aux_classes");
+
+                        // send loaded type initializers
+                        for (Map.Entry<TypeDescription, LoadedTypeInitializer> entry : dynamicType.getLoadedTypeInitializers().entrySet()) {
+                            handleLoadedTypeInitializers(entry.getValue());
+                        }
+                        sock.send("no_more_initializers");
+                        sock.send("ack_req_int_yes");
+                    }
+
+                    @Override
+                    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
+                        log.info("Following type won't be instrumented: " + typeDescription);
+                        sock.send("no_more_aux_classes");
+                        sock.send("no_more_initializers");
+                        sock.send("ack_req_int_no");
+                    }
+
+                    @Override
+                    public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
+                        log.error("Error whilst instrumenting: " + typeName, throwable);
+                    }
+
+                    @Override
+                    public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
+                        log.info("Finished processing of: " + typeName);
+                    }
+                })
+                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(AgentBuilder.PoolStrategy.ClassLoading.EXTENDED)
+                .with(new AgentBuilder.PoolStrategy() {
+                    @Override
+                    public TypePool typePool(ClassFileLocator classFileLocator, final ClassLoader classLoader) {
+                        return new TypePool() {
+                            private HashMap<String, TypeDescription> cache = new HashMap<>();
+
+                            @Override
+                            public Resolution describe(String name) {
+                                try {
+                                    if (!cache.containsKey(name)) {
+                                        Class<?> clazz = instrumentorClassLoader.loadClass(name);
+                                        TypeDescription typeDescription = new TypeDescription.ForLoadedType(clazz);
+                                        cache.put(name, typeDescription);
+                                    }
+                                    log.info("Created TypeDescription for class " + name);
+                                    return new Resolution.Simple(cache.get(name));
+                                } catch (ClassNotFoundException e) {
+                                    assert false; //can't happen
+                                    return null;
+                                }
+                            }
+
+                            @Override
+                            public void clear() {
+                                // no need to implement
+                            }
+                        };
+                    }
+                })
+                .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(instrumentorClassLoader)));
+
+    }
+
+
 }

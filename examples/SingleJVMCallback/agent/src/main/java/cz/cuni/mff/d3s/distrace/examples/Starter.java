@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.distrace.examples;
 
 import cz.cuni.mff.d3s.distrace.Instrumentor;
 import cz.cuni.mff.d3s.distrace.instrumentation.BaseAgentBuilder;
-import cz.cuni.mff.d3s.distrace.instrumentation.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.MainAgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -14,9 +14,9 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public class Starter {
     public static void main(String[] args) {
         new Instrumentor().start(args,
-                new CustomAgentBuilder() {
+                new MainAgentBuilder() {
                     @Override
-                    public AgentBuilder createAgent(BaseAgentBuilder builder) {
+                    public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToInstrumentedClasses) {
                         return builder
                                 .type(is(Task.class))
                                 .transform(new TaskTransformer())

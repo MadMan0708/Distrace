@@ -6,6 +6,11 @@ package cz.cuni.mff.d3s.distrace.utils;
 public class NativeAgentUtils {
 
     /**
+     * Check whether we are running in the debug mode.
+     */
+    public static native boolean isDebugging();
+
+    /**
      * Get type one UUID
      * @return type 1 UUID
      */

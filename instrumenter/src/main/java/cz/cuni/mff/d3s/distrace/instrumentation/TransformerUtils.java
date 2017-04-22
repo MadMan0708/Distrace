@@ -162,7 +162,6 @@ public class TransformerUtils {
         }
     }
 
-
     /**
      * Create a trace context field on the specified builder
      *

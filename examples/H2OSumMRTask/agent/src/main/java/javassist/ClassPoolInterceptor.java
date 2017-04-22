@@ -18,9 +18,8 @@ public class ClassPoolInterceptor implements Interceptor {
     private boolean alreadyInserted = false;
     private String pathToInstrumentedClasses;
 
-    public ClassPoolInterceptor() {
-        final String classOutputDir = TraceContext.getClassOutputDir();
-        if (TraceContext.getClassOutputDir().endsWith("/")) {
+    public ClassPoolInterceptor(String classOutputDir) {
+        if (classOutputDir.endsWith("/")) {
             // trim the ending slash
             pathToInstrumentedClasses = classOutputDir.substring(0, classOutputDir.length() - 1);
         } else {
@@ -36,7 +35,7 @@ public class ClassPoolInterceptor implements Interceptor {
                 alreadyInserted = true;
             } catch (NotFoundException ignore) {
             }
-            System.out.println("GET was called, class path: " + classPool.source);
+            System.out.println("GET was called, class path: " + classPool.source + " ");
         }
     }
 }

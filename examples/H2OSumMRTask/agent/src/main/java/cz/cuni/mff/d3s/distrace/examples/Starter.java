@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.distrace.examples;
 
 import cz.cuni.mff.d3s.distrace.Instrumentor;
 import cz.cuni.mff.d3s.distrace.instrumentation.BaseAgentBuilder;
-import cz.cuni.mff.d3s.distrace.instrumentation.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.MainAgentBuilder;
 import cz.cuni.mff.d3s.distrace.instrumentation.TransformerUtils;
 import cz.cuni.mff.d3s.distrace.utils.ReflectionUtils;
 import javassist.ClassPool;
@@ -27,12 +27,12 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  */
 public class Starter {
     public static void main(String args[]) {
-        new Instrumentor().start(args, new CustomAgentBuilder() {
+        new Instrumentor().start(args, new MainAgentBuilder() {
             @Override
-            public AgentBuilder createAgent(BaseAgentBuilder builder) {
+            public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToInstrumentedClasses) {
                 return builder
                         .type(is(ClassPool.class))
-                        .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(), true))
+                        .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(pathToInstrumentedClasses), true))
                         .type(isSubTypeOf(H2O.H2OCountedCompleter.class))
                         .transform(new AgentBuilder.Transformer() {
                             @Override
@@ -67,6 +67,7 @@ public class Starter {
                                         visit(Advice.to(RPCAdvices.response.class).on(named("response")));
                             }
                         });
+
             }
         });
     }

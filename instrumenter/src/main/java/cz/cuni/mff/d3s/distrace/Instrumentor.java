@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.distrace;
 
-import cz.cuni.mff.d3s.distrace.instrumentation.CustomAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.MainAgentBuilder;
 import cz.cuni.mff.d3s.distrace.instrumentation.InstrumentorServer;
 import cz.cuni.mff.d3s.distrace.utils.InstrumentorConfFactory;
 import org.apache.logging.log4j.LogManager;
@@ -21,13 +21,14 @@ public class Instrumentor {
      * @param args    command line arguments of the instrumentor
      * @param builder builder for the instrumentation
      */
-    public void start(String[] args, CustomAgentBuilder builder) {
-        assert args.length == 3;
+    public void start(String[] args, MainAgentBuilder builder) {
+        assert args.length == 4;
         // instrumentation server from native agent is always started with the
-        // following 3 arguments:
+        // following 4 arguments:
         // - socket address
         // - log level
         // - log dir
+        // - class output directory of auxiliary and instrumented classes
 
         String socketAddress = args[0];
 
@@ -38,15 +39,17 @@ public class Instrumentor {
 
         String logLevel = args[1];
         String logDir = args[2];
+        String classOutputDir = args[3];
         ConfigurationFactory.setConfigurationFactory(new InstrumentorConfFactory(logLevel, logDir));
         Logger log = LogManager.getLogger(Instrumentor.class);
         log.info("Running forked JVM \n" +
                 "   connection string : " + socketAddress + "\n" +
                 "   log level         : " + logLevel + "\n" +
                 "   log dir           : " + logDir + "\n" +
+                "   class output dir  : " + classOutputDir + "\n" +
                 "");
 
-        new InstrumentorServer(socketAddress, builder)
+        new InstrumentorServer(socketAddress, builder, classOutputDir)
                 .start();
 
     }
