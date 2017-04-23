@@ -39,4 +39,20 @@ public class ReflectionUtils {
         }
     }
 
+    /**
+     * Get object value
+     * @param cl class containing the field
+     * @param o object on which to obtain field value
+     * @param fieldName field name
+     * @return value
+     */
+    public static Object getFieldValue(Class cl, Object o, String fieldName){
+        try {
+            Field f = cl.getDeclaredField(fieldName);
+            f.setAccessible(true);
+            return f.get(o);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(String.format("Field \"%s\" needs to be available!", fieldName));
+        }
+    }
 }
