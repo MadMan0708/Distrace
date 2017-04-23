@@ -1,15 +1,17 @@
 package water;
 
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.instrumentation.StorageUtils;
 import cz.cuni.mff.d3s.distrace.instrumentation.StackTraceUtils;
-import cz.cuni.mff.d3s.distrace.tracing.Span;
+import cz.cuni.mff.d3s.distrace.instrumentation.StorageUtils;
 import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import jsr166y.CountedCompleter;
 import net.bytebuddy.asm.Advice;
 
 public abstract class MRTaskAdvices {
-
+    /**
+     * dfork method starts an computation on the initiating node, it's the entry point where the trace
+     * context is created. The span created by dfork is closed by getResult method
+     */
     public static class dfork {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
@@ -18,23 +20,28 @@ public abstract class MRTaskAdvices {
                 tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Complete MRTask Computation")
                         .setIpPort(H2O.getIpPortString())
                         .add("ipPort", H2O.getIpPortString());
-
-                System.out.println("doAll: Method was called on node: " + H2O.getIpPortString() + " trace ID " + tc.getTraceId() + " thread id " + Thread.currentThread().getId() + " Span id = " + tc.getCurrentSpan().getSpanId());
             }
         }
     }
 
+    /**
+     * This is closing side of the span opened by the dfork method.
+     */
     public static class getResult {
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
                 TraceContext tc = TraceContext.getFromObject(o).attachOnCurrentThread();
-                System.out.println("getResult: Storing Span with ID: " + tc.getCurrentSpan().getSpanId());
                 tc.closeCurrentSpan();
             }
         }
     }
 
+    /**
+     * This method opens an span tracing a splitting method to smaller tasks and sending remote tasks
+     * This span is closed by the onCompletion method once all the sub-tasks on all nodes have been
+     * completed.
+     */
     public static class setupLocal0 {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
@@ -44,22 +51,16 @@ public abstract class MRTaskAdvices {
                         .setIpPort(H2O.getIpPortString());
                 tc.getCurrentSpan().add("setupLocal0 entry", o.toString());
                 tc.attachOnObject(o);
-                StorageUtils.getList("setupLocal").add(o);
-                System.out.println("SETUPLOCAL0 " + o.hashCode() + " span id = " + tc.getCurrentSpan().getSpanId() + " parent id = " + tc.getCurrentSpan().getParentSpan().getSpanId());
-
-            }
-        }
-
-        @Advice.OnMethodExit
-        public static void exit(@Advice.This Object o) {
-            if (o instanceof SumMRTask) {
-                System.out.println("SetupLocal0 ( dist prepare) was called on node: " + H2O.getIpPortString() + " trace ID " + TraceContext.getFromObject(o).getTraceId());
+                StorageUtils.addToList("setupLocal", o);
             }
         }
     }
 
+    /**
+     * This method opens span tracing the remote computation in case when no remote computation is actually done.
+     * It is closed by the following method
+     */
     public static class remote_compute {
-
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o, @Advice.Argument(0) Integer nlo, @Advice.Argument(1) Integer nhi) {
             if (o instanceof SumMRTask) {
@@ -67,7 +68,6 @@ public abstract class MRTaskAdvices {
                     TraceContext tc = TraceContext.getFromObject(o).deepCopy();
                     tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Remote Work - none")
                             .setIpPort(H2O.getIpPortString());
-
                     tc.attachOnObject(o);
                 }
             }
@@ -83,6 +83,10 @@ public abstract class MRTaskAdvices {
         }
     }
 
+    /**
+     * This method traces the real computation on a single node. The span created by this method
+     * is closed by the onCompletion method
+     */
     public static class compute2 {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
@@ -92,8 +96,7 @@ public abstract class MRTaskAdvices {
                 tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Local work - chunks : " + (tsk._hi - tsk._lo));
                 tc.getCurrentSpan().add("compute2 entry", o.toString());
                 tc.attachOnObject(o);
-                StorageUtils.getList("compute2").add(o);
-                System.out.println("Compute2 (= Local Work) entered. Node: " + H2O.getIpPortString() + " trace ID: " + tc.getTraceId());
+                StorageUtils.addToList("compute2", o);
 
                 if (StackTraceUtils.numMethodCalls("compute2") >= 2) {
                     tc.getCurrentSpan().appendToName(" - forked");
@@ -102,6 +105,9 @@ public abstract class MRTaskAdvices {
         }
     }
 
+    /**
+     * The following methods are used to open and close span denoting task reducing
+     */
     public static class reduce2 {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This MRTask thizz, @Advice.Argument(0) MRTask mrt) {
@@ -118,7 +124,6 @@ public abstract class MRTaskAdvices {
                     TraceContext tc = TraceContext.getFromObject(thizz);
                     tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Reducing " + str);
                 }
-
             }
         }
 
@@ -126,13 +131,15 @@ public abstract class MRTaskAdvices {
         public static void exit(@Advice.This MRTask thizz, @Advice.Argument(0) MRTask mrt) {
             if (mrt != null) {
                 TraceContext tc = TraceContext.getFromObject(thizz);
-                Span s = tc.getCurrentSpan();
                 tc.closeCurrentSpan();
             }
         }
     }
 
 
+    /**
+     * The following methods are used to open and close span denoting task mapping
+     */
     public static class map {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This MRTask thizz) {
@@ -145,37 +152,38 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodExit
         public static void exit(@Advice.This MRTask thizz) {
             TraceContext tc = TraceContext.getFromObject(thizz);
-            Span s = tc.getCurrentSpan();
             tc.closeCurrentSpan();
         }
     }
 
+    /**
+     * This method closes computation and setulLocal0 spans.
+     */
     public static class onCompletion {
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o, @Advice.Argument(0) CountedCompleter caller) {
+            System.out.println("Before " + o);
             if (o instanceof SumMRTask) {
+                System.out.println("After " + o);
                 MRTask task = (MRTask) o;
                 TraceContext tc = TraceContext.getFromObject(task);
 
-                if (StorageUtils.getList("compute2").contains(task)) {
-                    StorageUtils.getList("compute2").remove(task);
+                if (StorageUtils.listContains("compute2", task)) {
+                    StorageUtils.removeFromList("compute2", task);
                     tc.getCurrentSpan().add("compute2 exit", task.toString());
                     tc.closeCurrentSpan();
-                    System.out.println("OnCompletion exit compute2: " + H2O.getIpPortString() + " trace ID " + tc.getTraceId() + " task id " + task.hashCode());
                 }
+
                 // setupLocal0 span finishes when there are no more pending task on this node for this MRTask
-                if (StorageUtils.getList("setupLocal").contains(task)) {
-                    StorageUtils.getList("setupLocal").remove(task);
+                if (StorageUtils.listContains("setupLocal", task)) {
+                    StorageUtils.removeFromList("setupLocal", task);
                     tc.getCurrentSpan()
                             .add("left", task._nleft == null ? "local" : task._nleft._target.getIpPortString())
                             .add("right", task._nrite == null ? "local" : task._nrite._target.getIpPortString());
 
-                    tc.getCurrentSpan().add("setupLocal0 exit", task.toString())
-                            .add("caller", caller.toString());
+                    tc.getCurrentSpan().add("setupLocal0 exit", task.toString());
                     tc.closeCurrentSpan();
-                    System.out.println("OnCompletion exit setupLocal0: " + H2O.getIpPortString() + " trace ID " + tc.getTraceId() + " task id " + task.hashCode());
                 }
-
             }
         }
     }
