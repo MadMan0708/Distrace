@@ -3,6 +3,7 @@ package cz.cuni.mff.d3s.distrace.examples;
 
 import cz.cuni.mff.d3s.distrace.Instrumentor;
 import cz.cuni.mff.d3s.distrace.instrumentation.BaseAgentBuilder;
+import cz.cuni.mff.d3s.distrace.instrumentation.BaseTransformer;
 import cz.cuni.mff.d3s.distrace.instrumentation.MainAgentBuilder;
 import cz.cuni.mff.d3s.distrace.instrumentation.TransformerUtils;
 import cz.cuni.mff.d3s.distrace.utils.ReflectionUtils;
@@ -11,9 +12,7 @@ import javassist.ClassPoolInterceptor;
 import jsr166y.CountedCompleter;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.utility.JavaModule;
 import water.*;
 import water.fvec.Frame;
 
@@ -34,9 +33,9 @@ public class Starter {
                         .type(is(ClassPool.class))
                         .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(pathToInstrumentedClasses), true))
                         .type(isSubTypeOf(H2O.H2OCountedCompleter.class))
-                        .transform(new AgentBuilder.Transformer() {
+                        .transform(new BaseTransformer() {
                             @Override
-                            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+                            public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
                                 // get the methods
                                 Method dfork = ReflectionUtils.getMethod(MRTask.class, "dfork", byte[].class, Frame.class, boolean.class);
                                 Method dfork2 = ReflectionUtils.getMethod(MRTask.class, "dfork", Key[].class);
@@ -58,9 +57,9 @@ public class Starter {
                             }
                         })
                         .type(is(RPC.class))
-                        .transform(new AgentBuilder.Transformer() {
+                        .transform(new BaseTransformer() {
                             @Override
-                            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+                            public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
                                 Method call = ReflectionUtils.getMethod(RPC.class, "call");
 
                                 return builder.visit(Advice.to(RPCAdvices.call.class).on(is(call))).
