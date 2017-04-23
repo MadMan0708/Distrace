@@ -36,8 +36,8 @@ public class RPCAdvices {
         @Advice.OnMethodExit
         public static void exit(@Advice.This RPC thizz) {
             if (thizz._dt instanceof SumMRTask) {
-                if (StorageUtils.getList("remote_task_num").contains(thizz._tasknum)) {
-                    StorageUtils.getList("remote_task_num").remove(thizz._tasknum);
+                if (StorageUtils.listContains("remote_task_num", thizz._tasknum)) {
+                    StorageUtils.removeFromList("remote_task_num", thizz._tasknum);
                     TraceContext tc = TraceContext.getFromObject(thizz._dt);
                     tc.closeCurrentSpan();
                 }

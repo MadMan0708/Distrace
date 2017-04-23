@@ -7,10 +7,8 @@ import java.util.*;
  * thread on the same node
  */
 public class StorageUtils {
-    private static Map<String, ArrayList<Object>> listStorage =
-            Collections.synchronizedMap(new HashMap<String, ArrayList<Object>>());
-    private static Map<String, HashMap<Object, Object>> mapStorage =
-            Collections.synchronizedMap(new HashMap<String, HashMap<Object, Object>>());
+    private static Map<String, ArrayList<Object>> listStorage = new HashMap<>();
+    private static Map<String, HashMap<Object, Object>> mapStorage = new HashMap<>();
 
     /**
      * Store object to the list with the specified name
@@ -18,22 +16,47 @@ public class StorageUtils {
      * @param storageName list name
      * @param value       object to insert
      */
-    public static void addToList(String storageName, Object value) {
+    public static synchronized void addToList(String storageName, Object value) {
         if (!listStorage.containsKey(storageName)) {
             listStorage.put(storageName, new ArrayList<>());
         }
         listStorage.get(storageName).add(value);
     }
 
+    /**
+     * Remove object to the list with the specified name
+     *
+     * @param storageName list name
+     * @param value       object to remove
+     */
+    public static synchronized void removeFromList(String storageName, Object value) {
+        if (!listStorage.containsKey(storageName)) {
+            listStorage.put(storageName, new ArrayList<>());
+        }
+        listStorage.get(storageName).remove(value);
+    }
 
     /**
-     * Store key-value par into the hash map with the specified name
+     * Check whether the list contains object
+     *
+     * @param storageName list name
+     * @param value       object to check for presence
+     */
+    public static synchronized boolean listContains(String storageName, Object value) {
+        if (!listStorage.containsKey(storageName)) {
+            listStorage.put(storageName, new ArrayList<>());
+        }
+        return listStorage.get(storageName).contains(value);
+    }
+
+    /**
+     * Store key-value pair into the hash map with the specified name
      *
      * @param storageName name of the hash map
      * @param key         key to insert
      * @param value       value to insert
      */
-    public static void addToMap(String storageName, Object key, Object value) {
+    public static synchronized void addToMap(String storageName, Object key, Object value) {
         if (!mapStorage.containsKey(storageName)) {
             mapStorage.put(storageName, new HashMap<>());
         }
@@ -41,28 +64,29 @@ public class StorageUtils {
     }
 
     /**
-     * Get list with the specified name
+     * Remove key-value pair from the hash map with the specified name
      *
-     * @param storageName list name
-     * @return associated list
+     * @param storageName name of the hash map
+     * @param key         key to remove
      */
-    public static ArrayList<Object> getList(String storageName) {
-        if (!listStorage.containsKey(storageName)) {
-            listStorage.put(storageName, new ArrayList<>());
-        }
-        return listStorage.get(storageName);
-    }
-
-    /**
-     * Get hash map with the specified name
-     *
-     * @param storageName hash map name
-     * @return associated hash map
-     */
-    public static HashMap<Object, Object> getMap(String storageName) {
+    public static synchronized void removeFromMap(String storageName, Object key) {
         if (!mapStorage.containsKey(storageName)) {
             mapStorage.put(storageName, new HashMap<>());
         }
-        return mapStorage.get(storageName);
+        mapStorage.get(storageName).remove(key);
     }
+
+    /**
+     * Check key-value pair for presence in the hash map with the specified name
+     *
+     * @param storageName name of the hash map
+     * @param key         key to to check for presence
+     */
+    public static synchronized boolean mapContains(String storageName, Object key) {
+        if (!mapStorage.containsKey(storageName)) {
+            mapStorage.put(storageName, new HashMap<>());
+        }
+        return mapStorage.get(storageName).containsKey(key);
+    }
+
 }
