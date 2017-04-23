@@ -34,7 +34,7 @@ public class ClassPoolInterceptor implements Interceptor {
                 alreadyInserted = true;
             } catch (NotFoundException ignore) {
             }
-            System.out.println("GET was called, class path: " + classPool.source + " ");
+            System.out.println("Javassist class path altered, new path is: " + classPool.source + " ");
         }
     }
 }

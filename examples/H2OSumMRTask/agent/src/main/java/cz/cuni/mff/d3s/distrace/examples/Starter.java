@@ -32,7 +32,7 @@ public class Starter {
                 return builder
                         .type(is(ClassPool.class))
                         .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(pathToInstrumentedClasses), true))
-                        .type(isSubTypeOf(H2O.H2OCountedCompleter.class))
+                        .type(isSubTypeOf(MRTask.class))
                         .transform(new BaseTransformer() {
                             @Override
                             public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
