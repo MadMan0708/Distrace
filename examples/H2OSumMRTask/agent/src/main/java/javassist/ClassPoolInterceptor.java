@@ -2,7 +2,6 @@ package javassist;
 
 import com.google.auto.service.AutoService;
 import cz.cuni.mff.d3s.distrace.instrumentation.Interceptor;
-import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import net.bytebuddy.implementation.bind.annotation.This;
 
 
