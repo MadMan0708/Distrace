@@ -91,6 +91,7 @@ public abstract class MRTaskAdvices {
     public static class compute2 {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
+
             if (o instanceof SumMRTask) {
                 MRTask tsk = (MRTask) o;
                 TraceContext tc = TraceContext.getFromObject(o).deepCopy();
@@ -160,7 +161,7 @@ public abstract class MRTaskAdvices {
     }
 
     /**
-     * This method closes computation and setulLocal0 spans.
+     * This method closes computation and setupLocal0 spans.
      */
     public static class onCompletion {
         @Advice.OnMethodExit

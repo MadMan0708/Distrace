@@ -7,10 +7,7 @@ import cz.cuni.mff.d3s.distrace.json.JSONValue;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Span class is used to encapsulate a relatively small part of the communication between the nodes.
@@ -192,6 +189,13 @@ public class Span implements Serializable {
      */
     public boolean hasFlag(String flag) {
         return this.flags.contains(flag);
+    }
+
+    /**
+     * Return all flags on this span
+     */
+    public List<String> getFlags(){
+        return flags;
     }
 
     /**
