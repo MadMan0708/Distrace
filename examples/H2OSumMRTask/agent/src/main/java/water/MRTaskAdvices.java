@@ -38,7 +38,7 @@ public abstract class MRTaskAdvices {
     }
 
     /**
-     * This method opens an span tracing a splitting method to smaller tasks and sending remote tasks
+     * This method opens an span which traces splitting to smaller tasks and sending remote tasks
      * This span is closed by the onCompletion method once all the sub-tasks on all nodes have been
      * completed.
      */
@@ -46,10 +46,11 @@ public abstract class MRTaskAdvices {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Object o) {
             if (o instanceof SumMRTask) {
-                TraceContext tc = TraceContext.getFromObject(o);
+                TraceContext tc = TraceContext.getFromObject(o).deepCopy();
                 tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Setting and Splitting")
                         .setIpPort(H2O.getIpPortString());
-                tc.getCurrentSpan().add("setupLocal0 entry", o.toString());
+                tc.getCurrentSpan().add("setupLocal0 entry", o.toString())
+                        .addFlag("setup");
                 tc.attachOnObject(o);
                 StorageUtils.addToList("setupLocal", o);
             }
@@ -95,11 +96,13 @@ public abstract class MRTaskAdvices {
                 TraceContext tc = TraceContext.getFromObject(o).deepCopy();
                 tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Local work - chunks : " + (tsk._hi - tsk._lo));
                 tc.getCurrentSpan().add("compute2 entry", o.toString());
+                tc.getCurrentSpan().addFlag("compute");
                 tc.attachOnObject(o);
                 StorageUtils.addToList("compute2", o);
-
                 if (StackTraceUtils.numMethodCalls("compute2") >= 2) {
-                    tc.getCurrentSpan().appendToName(" - forked");
+                    tc.getCurrentSpan().appendToName(" - same thread");
+                } else {
+                    tc.getCurrentSpan().appendToName(" - new thread");
                 }
             }
         }
@@ -162,20 +165,21 @@ public abstract class MRTaskAdvices {
     public static class onCompletion {
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o, @Advice.Argument(0) CountedCompleter caller) {
-            System.out.println("Before " + o);
             if (o instanceof SumMRTask) {
-                System.out.println("After " + o);
                 MRTask task = (MRTask) o;
                 TraceContext tc = TraceContext.getFromObject(task);
 
-                if (StorageUtils.listContains("compute2", task)) {
+                if (StorageUtils.listContains("compute2", task)
+                        && tc.getCurrentSpan().hasFlag("compute")) {
                     StorageUtils.removeFromList("compute2", task);
                     tc.getCurrentSpan().add("compute2 exit", task.toString());
                     tc.closeCurrentSpan();
                 }
 
+
                 // setupLocal0 span finishes when there are no more pending task on this node for this MRTask
-                if (StorageUtils.listContains("setupLocal", task)) {
+                if (StorageUtils.listContains("setupLocal", task)
+                        && tc.getCurrentSpan().hasFlag("setup")) {
                     StorageUtils.removeFromList("setupLocal", task);
                     tc.getCurrentSpan()
                             .add("left", task._nleft == null ? "local" : task._nleft._target.getIpPortString())

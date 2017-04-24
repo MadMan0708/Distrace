@@ -1,10 +1,10 @@
 package water;
 
+
 import cz.cuni.mff.d3s.distrace.examples.SumMRTask;
-import cz.cuni.mff.d3s.distrace.instrumentation.StorageUtils;
 import cz.cuni.mff.d3s.distrace.instrumentation.StackTraceUtils;
+import cz.cuni.mff.d3s.distrace.instrumentation.StorageUtils;
 import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
-import jsr166y.CountedCompleter;
 import net.bytebuddy.asm.Advice;
 
 
@@ -22,6 +22,7 @@ public class RPCAdvices {
                     tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Remote work - rpc")
                             .setIpPort(H2O.getIpPortString())
                             .add("ipPort", H2O.getIpPortString());
+                    tc.getCurrentSpan().addFlag("rpc");
                     StorageUtils.addToList("remote_task_num", thizz._tasknum);
                     tc.attachOnObject(thizz._dt);
                 }
@@ -36,9 +37,11 @@ public class RPCAdvices {
         @Advice.OnMethodExit
         public static void exit(@Advice.This RPC thizz) {
             if (thizz._dt instanceof SumMRTask) {
-                if (StorageUtils.listContains("remote_task_num", thizz._tasknum)) {
+                TraceContext tc = TraceContext.getFromObject(thizz._dt);
+
+                if (StorageUtils.listContains("remote_task_num", thizz._tasknum)
+                        && tc.getCurrentSpan().hasFlag("rpc")) {
                     StorageUtils.removeFromList("remote_task_num", thizz._tasknum);
-                    TraceContext tc = TraceContext.getFromObject(thizz._dt);
                     tc.closeCurrentSpan();
                 }
             }

@@ -7,6 +7,7 @@ import cz.cuni.mff.d3s.distrace.json.JSONValue;
 import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -37,6 +38,7 @@ public class Span implements Serializable {
     private int port = 0;
     private String ipv4;
     private JSONObject cachedEndpoint = null;
+    private ArrayList<String> flags = new ArrayList<>();
 
     /**
      * Internal constructor used to create a new top-level span.
@@ -85,6 +87,8 @@ public class Span implements Serializable {
         this.name = span.name;
         this.annotations = getAnnotationsCopy(span.annotations);
         this.binaryAnnotations = getAnnotationsCopy(span.binaryAnnotations);
+        this.flags = new ArrayList<>();
+        this.flags.addAll(span.flags);
         this.ipv4 = span.ipv4;
         this.port = span.port;
     }
@@ -157,6 +161,37 @@ public class Span implements Serializable {
     public Span setName(String name) {
         this.name = name;
         return this;
+    }
+
+    /**
+     * Add a flag to this span. Flags may be used during instrumentation and are not propagated to the
+     * user interface.
+     *
+     * @param flag flag
+     */
+    public Span addFlag(String flag) {
+        this.flags.add(flag);
+        return this;
+    }
+
+    /**
+     * Remove a flag from this span. Flags may be used during instrumentation and are not propagated to the
+     * user interface.
+     *
+     * @param flag flag
+     */
+    public Span removeFlag(String flag) {
+        this.flags.remove(flag);
+        return this;
+    }
+
+    /**
+     * Check whether this span has specific flag attached
+     *
+     * @param flag flag to check for
+     */
+    public boolean hasFlag(String flag) {
+        return this.flags.contains(flag);
     }
 
     /**
