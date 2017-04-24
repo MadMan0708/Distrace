@@ -11,7 +11,8 @@ public class ExecutorAdvice {
         public static void enter(@Advice.Argument(0) Runnable task) {
             TraceContext tc = TraceContext.getFromObject(ReflectionUtils.getFieldValue(task, "callback"));
             tc.deepCopy().attachOnObject(task);
-            tc.openNestedSpan("Task submission span");
+            tc.openNestedSpan("Task submission span")
+                    .setServiceName("callback");
             System.out.println("Trace context attached to the Task!");
         }
     }

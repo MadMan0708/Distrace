@@ -19,6 +19,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        System.out.println("Finished, check http://localhost:9411 for span visualizations!");
         System.exit(0);
     }
 }

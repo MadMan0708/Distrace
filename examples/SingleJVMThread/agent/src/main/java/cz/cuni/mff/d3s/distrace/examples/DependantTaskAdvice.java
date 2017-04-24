@@ -13,7 +13,8 @@ public class DependantTaskAdvice {
         public static void enter(@Advice.This Thread thizz) {
             TraceContext tc = TraceContext.getFromCurrentThread().deepCopy();
             tc.attachOnTread(thizz);
-            tc.openNestedSpan("Nested Span");
+            tc.openNestedSpan("Nested Span")
+                    .setServiceName("thread");
             System.out.println("Method start on dependant task was called. Thread id: " + thizz.getId());
         }
     }

@@ -11,7 +11,8 @@ public class StarterTaskAdvice {
     public static class start {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Thread thizz) {
-            TraceContext.create().attachOnTread(thizz).openNestedSpan("Starter Span");
+            TraceContext.create().attachOnTread(thizz).openNestedSpan("Starter Span")
+                    .setServiceName("thread");
             System.out.printf("Method start on starter task was called. Thread id: %d\n", thizz.getId());
         }
     }

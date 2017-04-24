@@ -24,6 +24,7 @@ public class Main {
         executor.submitTask(taskB);
 
         executor.stop();
+        System.out.println("Finished, check http://localhost:9411 for span visualizations!");
         System.exit(0);
     }
 }

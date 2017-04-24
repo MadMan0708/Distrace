@@ -9,7 +9,8 @@ public class CallbackCreatorAdvice {
     @Advice.OnMethodExit
     public static Object exit(@Advice.Return Callback value) {
         TraceContext tc = TraceContext.create().attachOnObject(value);
-        tc.openNestedSpan("Main Callback Span");
+        tc.openNestedSpan("Main Callback Span")
+        .setServiceName("callback");
         System.out.println("Created callback with trace ID = " + tc.getTraceId());
         return value;
     }

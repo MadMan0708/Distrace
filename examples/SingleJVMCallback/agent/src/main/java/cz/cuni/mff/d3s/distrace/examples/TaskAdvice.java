@@ -10,7 +10,8 @@ public class TaskAdvice {
         @Advice.OnMethodEnter
         public static void enter(@Advice.This Task task) {
             TraceContext tc = TraceContext.getFromObject(task);
-            tc.openNestedSpan("Thread execution span");
+            tc.openNestedSpan("Thread execution span")
+                    .setServiceName("callback");
         }
 
         @Advice.OnMethodExit
