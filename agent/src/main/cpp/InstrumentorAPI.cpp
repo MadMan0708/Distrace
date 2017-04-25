@@ -45,7 +45,7 @@ std::vector<std::string> InstrumentorAPI::ignoredLoaders =  {
         // bootstrap classloader, it loads system classes which we usually don't want to instrument
         "@Bootstrap",
         "sun.reflect.DelegatingClassLoader"
-        // classloader created because of mechanism called "inflatation", it is created synthetically and loads synthetic classes
+        // classloader created because of mechanism called "inflation", it is created synthetically and loads synthetic classes
         // and we do not want to create type Descriptions for these internal java classes
         // see http://stackoverflow.com/questions/6505274/what-for-sun-jvm-creates-instances-of-sun-reflect-delegatingclassloader-at-runti
 };
