@@ -28,10 +28,10 @@ public class Starter {
     public static void main(String args[]) {
         new Instrumentor().start(args, new MainAgentBuilder() {
             @Override
-            public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToInstrumentedClasses) {
+            public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToHelperClasses) {
                 return builder
                         .type(is(ClassPool.class))
-                        .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(pathToInstrumentedClasses), true))
+                        .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(pathToHelperClasses), true))
                         .type(isSubTypeOf(MRTask.class))
                         .transform(new BaseTransformer() {
                             @Override

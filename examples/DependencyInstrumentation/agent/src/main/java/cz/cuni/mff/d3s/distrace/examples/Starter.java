@@ -18,7 +18,7 @@ public class Starter {
         new Instrumentor().start(args,
                 new MainAgentBuilder() {
                     @Override
-                    public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToInstrumentedClasses) {
+                    public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToHelperClasses) {
                         return builder
                                 .type(named("cz.cuni.mff.d3s.distrace.examples.BaseTask"))
                                 // when instrumenting toString it is not desired to call super toString method as it overrides the instrumented result

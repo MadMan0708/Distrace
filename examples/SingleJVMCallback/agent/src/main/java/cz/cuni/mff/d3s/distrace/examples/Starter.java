@@ -16,7 +16,7 @@ public class Starter {
         new Instrumentor().start(args,
                 new MainAgentBuilder() {
                     @Override
-                    public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToInstrumentedClasses) {
+                    public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToHelperClasses) {
                         return builder
                                 .type(is(Task.class))
                                 .transform(new TaskTransformer())
