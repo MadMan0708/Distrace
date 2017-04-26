@@ -66,7 +66,7 @@ public abstract class MRTaskAdvices {
         public static void enter(@Advice.This Object o, @Advice.Argument(0) Integer nlo, @Advice.Argument(1) Integer nhi) {
             if (o instanceof SumMRTask) {
                 if (nlo >= nhi) {
-                    TraceContext tc = TraceContext.getFromObject(o).deepCopy();
+                    TraceContext tc = TraceContext.getFromObject(o);
                     tc.openNestedSpan("H2O Node" + H2O.SELF.index() + " - Remote Work - none")
                             .setIpPort(H2O.getIpPortString());
                     tc.attachOnObject(o);
