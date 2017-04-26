@@ -78,7 +78,7 @@ The Zipkin UI is by default started on the following address - [http://localhost
 ## How to start examples
 1) Clone this repo.
 2) Run: `./docker/run-test.sh EXAMPLE_NAME`
-Requirements: Docker and Docker compose.The project is tested on JDK 8 and the correct JDK is already used within the docker image.
+Requirements: Docker and Docker compose. The project is tested on JDK 8 and the correct JDK is already used within the docker image.
 
 The ./run-test.sh script is used to start examples within this docker image. The
 only argument to this script is example name.  This script is is actually using docker-compose to start 
