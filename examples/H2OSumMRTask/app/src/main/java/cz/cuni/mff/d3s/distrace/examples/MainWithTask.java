@@ -18,6 +18,7 @@ public class MainWithTask {
         H2OApp.main(args);
         // Wait for rest of the cloud, for 10 seconds max
         H2O.waitForCloudSize(3, 10000);
+
         // Create frame with numbers we want to count
         Frame frame = FrameTestCreator.createFrame("test", new long[]{0, 10});
         // Vec numVec = Vec.makeSeq(3, 100);
@@ -25,7 +26,7 @@ public class MainWithTask {
         printFrameInfo(frame);
 
         // Start Sum MR task n times
-        startTask(frame, 1);
+        startTask(frame, 11);
 
         System.out.println("Finished, check http://localhost:9411 for span visualizations!");
         // Shutdown the cluster once we have the result
@@ -35,7 +36,11 @@ public class MainWithTask {
 
     private static void startTask(Frame frame, int howManyTimes) {
         for (int i = 0; i < howManyTimes; i++) {
+            long start = System.nanoTime();
             SumMRTask mrTask = new SumMRTask().doAll(frame);
+            long end = System.nanoTime() - start;
+            System.out.println("TIMETIMETIME"+i  + end);
+
             System.out.println("Computed sum is " + mrTask.getSum());
         }
     }

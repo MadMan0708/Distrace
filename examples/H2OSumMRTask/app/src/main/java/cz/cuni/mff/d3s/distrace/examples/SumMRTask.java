@@ -7,6 +7,7 @@ import water.fvec.Chunk;
  * Simple sum MR task
  */
 public class SumMRTask extends MRTask<SumMRTask> {
+
     long sum = 0;
 
     public long getSum() {

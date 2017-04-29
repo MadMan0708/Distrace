@@ -1,0 +1,465 @@
+Iteration 1
+
+Top project dir is    : /Users/kuba/devel/thesis/Distrace
+Test location is      : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask
+Example name          : H2OSumMRTask
+Project version       : 0.0.0
+Native agent library  : /Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib
+Server JAR            : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar
+App JAR               : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar
+Instrumentor lib JAR  : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar
+
+
+Using following agent arguments:
+
+Instrumentor main class : cz.cuni.mff.d3s.distrace.examples.Starter
+Socket address          : ipc
+Log dir                 : logs
+Log level               : error
+Extra server classpath  : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar
+Saver type              : cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411)
+
+04-28 18:46:03.395 192.168.0.17:54321    23500  main      INFO: ----- H2O started  -----
+04-28 18:46:03.422 192.168.0.17:54323    23499  main      INFO: ----- H2O started  -----
+04-28 18:46:03.441 192.168.0.17:54321    23500  main      INFO: Build git branch: rel-ueno
+04-28 18:46:03.441 192.168.0.17:54321    23500  main      INFO: Build git hash: af9f0739fee6f1b86dd1ae1b2a7b9ccabe72e6c4
+04-28 18:46:03.441 192.168.0.17:54321    23500  main      INFO: Build git describe: jenkins-rel-ueno-4-4-gaf9f073
+04-28 18:46:03.441 192.168.0.17:54321    23500  main      INFO: Build project version: 3.10.4.5 (latest version: 3.10.4.6)
+04-28 18:46:03.441 192.168.0.17:54321    23500  main      INFO: Build age: 9 days
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Built by: 'jenkins'
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Built on: '2017-04-19 17:15:30'
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Watchdog Build git branch: (unknown)
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Watchdog Build git hash: (unknown)
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Watchdog Build git describe: (unknown)
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Watchdog Build project version: (unknown)
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Watchdog Built by: (unknown)
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Watchdog Built on: (unknown)
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Processed H2O arguments: [-name, test_cluster]
+04-28 18:46:03.442 192.168.0.17:54321    23500  main      INFO: Java availableProcessors: 8
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: Java heap totalMemory: 245.5 MB
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: Java heap maxMemory: 3.56 GB
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: Java version: Java 1.8.0_111 (from Oracle Corporation)
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: JVM launch parameters: [-agentpath:/Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib=instrumentor_server_cp=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar;saver=cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411);log_dir=logs;log_level=error;instrumentor_server_jar=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar;instrumentor_main_class=cz.cuni.mff.d3s.distrace.examples.Starter;connection_str=ipc]
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: OS version: Mac OS X 10.12.4 (x86_64)
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: Machine physical memory: 16.00 GB
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: X-h2o-cluster-id: 1493397951253
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: User name: 'kuba'
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: IPv6 stack selected: false
+04-28 18:46:03.443 192.168.0.17:54321    23500  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:d726:ed53:245f:c06d%utun0/name:utun0 (utun0)
+04-28 18:46:03.444 192.168.0.17:54321    23500  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:c000:78ff:fe4c:fbdb%awdl0/name:awdl0 (awdl0)
+04-28 18:46:03.444 192.168.0.17:54321    23500  main      INFO: Possible IP Address: en0 (en0), fe80:0:0:0:54:f6a2:c526:62b5%en0
+04-28 18:46:03.444 192.168.0.17:54321    23500  main      INFO: Possible IP Address: en0 (en0), 192.168.0.17
+04-28 18:46:03.444 192.168.0.17:54321    23500  main      INFO: Possible IP Address: lo0 (lo0), fe80:0:0:0:0:0:0:1%lo0
+04-28 18:46:03.444 192.168.0.17:54321    23500  main      INFO: Possible IP Address: lo0 (lo0), 0:0:0:0:0:0:0:1
+04-28 18:46:03.444 192.168.0.17:54321    23500  main      INFO: Possible IP Address: lo0 (lo0), 127.0.0.1
+04-28 18:46:03.444 192.168.0.17:54321    23500  main      INFO: H2O node running in unencrypted mode.
+04-28 18:46:03.449 192.168.0.17:54321    23500  main      INFO: Internal communication uses port: 54322
+04-28 18:46:03.449 192.168.0.17:54321    23500  main      INFO: Listening for HTTP and REST traffic on http://192.168.0.17:54321/
+04-28 18:46:03.450 192.168.0.17:54321    23500  main      INFO: H2O cloud name: 'test_cluster' on /192.168.0.17:54321, discovery address /238.68.75.77:60996
+04-28 18:46:03.450 192.168.0.17:54321    23500  main      INFO: If you have trouble connecting, try SSH tunneling from your local machine (e.g., via port 55555):
+04-28 18:46:03.450 192.168.0.17:54321    23500  main      INFO:   1. Open a terminal and run 'ssh -L 55555:localhost:54321 kuba@192.168.0.17'
+04-28 18:46:03.450 192.168.0.17:54321    23500  main      INFO:   2. Point your browser to http://localhost:55555
+04-28 18:46:03.451 192.168.0.17:54321    23500  main      INFO: Log dir: '/tmp/h2o-kuba/h2ologs'
+04-28 18:46:03.451 192.168.0.17:54321    23500  main      INFO: Cur dir: '/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask'
+04-28 18:46:03.455 192.168.0.17:54325    23498  main      INFO: ----- H2O started  -----
+04-28 18:46:03.462 192.168.0.17:54321    23500  main      INFO: HDFS subsystem not available
+04-28 18:46:03.462 192.168.0.17:54321    23500  main      INFO: S3 subsystem not available
+04-28 18:46:03.462 192.168.0.17:54321    23500  main      INFO: Flow dir: '/Users/kuba/h2oflows'
+04-28 18:46:03.470 192.168.0.17:54323    23499  main      INFO: Build git branch: rel-ueno
+04-28 18:46:03.470 192.168.0.17:54323    23499  main      INFO: Build git hash: af9f0739fee6f1b86dd1ae1b2a7b9ccabe72e6c4
+04-28 18:46:03.470 192.168.0.17:54323    23499  main      INFO: Build git describe: jenkins-rel-ueno-4-4-gaf9f073
+04-28 18:46:03.470 192.168.0.17:54323    23499  main      INFO: Build project version: 3.10.4.5 (latest version: 3.10.4.6)
+04-28 18:46:03.470 192.168.0.17:54323    23499  main      INFO: Build age: 9 days
+04-28 18:46:03.470 192.168.0.17:54323    23499  main      INFO: Built by: 'jenkins'
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Built on: '2017-04-19 17:15:30'
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Watchdog Build git branch: (unknown)
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Watchdog Build git hash: (unknown)
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Watchdog Build git describe: (unknown)
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Watchdog Build project version: (unknown)
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Watchdog Built by: (unknown)
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Watchdog Built on: (unknown)
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Processed H2O arguments: [-name, test_cluster]
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Java availableProcessors: 8
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Java heap totalMemory: 245.5 MB
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Java heap maxMemory: 3.56 GB
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: Java version: Java 1.8.0_111 (from Oracle Corporation)
+04-28 18:46:03.471 192.168.0.17:54323    23499  main      INFO: JVM launch parameters: [-agentpath:/Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib=instrumentor_server_cp=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar;saver=cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411);log_dir=logs;log_level=error;instrumentor_server_jar=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar;instrumentor_main_class=cz.cuni.mff.d3s.distrace.examples.Starter;connection_str=ipc]
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: OS version: Mac OS X 10.12.4 (x86_64)
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Machine physical memory: 16.00 GB
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: X-h2o-cluster-id: 1493397951263
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: User name: 'kuba'
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: IPv6 stack selected: false
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:d726:ed53:245f:c06d%utun0/name:utun0 (utun0)
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:c000:78ff:fe4c:fbdb%awdl0/name:awdl0 (awdl0)
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Possible IP Address: en0 (en0), fe80:0:0:0:54:f6a2:c526:62b5%en0
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Possible IP Address: en0 (en0), 192.168.0.17
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Possible IP Address: lo0 (lo0), fe80:0:0:0:0:0:0:1%lo0
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Possible IP Address: lo0 (lo0), 0:0:0:0:0:0:0:1
+04-28 18:46:03.472 192.168.0.17:54323    23499  main      INFO: Possible IP Address: lo0 (lo0), 127.0.0.1
+04-28 18:46:03.473 192.168.0.17:54323    23499  main      INFO: H2O node running in unencrypted mode.
+04-28 18:46:03.478 192.168.0.17:54323    23499  main      INFO: Internal communication uses port: 54324
+04-28 18:46:03.478 192.168.0.17:54323    23499  main      INFO: Listening for HTTP and REST traffic on http://192.168.0.17:54323/
+04-28 18:46:03.479 192.168.0.17:54323    23499  main      INFO: H2O cloud name: 'test_cluster' on /192.168.0.17:54323, discovery address /238.68.75.77:60996
+04-28 18:46:03.479 192.168.0.17:54323    23499  main      INFO: If you have trouble connecting, try SSH tunneling from your local machine (e.g., via port 55555):
+04-28 18:46:03.479 192.168.0.17:54323    23499  main      INFO:   1. Open a terminal and run 'ssh -L 55555:localhost:54323 kuba@192.168.0.17'
+04-28 18:46:03.479 192.168.0.17:54323    23499  main      INFO:   2. Point your browser to http://localhost:55555
+04-28 18:46:03.480 192.168.0.17:54323    23499  main      INFO: Log dir: '/tmp/h2o-kuba/h2ologs'
+04-28 18:46:03.480 192.168.0.17:54323    23499  main      INFO: Cur dir: '/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask'
+04-28 18:46:03.489 192.168.0.17:54321    23500  main      INFO: Cloud of size 1 formed [/192.168.0.17:54321]
+04-28 18:46:03.493 192.168.0.17:54323    23499  main      INFO: HDFS subsystem not available
+04-28 18:46:03.493 192.168.0.17:54323    23499  main      INFO: S3 subsystem not available
+04-28 18:46:03.493 192.168.0.17:54323    23499  main      INFO: Flow dir: '/Users/kuba/h2oflows'
+04-28 18:46:03.513 192.168.0.17:54325    23498  main      INFO: Build git branch: rel-ueno
+04-28 18:46:03.513 192.168.0.17:54325    23498  main      INFO: Build git hash: af9f0739fee6f1b86dd1ae1b2a7b9ccabe72e6c4
+04-28 18:46:03.513 192.168.0.17:54325    23498  main      INFO: Build git describe: jenkins-rel-ueno-4-4-gaf9f073
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Build project version: 3.10.4.5 (latest version: 3.10.4.6)
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Build age: 9 days
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Built by: 'jenkins'
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Built on: '2017-04-19 17:15:30'
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Watchdog Build git branch: (unknown)
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Watchdog Build git hash: (unknown)
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Watchdog Build git describe: (unknown)
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Watchdog Build project version: (unknown)
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Watchdog Built by: (unknown)
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Watchdog Built on: (unknown)
+04-28 18:46:03.514 192.168.0.17:54325    23498  main      INFO: Processed H2O arguments: [-name, test_cluster]
+04-28 18:46:03.515 192.168.0.17:54325    23498  main      INFO: Java availableProcessors: 8
+04-28 18:46:03.515 192.168.0.17:54325    23498  main      INFO: Java heap totalMemory: 245.5 MB
+04-28 18:46:03.515 192.168.0.17:54325    23498  main      INFO: Java heap maxMemory: 3.56 GB
+04-28 18:46:03.515 192.168.0.17:54325    23498  main      INFO: Java version: Java 1.8.0_111 (from Oracle Corporation)
+04-28 18:46:03.515 192.168.0.17:54321    23500  main      INFO: Registered parsers: [GUESS, ARFF, XLS, SVMLight, CSV]
+04-28 18:46:03.515 192.168.0.17:54325    23498  main      INFO: JVM launch parameters: [-agentpath:/Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib=instrumentor_server_cp=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar;saver=cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411);log_dir=logs;log_level=error;instrumentor_server_jar=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar;instrumentor_main_class=cz.cuni.mff.d3s.distrace.examples.Starter;connection_str=ipc]
+04-28 18:46:03.515 192.168.0.17:54325    23498  main      INFO: OS version: Mac OS X 10.12.4 (x86_64)
+04-28 18:46:03.515 192.168.0.17:54321    23500  main      INFO: Watchdog extension initialized
+04-28 18:46:03.515 192.168.0.17:54325    23498  main      INFO: Machine physical memory: 16.00 GB
+04-28 18:46:03.516 192.168.0.17:54321    23500  main      INFO: Registered 1 extensions in: 4mS
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: X-h2o-cluster-id: 1493397951265
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: User name: 'kuba'
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: IPv6 stack selected: false
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:d726:ed53:245f:c06d%utun0/name:utun0 (utun0)
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:c000:78ff:fe4c:fbdb%awdl0/name:awdl0 (awdl0)
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: Possible IP Address: en0 (en0), fe80:0:0:0:54:f6a2:c526:62b5%en0
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: Possible IP Address: en0 (en0), 192.168.0.17
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: Possible IP Address: lo0 (lo0), fe80:0:0:0:0:0:0:1%lo0
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: Possible IP Address: lo0 (lo0), 0:0:0:0:0:0:0:1
+04-28 18:46:03.516 192.168.0.17:54325    23498  main      INFO: Possible IP Address: lo0 (lo0), 127.0.0.1
+04-28 18:46:03.517 192.168.0.17:54325    23498  main      INFO: H2O node running in unencrypted mode.
+04-28 18:46:03.523 192.168.0.17:54325    23498  main      INFO: Internal communication uses port: 54326
+04-28 18:46:03.523 192.168.0.17:54325    23498  main      INFO: Listening for HTTP and REST traffic on http://192.168.0.17:54325/
+04-28 18:46:03.525 192.168.0.17:54325    23498  main      INFO: H2O cloud name: 'test_cluster' on /192.168.0.17:54325, discovery address /238.68.75.77:60996
+04-28 18:46:03.525 192.168.0.17:54325    23498  main      INFO: If you have trouble connecting, try SSH tunneling from your local machine (e.g., via port 55555):
+04-28 18:46:03.525 192.168.0.17:54325    23498  main      INFO:   1. Open a terminal and run 'ssh -L 55555:localhost:54325 kuba@192.168.0.17'
+04-28 18:46:03.525 192.168.0.17:54325    23498  main      INFO:   2. Point your browser to http://localhost:55555
+04-28 18:46:03.526 192.168.0.17:54325    23498  main      INFO: Log dir: '/tmp/h2o-kuba/h2ologs'
+04-28 18:46:03.526 192.168.0.17:54325    23498  main      INFO: Cur dir: '/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask'
+04-28 18:46:03.528 192.168.0.17:54323    23499  main      INFO: Cloud of size 1 formed [/192.168.0.17:54323]
+04-28 18:46:03.541 192.168.0.17:54325    23498  main      INFO: HDFS subsystem not available
+04-28 18:46:03.542 192.168.0.17:54325    23498  main      INFO: S3 subsystem not available
+04-28 18:46:03.542 192.168.0.17:54325    23498  main      INFO: Flow dir: '/Users/kuba/h2oflows'
+04-28 18:46:03.555 192.168.0.17:54323    23499  main      INFO: Registered parsers: [GUESS, ARFF, XLS, SVMLight, CSV]
+04-28 18:46:03.555 192.168.0.17:54323    23499  main      INFO: Watchdog extension initialized
+04-28 18:46:03.558 192.168.0.17:54323    23499  main      INFO: Registered 1 extensions in: 4mS
+04-28 18:46:03.576 192.168.0.17:54325    23498  main      INFO: Cloud of size 1 formed [/192.168.0.17:54325]
+04-28 18:46:03.603 192.168.0.17:54325    23498  main      INFO: Registered parsers: [GUESS, ARFF, XLS, SVMLight, CSV]
+04-28 18:46:03.603 192.168.0.17:54325    23498  main      INFO: Watchdog extension initialized
+04-28 18:46:03.606 192.168.0.17:54325    23498  main      INFO: Registered 1 extensions in: 4mS
+04-28 18:46:04.612 192.168.0.17:54321    23500  main      INFO: Registered: 148 REST APIs in: 1096mS
+04-28 18:46:04.619 192.168.0.17:54323    23499  main      INFO: Registered: 148 REST APIs in: 1061mS
+04-28 18:46:04.701 192.168.0.17:54325    23498  main      INFO: Registered: 148 REST APIs in: 1095mS
+Javassist class path altered, new path is: [class path: /var/folders/lz/cpjqt79x415_fbkhyf5zbx_00000gn/T/3c15-021c-2eea-46bd:water.Weaver.class:java.lang.Object.class:] 
+Javassist class path altered, new path is: [class path: /var/folders/lz/cpjqt79x415_fbkhyf5zbx_00000gn/T/418d-069f-f517-77a3:water.Weaver.class:java.lang.Object.class:] 
+Javassist class path altered, new path is: [class path: /var/folders/lz/cpjqt79x415_fbkhyf5zbx_00000gn/T/726d-1f94-762f-2a87:water.Weaver.class:java.lang.Object.class:] 
+04-28 18:46:06.815 192.168.0.17:54321    23500  main      INFO: Registered: 209 schemas in 2191ms
+04-28 18:46:06.815 192.168.0.17:54321    23500  main      INFO: H2O started in 15551ms
+04-28 18:46:06.815 192.168.0.17:54321    23500  main      INFO: 
+04-28 18:46:06.815 192.168.0.17:54321    23500  main      INFO: Open H2O Flow in your web browser: http://192.168.0.17:54321
+04-28 18:46:06.815 192.168.0.17:54321    23500  main      INFO: 
+04-28 18:46:06.825 192.168.0.17:54323    23499  main      INFO: Registered: 209 schemas in 2203ms
+04-28 18:46:06.826 192.168.0.17:54323    23499  main      INFO: H2O started in 15549ms
+04-28 18:46:06.826 192.168.0.17:54323    23499  main      INFO: 
+04-28 18:46:06.826 192.168.0.17:54323    23499  main      INFO: Open H2O Flow in your web browser: http://192.168.0.17:54323
+04-28 18:46:06.827 192.168.0.17:54323    23499  main      INFO: 
+04-28 18:46:06.906 192.168.0.17:54325    23498  main      INFO: Registered: 209 schemas in 2202ms
+04-28 18:46:06.907 192.168.0.17:54325    23498  main      INFO: H2O started in 15628ms
+04-28 18:46:06.907 192.168.0.17:54325    23498  main      INFO: 
+04-28 18:46:06.907 192.168.0.17:54325    23498  main      INFO: Open H2O Flow in your web browser: http://192.168.0.17:54325
+04-28 18:46:06.907 192.168.0.17:54325    23498  main      INFO: 
+04-28 18:46:16.881 192.168.0.17:54321    23500  main      INFO: Locking cloud to new members, because water.Lockable$PriorWriteLock
+04-28 18:46:20.719 192.168.0.17:54321    23500  FJ-126-15 INFO: Cloud of size 3 formed [/192.168.0.17:54321, /192.168.0.17:54323, /192.168.0.17:54325]
+04-28 18:46:21.794 192.168.0.17:54325    23498  FJ-123-15 INFO: Locking cloud to new members, because water.Lockable$PriorWriteLock
+04-28 18:46:24.005 192.168.0.17:54323    23499  FJ-126-15 INFO: Cloud of size 3 formed [/192.168.0.17:54321, /192.168.0.17:54323, /192.168.0.17:54325]
+04-28 18:46:24.010 192.168.0.17:54325    23498  FJ-126-15 INFO: Cloud of size 3 formed [192.168.0.17/192.168.0.17:54321, /192.168.0.17:54323, /192.168.0.17:54325]
+04-28 18:46:28.386 192.168.0.17:54323    23499  FJ-123-15 INFO: Locking cloud to new members, because water.TaskPutKey
+Number of chunks on frame: 2
+Frame distributed on nodes:
+/192.168.0.17:54321
+192.168.0.17/192.168.0.17:54323
+
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@1ceee029 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@16168b59 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@41f74411 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@531407ff won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4f30a25f won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@43a46cb4 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@6a192456 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@60e14f26 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@25e3cd5e won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@36b89fce won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@50a91e10 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@6fb6620 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@5096616f won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@27372230 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4456ad7c won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@49ed8bf3 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@6dd82c0c won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@5929d603 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@148c6c75 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@5e6efa75 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@387f7769 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@788b2bd3 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@7e7e99bd won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4d639ab0 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4b0f2f61 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@38104a1c won't be sent!
+Computed sum is 10045
+Finished, check http://localhost:9411 for span visualizations!
+TIMETIMETIME 11838530587
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@76a94fb5 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@e0da864 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@620d37f7 won't be sent!
+04-28 18:46:28.731 192.168.0.17:54325    23498  FJ-119-15 INFO: Orderly shutdown from 192.168.0.17/192.168.0.17:54321
+04-28 18:46:28.733 192.168.0.17:54323    23499  FJ-119-15 INFO: Orderly shutdown from 192.168.0.17/192.168.0.17:54321
+04-28 18:46:28.734 192.168.0.17:54323    23499  FJ-126-15 INFO: Orderly shutdown acknowledged to 192.168.0.17/192.168.0.17:54321, exiting with exit code 0.
+04-28 18:46:28.735 192.168.0.17:54325    23498  FJ-126-15 INFO: Orderly shutdown acknowledged to 192.168.0.17/192.168.0.17:54321, exiting with exit code 0.
+Iteration 2
+
+Top project dir is    : /Users/kuba/devel/thesis/Distrace
+Test location is      : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask
+Example name          : H2OSumMRTask
+Project version       : 0.0.0
+Native agent library  : /Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib
+Server JAR            : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar
+App JAR               : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar
+Instrumentor lib JAR  : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar
+
+
+Using following agent arguments:
+
+Instrumentor main class : cz.cuni.mff.d3s.distrace.examples.Starter
+Socket address          : ipc
+Log dir                 : logs
+Log level               : error
+Extra server classpath  : /Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar
+Saver type              : cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411)
+
+04-28 18:46:59.222 192.168.0.17:54321    23695  main      INFO: ----- H2O started  -----
+04-28 18:46:59.246 192.168.0.17:54325    23696  main      INFO: ----- H2O started  -----
+04-28 18:46:59.248 192.168.0.17:54323    23697  main      INFO: ----- H2O started  -----
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Build git branch: rel-ueno
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Build git hash: af9f0739fee6f1b86dd1ae1b2a7b9ccabe72e6c4
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Build git describe: jenkins-rel-ueno-4-4-gaf9f073
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Build project version: 3.10.4.5 (latest version: 3.10.4.6)
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Build age: 9 days
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Built by: 'jenkins'
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Built on: '2017-04-19 17:15:30'
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Watchdog Build git branch: (unknown)
+04-28 18:46:59.271 192.168.0.17:54321    23695  main      INFO: Watchdog Build git hash: (unknown)
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Watchdog Build git describe: (unknown)
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Watchdog Build project version: (unknown)
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Watchdog Built by: (unknown)
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Watchdog Built on: (unknown)
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Processed H2O arguments: [-name, test_cluster]
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Java availableProcessors: 8
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Java heap totalMemory: 245.5 MB
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Java heap maxMemory: 3.56 GB
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Java version: Java 1.8.0_111 (from Oracle Corporation)
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: JVM launch parameters: [-agentpath:/Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib=instrumentor_server_cp=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar;saver=cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411);log_dir=logs;log_level=error;instrumentor_server_jar=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar;instrumentor_main_class=cz.cuni.mff.d3s.distrace.examples.Starter;connection_str=ipc]
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: OS version: Mac OS X 10.12.4 (x86_64)
+04-28 18:46:59.272 192.168.0.17:54321    23695  main      INFO: Machine physical memory: 16.00 GB
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: X-h2o-cluster-id: 1493398007276
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: User name: 'kuba'
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: IPv6 stack selected: false
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:d726:ed53:245f:c06d%utun0/name:utun0 (utun0)
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:c000:78ff:fe4c:fbdb%awdl0/name:awdl0 (awdl0)
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: Possible IP Address: en0 (en0), fe80:0:0:0:54:f6a2:c526:62b5%en0
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: Possible IP Address: en0 (en0), 192.168.0.17
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: Possible IP Address: lo0 (lo0), fe80:0:0:0:0:0:0:1%lo0
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: Possible IP Address: lo0 (lo0), 0:0:0:0:0:0:0:1
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: Possible IP Address: lo0 (lo0), 127.0.0.1
+04-28 18:46:59.273 192.168.0.17:54321    23695  main      INFO: H2O node running in unencrypted mode.
+04-28 18:46:59.278 192.168.0.17:54321    23695  main      INFO: Internal communication uses port: 54322
+04-28 18:46:59.278 192.168.0.17:54321    23695  main      INFO: Listening for HTTP and REST traffic on http://192.168.0.17:54321/
+04-28 18:46:59.279 192.168.0.17:54321    23695  main      INFO: H2O cloud name: 'test_cluster' on /192.168.0.17:54321, discovery address /238.68.75.77:60996
+04-28 18:46:59.279 192.168.0.17:54321    23695  main      INFO: If you have trouble connecting, try SSH tunneling from your local machine (e.g., via port 55555):
+04-28 18:46:59.279 192.168.0.17:54321    23695  main      INFO:   1. Open a terminal and run 'ssh -L 55555:localhost:54321 kuba@192.168.0.17'
+04-28 18:46:59.279 192.168.0.17:54321    23695  main      INFO:   2. Point your browser to http://localhost:55555
+04-28 18:46:59.280 192.168.0.17:54321    23695  main      INFO: Log dir: '/tmp/h2o-kuba/h2ologs'
+04-28 18:46:59.280 192.168.0.17:54321    23695  main      INFO: Cur dir: '/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask'
+04-28 18:46:59.292 192.168.0.17:54321    23695  main      INFO: HDFS subsystem not available
+04-28 18:46:59.293 192.168.0.17:54321    23695  main      INFO: S3 subsystem not available
+04-28 18:46:59.293 192.168.0.17:54321    23695  main      INFO: Flow dir: '/Users/kuba/h2oflows'
+04-28 18:46:59.293 192.168.0.17:54325    23696  main      INFO: Build git branch: rel-ueno
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Build git hash: af9f0739fee6f1b86dd1ae1b2a7b9ccabe72e6c4
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Build git describe: jenkins-rel-ueno-4-4-gaf9f073
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Build project version: 3.10.4.5 (latest version: 3.10.4.6)
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Build age: 9 days
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Built by: 'jenkins'
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Built on: '2017-04-19 17:15:30'
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Watchdog Build git branch: (unknown)
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Watchdog Build git hash: (unknown)
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Watchdog Build git describe: (unknown)
+04-28 18:46:59.294 192.168.0.17:54325    23696  main      INFO: Watchdog Build project version: (unknown)
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Watchdog Built by: (unknown)
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Watchdog Built on: (unknown)
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Processed H2O arguments: [-name, test_cluster]
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Java availableProcessors: 8
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Java heap totalMemory: 245.5 MB
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Java heap maxMemory: 3.56 GB
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Java version: Java 1.8.0_111 (from Oracle Corporation)
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: JVM launch parameters: [-agentpath:/Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib=instrumentor_server_cp=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar;saver=cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411);log_dir=logs;log_level=error;instrumentor_server_jar=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar;instrumentor_main_class=cz.cuni.mff.d3s.distrace.examples.Starter;connection_str=ipc]
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: OS version: Mac OS X 10.12.4 (x86_64)
+04-28 18:46:59.295 192.168.0.17:54325    23696  main      INFO: Machine physical memory: 16.00 GB
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: X-h2o-cluster-id: 1493398007302
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: User name: 'kuba'
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: IPv6 stack selected: false
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:d726:ed53:245f:c06d%utun0/name:utun0 (utun0)
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:c000:78ff:fe4c:fbdb%awdl0/name:awdl0 (awdl0)
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: Possible IP Address: en0 (en0), fe80:0:0:0:54:f6a2:c526:62b5%en0
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: Possible IP Address: en0 (en0), 192.168.0.17
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: Possible IP Address: lo0 (lo0), fe80:0:0:0:0:0:0:1%lo0
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: Possible IP Address: lo0 (lo0), 0:0:0:0:0:0:0:1
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: Possible IP Address: lo0 (lo0), 127.0.0.1
+04-28 18:46:59.296 192.168.0.17:54325    23696  main      INFO: H2O node running in unencrypted mode.
+04-28 18:46:59.297 192.168.0.17:54323    23697  main      INFO: Build git branch: rel-ueno
+04-28 18:46:59.297 192.168.0.17:54323    23697  main      INFO: Build git hash: af9f0739fee6f1b86dd1ae1b2a7b9ccabe72e6c4
+04-28 18:46:59.298 192.168.0.17:54323    23697  main      INFO: Build git describe: jenkins-rel-ueno-4-4-gaf9f073
+04-28 18:46:59.298 192.168.0.17:54323    23697  main      INFO: Build project version: 3.10.4.5 (latest version: 3.10.4.6)
+04-28 18:46:59.298 192.168.0.17:54323    23697  main      INFO: Build age: 9 days
+04-28 18:46:59.298 192.168.0.17:54323    23697  main      INFO: Built by: 'jenkins'
+04-28 18:46:59.298 192.168.0.17:54323    23697  main      INFO: Built on: '2017-04-19 17:15:30'
+04-28 18:46:59.298 192.168.0.17:54323    23697  main      INFO: Watchdog Build git branch: (unknown)
+04-28 18:46:59.298 192.168.0.17:54323    23697  main      INFO: Watchdog Build git hash: (unknown)
+04-28 18:46:59.299 192.168.0.17:54323    23697  main      INFO: Watchdog Build git describe: (unknown)
+04-28 18:46:59.299 192.168.0.17:54323    23697  main      INFO: Watchdog Build project version: (unknown)
+04-28 18:46:59.299 192.168.0.17:54323    23697  main      INFO: Watchdog Built by: (unknown)
+04-28 18:46:59.299 192.168.0.17:54323    23697  main      INFO: Watchdog Built on: (unknown)
+04-28 18:46:59.299 192.168.0.17:54323    23697  main      INFO: Processed H2O arguments: [-name, test_cluster]
+04-28 18:46:59.299 192.168.0.17:54323    23697  main      INFO: Java availableProcessors: 8
+04-28 18:46:59.299 192.168.0.17:54323    23697  main      INFO: Java heap totalMemory: 245.5 MB
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: Java heap maxMemory: 3.56 GB
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: Java version: Java 1.8.0_111 (from Oracle Corporation)
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: JVM launch parameters: [-agentpath:/Users/kuba/devel/thesis/Distrace/agent/build/lib-distrace-agent.dylib=instrumentor_server_cp=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/app/build/libs/distrace-examples-H2OSumMRTask-app-0.0.0-all.jar;saver=cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(localhost:9411);log_dir=logs;log_level=error;instrumentor_server_jar=/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask/agent/build/libs/distrace-examples-H2OSumMRTask-agent-0.0.0-all.jar;instrumentor_main_class=cz.cuni.mff.d3s.distrace.examples.Starter;connection_str=ipc]
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: OS version: Mac OS X 10.12.4 (x86_64)
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: Machine physical memory: 16.00 GB
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: X-h2o-cluster-id: 1493398007278
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: User name: 'kuba'
+04-28 18:46:59.300 192.168.0.17:54323    23697  main      INFO: IPv6 stack selected: false
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:d726:ed53:245f:c06d%utun0/name:utun0 (utun0)
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: Network address/interface is not reachable in 150ms: /fe80:0:0:0:c000:78ff:fe4c:fbdb%awdl0/name:awdl0 (awdl0)
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: Possible IP Address: en0 (en0), fe80:0:0:0:54:f6a2:c526:62b5%en0
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: Possible IP Address: en0 (en0), 192.168.0.17
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: Possible IP Address: lo0 (lo0), fe80:0:0:0:0:0:0:1%lo0
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: Possible IP Address: lo0 (lo0), 0:0:0:0:0:0:0:1
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: Possible IP Address: lo0 (lo0), 127.0.0.1
+04-28 18:46:59.301 192.168.0.17:54323    23697  main      INFO: H2O node running in unencrypted mode.
+04-28 18:46:59.303 192.168.0.17:54325    23696  main      INFO: Internal communication uses port: 54326
+04-28 18:46:59.303 192.168.0.17:54325    23696  main      INFO: Listening for HTTP and REST traffic on http://192.168.0.17:54325/
+04-28 18:46:59.304 192.168.0.17:54325    23696  main      INFO: H2O cloud name: 'test_cluster' on /192.168.0.17:54325, discovery address /238.68.75.77:60996
+04-28 18:46:59.304 192.168.0.17:54325    23696  main      INFO: If you have trouble connecting, try SSH tunneling from your local machine (e.g., via port 55555):
+04-28 18:46:59.304 192.168.0.17:54325    23696  main      INFO:   1. Open a terminal and run 'ssh -L 55555:localhost:54325 kuba@192.168.0.17'
+04-28 18:46:59.304 192.168.0.17:54325    23696  main      INFO:   2. Point your browser to http://localhost:55555
+04-28 18:46:59.305 192.168.0.17:54325    23696  main      INFO: Log dir: '/tmp/h2o-kuba/h2ologs'
+04-28 18:46:59.305 192.168.0.17:54325    23696  main      INFO: Cur dir: '/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask'
+04-28 18:46:59.307 192.168.0.17:54323    23697  main      INFO: Internal communication uses port: 54324
+04-28 18:46:59.307 192.168.0.17:54323    23697  main      INFO: Listening for HTTP and REST traffic on http://192.168.0.17:54323/
+04-28 18:46:59.309 192.168.0.17:54323    23697  main      INFO: H2O cloud name: 'test_cluster' on /192.168.0.17:54323, discovery address /238.68.75.77:60996
+04-28 18:46:59.309 192.168.0.17:54323    23697  main      INFO: If you have trouble connecting, try SSH tunneling from your local machine (e.g., via port 55555):
+04-28 18:46:59.309 192.168.0.17:54323    23697  main      INFO:   1. Open a terminal and run 'ssh -L 55555:localhost:54323 kuba@192.168.0.17'
+04-28 18:46:59.309 192.168.0.17:54323    23697  main      INFO:   2. Point your browser to http://localhost:55555
+04-28 18:46:59.310 192.168.0.17:54323    23697  main      INFO: Log dir: '/tmp/h2o-kuba/h2ologs'
+04-28 18:46:59.310 192.168.0.17:54323    23697  main      INFO: Cur dir: '/Users/kuba/devel/thesis/Distrace/examples/H2OSumMRTask'
+04-28 18:46:59.318 192.168.0.17:54325    23696  main      INFO: HDFS subsystem not available
+04-28 18:46:59.318 192.168.0.17:54325    23696  main      INFO: S3 subsystem not available
+04-28 18:46:59.318 192.168.0.17:54325    23696  main      INFO: Flow dir: '/Users/kuba/h2oflows'
+04-28 18:46:59.324 192.168.0.17:54323    23697  main      INFO: HDFS subsystem not available
+04-28 18:46:59.325 192.168.0.17:54323    23697  main      INFO: S3 subsystem not available
+04-28 18:46:59.325 192.168.0.17:54323    23697  main      INFO: Flow dir: '/Users/kuba/h2oflows'
+04-28 18:46:59.325 192.168.0.17:54321    23695  main      INFO: Cloud of size 1 formed [/192.168.0.17:54321]
+04-28 18:46:59.360 192.168.0.17:54321    23695  main      INFO: Registered parsers: [GUESS, ARFF, XLS, SVMLight, CSV]
+04-28 18:46:59.361 192.168.0.17:54321    23695  main      INFO: Watchdog extension initialized
+04-28 18:46:59.361 192.168.0.17:54321    23695  main      INFO: Registered 1 extensions in: 6mS
+04-28 18:46:59.364 192.168.0.17:54325    23696  main      INFO: Cloud of size 1 formed [/192.168.0.17:54325]
+04-28 18:46:59.374 192.168.0.17:54323    23697  main      INFO: Cloud of size 1 formed [/192.168.0.17:54323]
+04-28 18:46:59.393 192.168.0.17:54325    23696  main      INFO: Registered parsers: [GUESS, ARFF, XLS, SVMLight, CSV]
+04-28 18:46:59.394 192.168.0.17:54325    23696  main      INFO: Watchdog extension initialized
+04-28 18:46:59.394 192.168.0.17:54325    23696  main      INFO: Registered 1 extensions in: 5mS
+04-28 18:46:59.404 192.168.0.17:54323    23697  main      INFO: Registered parsers: [GUESS, ARFF, XLS, SVMLight, CSV]
+04-28 18:46:59.404 192.168.0.17:54323    23697  main      INFO: Watchdog extension initialized
+04-28 18:46:59.407 192.168.0.17:54323    23697  main      INFO: Registered 1 extensions in: 6mS
+04-28 18:47:00.462 192.168.0.17:54321    23695  main      INFO: Registered: 148 REST APIs in: 1101mS
+04-28 18:47:00.534 192.168.0.17:54325    23696  main      INFO: Registered: 148 REST APIs in: 1140mS
+04-28 18:47:00.622 192.168.0.17:54323    23697  main      INFO: Registered: 148 REST APIs in: 1215mS
+Javassist class path altered, new path is: [class path: /var/folders/lz/cpjqt79x415_fbkhyf5zbx_00000gn/T/8f88-f601-78d7-b40e:water.Weaver.class:java.lang.Object.class:] 
+Javassist class path altered, new path is: [class path: /var/folders/lz/cpjqt79x415_fbkhyf5zbx_00000gn/T/ada1-ffd4-f30d-8749:water.Weaver.class:java.lang.Object.class:] 
+Javassist class path altered, new path is: [class path: /var/folders/lz/cpjqt79x415_fbkhyf5zbx_00000gn/T/5c96-1efe-6373-5fa6:water.Weaver.class:java.lang.Object.class:] 
+04-28 18:47:02.758 192.168.0.17:54325    23696  main      INFO: Registered: 209 schemas in 2221ms
+04-28 18:47:02.758 192.168.0.17:54325    23696  main      INFO: H2O started in 15443ms
+04-28 18:47:02.758 192.168.0.17:54325    23696  main      INFO: 
+04-28 18:47:02.758 192.168.0.17:54325    23696  main      INFO: Open H2O Flow in your web browser: http://192.168.0.17:54325
+04-28 18:47:02.759 192.168.0.17:54325    23696  main      INFO: 
+04-28 18:47:02.763 192.168.0.17:54321    23695  main      INFO: Registered: 209 schemas in 2299ms
+04-28 18:47:02.763 192.168.0.17:54321    23695  main      INFO: H2O started in 15476ms
+04-28 18:47:02.763 192.168.0.17:54321    23695  main      INFO: 
+04-28 18:47:02.763 192.168.0.17:54321    23695  main      INFO: Open H2O Flow in your web browser: http://192.168.0.17:54321
+04-28 18:47:02.764 192.168.0.17:54321    23695  main      INFO: 
+04-28 18:47:02.778 192.168.0.17:54323    23697  main      INFO: Registered: 209 schemas in 2153ms
+04-28 18:47:02.778 192.168.0.17:54323    23697  main      INFO: H2O started in 15488ms
+04-28 18:47:02.778 192.168.0.17:54323    23697  main      INFO: 
+04-28 18:47:02.778 192.168.0.17:54323    23697  main      INFO: Open H2O Flow in your web browser: http://192.168.0.17:54323
+04-28 18:47:02.778 192.168.0.17:54323    23697  main      INFO: 
+04-28 18:47:12.823 192.168.0.17:54323    23697  main      INFO: Locking cloud to new members, because water.Lockable$PriorWriteLock
+04-28 18:47:22.526 192.168.0.17:54325    23696  FJ-126-15 INFO: Cloud of size 3 formed [/192.168.0.17:54321, /192.168.0.17:54323, /192.168.0.17:54325]04-28 18:47:22.526 192.168.0.17:54321    23695  FJ-126-15 INFO: Cloud of size 3 formed [/192.168.0.17:54321, /192.168.0.17:54323, /192.168.0.17:54325]
+
+04-28 18:47:22.526 192.168.0.17:54323    23697  FJ-126-15 INFO: Cloud of size 3 formed [/192.168.0.17:54321, /192.168.0.17:54323, /192.168.0.17:54325]
+04-28 18:47:22.656 192.168.0.17:54321    23695  FJ-125-15 INFO: Locking cloud to new members, because water.Lockable$PriorWriteLock
+04-28 18:47:22.900 192.168.0.17:54325    23696  FJ-123-15 INFO: Locking cloud to new members, because water.Lockable$PriorWriteLock
+Number of chunks on frame: 2
+Frame distributed on nodes:
+192.168.0.17/192.168.0.17:54321
+/192.168.0.17:54323
+
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@5fc6eed3 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@553e85a3 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4338eb35 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@7c9d84c6 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@103c0160 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4dff1d22 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@379ae862 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@3d628312 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4f694893 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@9170f6 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@a691b86 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@17b8bf98 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4df491b1 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4f6b84af won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@197f531f won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@4333667f won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@44f64b74 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@1d40d4e8 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@41aebf0e won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@78600ada won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@7e6b3d47 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@459123e3 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@7864c5c2 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@49c08045 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@725a6525 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@7665efb6 won't be sent!
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@cc21719 won't be sent!
+Computed sum is 10045
+Finished, check http://localhost:9411 for span visualizations!
+TIMETIMETIME 10883696504
+Couldn't connect to Zipkin Server, are you sure it is running on localhost:9411? Span cz.cuni.mff.d3s.distrace.tracing.Span@21665246 won't be sent!
+04-28 18:47:23.728 192.168.0.17:54325    23696  FJ-119-15 INFO: Orderly shutdown from 192.168.0.17/192.168.0.17:54323
+04-28 18:47:23.730 192.168.0.17:54325    23696  FJ-126-15 INFO: Orderly shutdown acknowledged to 192.168.0.17/192.168.0.17:54323, exiting with exit code 0.
+04-28 18:47:23.735 192.168.0.17:54321    23695  FJ-119-15 INFO: Orderly shutdown from 192.168.0.17/192.168.0.17:54323
+04-28 18:47:23.737 192.168.0.17:54321    23695  FJ-126-15 INFO: Orderly shutdown acknowledged to 192.168.0.17/192.168.0.17:54323, exiting with exit code 0.
