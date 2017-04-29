@@ -4,8 +4,8 @@ TOPDIR=$(cd `dirname $0`/../..;pwd)
 EXAMPLE_NAME=$(basename `pwd`)
 source $TOPDIR/bin/prepare-env.sh
 
-# set our custom saver type
-SAVER="cz.cuni.mff.d3s.distrace.examples.H2OSpanSaver(${ZIPKIN_IP:-localhost}:9411)"
+# set our custom span exporter type
+SPAN_EXPORTER="cz.cuni.mff.d3s.distrace.examples.H2OSpanExporter(${ZIPKIN_IP:-localhost}:9411)"
 
 finalize_configuration
 

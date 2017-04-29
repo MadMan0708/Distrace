@@ -4,7 +4,7 @@ package cz.cuni.mff.d3s.distrace.tracing;
 import cz.cuni.mff.d3s.distrace.json.JSONArray;
 import cz.cuni.mff.d3s.distrace.json.JSONObject;
 import cz.cuni.mff.d3s.distrace.json.JSONValue;
-import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
+import cz.cuni.mff.d3s.distrace.storage.SpanExporter;
 
 import java.io.Serializable;
 import java.util.*;
@@ -17,10 +17,10 @@ import java.util.*;
  */
 public class Span implements Serializable {
 
-    private static SpanSaver saver;
+    private static SpanExporter exporter;
 
     static {
-        saver = SpanSaver.fromString(getSaverType());
+        exporter = SpanExporter.fromString(getSpanExporterType());
     }
 
     private Span parentSpan = null;
@@ -199,9 +199,9 @@ public class Span implements Serializable {
     }
 
     /**
-     * Save this span using the set span saver.
+     * Export this span using the set span exporter.
      */
-    void save() {
+    void export() {
         long time = System.currentTimeMillis() * 1000;
         addOriginReceivedAnn(time);
         duration = time - timestamp;
@@ -211,7 +211,7 @@ public class Span implements Serializable {
             // tool )
             duration = 1;
         }
-        saver.saveSpan(this);
+        exporter.export(this);
     }
 
     public String getParentSpanId() {
@@ -452,9 +452,9 @@ public class Span implements Serializable {
     }
 
     /**
-     * Get span saver type provided by the user or the default one if not set
+     * Get span exporter type provided by the user or the default one if not set
      */
-    private static native String getSaverType();
+    private static native String getSpanExporterType();
 
     /**
      * Create deep copy of annotation hash map

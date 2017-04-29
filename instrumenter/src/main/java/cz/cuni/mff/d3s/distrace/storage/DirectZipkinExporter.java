@@ -12,19 +12,19 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Implementation of Span saver which sends the Span data in a JSON format directly to the Zipkin user interface
+ * Implementation of Span exporter which sends the Span data in a JSON format directly to the Zipkin user interface
  */
-public class DirectZipkinSaver extends SpanSaver {
+public class DirectZipkinExporter extends SpanExporter {
 
     private String serverIpPort;
 
-    public DirectZipkinSaver(String args) {
+    public DirectZipkinExporter(String args) {
         parseAndSetArgs(args);
     }
 
     @Override
-    public void saveSpan(Span span) {
-        submitSpanTask(new DirectZipkinSaverTask(span));
+    public void export(Span span) {
+        submitSpanTask(new DirectZipkinExporterTask(span));
     }
 
     @Override
@@ -33,13 +33,13 @@ public class DirectZipkinSaver extends SpanSaver {
     }
 
     /**
-     * Span saving tasks sending data to the Zipkin UI
+     * Task for exporting tasks directly to the Zipkin UI.
      */
-    public class DirectZipkinSaverTask implements Runnable {
+    public class DirectZipkinExporterTask implements Runnable {
 
         private Span span;
 
-        public DirectZipkinSaverTask(Span span) {
+        public DirectZipkinExporterTask(Span span) {
             this.span = span;
         }
 

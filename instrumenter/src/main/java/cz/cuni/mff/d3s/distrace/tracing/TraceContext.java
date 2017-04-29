@@ -1,5 +1,7 @@
 package cz.cuni.mff.d3s.distrace.tracing;
 
+import cz.cuni.mff.d3s.distrace.storage.DirectZipkinExporter;
+import cz.cuni.mff.d3s.distrace.storage.SpanExporter;
 import cz.cuni.mff.d3s.distrace.utils.NativeAgentUtils;
 
 import java.io.Serializable;
@@ -67,16 +69,16 @@ public class TraceContext implements Serializable {
     }
 
     /**
-     * Process current span using the set {@link cz.cuni.mff.d3s.distrace.storage.SpanSaver} and move
+     * Process current span using the set {@link SpanExporter} and move
      * one level up in the span hierarchy.
-     * If no span saver is, the default {@link cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver} is used.
+     * If no span exporter is explicitly specified, the default {@link DirectZipkinExporter} is used.
      *
      * @return trace context
      */
     public TraceContext closeCurrentSpan() {
         printSpanInfo(SpanEvent.CLOSING);
         span.setCloseStackTrace(Thread.currentThread());
-        span.save();
+        span.export();
         span = span.getParentSpan();
         return this;
     }

@@ -23,7 +23,7 @@ const std::string AgentArgs::ARG_INSTRUMENTOR_MAIN_CLASS = "instrumentor_main_cl
 const std::string AgentArgs::ARG_CONNECTION_STR = "connection_str";
 const std::string AgentArgs::ARG_LOG_LEVEL = "log_level";
 const std::string AgentArgs::ARG_LOG_DIR = "log_dir";
-const std::string AgentArgs::ARG_SAVER_TYPE = "saver";
+const std::string AgentArgs::ARG_SPAN_EXPORTER_TYPE = "span_exporter";
 const std::string AgentArgs::ARG_CONFIG_FILE = "config_file";
 const std::string AgentArgs::ARG_CLASS_OUTPUT_DIR = "class_output_dir";
 
@@ -86,19 +86,19 @@ int AgentArgs::validateLogLevel(std::string &errorMsg){
     return JNI_OK;
 }
 
-int AgentArgs::validateSaverType(std::string &errorMsg){
-    if(isArgSet(ARG_SAVER_TYPE)){
-        auto saverType = getArgValue(ARG_SAVER_TYPE);
-        if(Utils::startsWith(saverType, "directZipkin")){
+int AgentArgs::validateSpanExporterType(std::string &errorMsg){
+    if(isArgSet(ARG_SPAN_EXPORTER_TYPE)){
+        auto exporterType = getArgValue(ARG_SPAN_EXPORTER_TYPE);
+        if(Utils::startsWith(exporterType, "directZipkin")){
             std::regex re("^directZipkin\\(.*:\\d{1,5}\\)");
-            if(!std::regex_match(saverType.begin(), saverType.end(), re)){
-                errorMsg = "Wrong format of directZipkin saver type \"" + saverType + "\". It should be specified as directZipkin(ip:port)";
+            if(!std::regex_match(exporterType.begin(), exporterType.end(), re)){
+                errorMsg = "Wrong format of directZipkin span exporter type \"" + exporterType + "\". It should be specified as directZipkin(ip:port)";
                 return JNI_ERR;
             }
-        }else if(Utils::startsWith(saverType, "disk")){
+        }else if(Utils::startsWith(exporterType, "disk")){
             std::regex re("^disk\\(.*\\)");
-            if(!std::regex_match(saverType.begin(), saverType.end(), re)){
-                errorMsg = "Wrong format of disk saver type \"" + saverType + "\". It should be specified as disk(path)";
+            if(!std::regex_match(exporterType.begin(), exporterType.end(), re)){
+                errorMsg = "Wrong format of disk span exporter type \"" + exporterType + "\". It should be specified as disk(path)";
                 return JNI_ERR;
             }
         }
@@ -115,7 +115,7 @@ int AgentArgs::validateArgs(std::string &err_msg){
         return JNI_ERR;
     }
 
-    if(validateSaverType(err_msg) == JNI_ERR){
+    if(validateSpanExporterType(err_msg) == JNI_ERR){
         return JNI_ERR;
     }
 
@@ -164,9 +164,9 @@ void AgentArgs::fillMissingWithDefaults(){
         args.insert({ARG_CONNECTION_STR, "ipc"});
     }
 
-    if(!isArgSet(ARG_SAVER_TYPE)){
-        // the default saver is directly to Zipkin where we expect that zipkin is running on localhost on default port
-        args.insert({ARG_SAVER_TYPE, "directZipkin(localhost:9411)"});
+    if(!isArgSet(ARG_SPAN_EXPORTER_TYPE)){
+        // the default span exporter is directly to Zipkin, where we expect that zipkin is running on localhost on default port
+        args.insert({ARG_SPAN_EXPORTER_TYPE, "directZipkin(localhost:9411)"});
     }
 
     if(!isArgSet(ARG_CLASS_OUTPUT_DIR)){

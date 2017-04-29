@@ -105,7 +105,7 @@ In order to develop custom instrumentation library based on Distrace you need to
 2) Create a empty java project and include distrace-instrumenter as a compile dependency.
 
 3) Code it!
--  In order to be able to use custom interceptors and savers, the interceptors have to implement Interceptor interface and
+-  In order to be able to use custom interceptors and span exporters, the interceptors have to implement Interceptor interface and
    have to be specified as implementation for Interceptor service in order to be able to load them using our
    ServiceLoader mechanism.
      There are 2 ways how to do it. First is to create META-INF/services entries manually or better way

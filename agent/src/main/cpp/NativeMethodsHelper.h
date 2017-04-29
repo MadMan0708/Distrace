@@ -24,9 +24,9 @@ namespace Distrace {
         static JNINativeMethod toNative(std::string name, std::string signature, void* method);
 
         /**
-         * Get storage type from the arguments
+         * Get span exporter type from the arguments
          */
-        static jstring getSaverType(JNIEnv *jni, jobject thiz);
+        static jstring getSpanExporterType(JNIEnv *jni, jobject thiz);
 
         /**
          * Returns true if the agent is running in debugging mode

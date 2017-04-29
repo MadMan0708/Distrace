@@ -12,8 +12,8 @@
 using namespace Distrace;
 using namespace Distrace::Logging;
 
-jstring NativeMethodsHelper::getSaverType(JNIEnv *jni, jobject thiz){
-   return JavaUtils::asJavaString(jni, Agent::getArgs()->getArgValue(AgentArgs::ARG_SAVER_TYPE));
+jstring NativeMethodsHelper::getSpanExporterType(JNIEnv *jni, jobject thiz){
+   return JavaUtils::asJavaString(jni, Agent::getArgs()->getArgValue(AgentArgs::ARG_SPAN_EXPORTER_TYPE));
 }
 
 jboolean NativeMethodsHelper::isDebugging(JNIEnv *jni, jobject thiz){
@@ -30,7 +30,7 @@ std::map<std::string, std::vector<JNINativeMethod>> NativeMethodsHelper::natives
         std::make_pair<std::string, std::vector<JNINativeMethod>>(
             "cz.cuni.mff.d3s.distrace.tracing.Span",
             {
-                    toNative("getSaverType", "()Ljava/lang/String;", (void *) getSaverType)
+                    toNative("getSpanExporterType", "()Ljava/lang/String;", (void *) getSpanExporterType)
             }
         ),
         std::make_pair<std::string, std::vector<JNINativeMethod>>(

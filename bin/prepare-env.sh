@@ -48,13 +48,13 @@ LOG_DIR="logs"
 LOG_LEVEL="error"
 CONNECTION_STR="ipc"
 INSTRUMETOR_CP="$APP_JAR_PATH"
-SAVER="directZipkin(${ZIPKIN_IP:-localhost}:9411)"
+SPAN_EXPORTER="directZipkin(${ZIPKIN_IP:-localhost}:9411)"
 
 
 finalize_configuration(){
     # Remove previous logs
     rm -rf $LOG_DIR
-    AGENT_ARGS="instrumentor_server_cp=$INSTRUMETOR_CP;saver=$SAVER;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_server_jar=$SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;connection_str=$CONNECTION_STR"
+    AGENT_ARGS="instrumentor_server_cp=$INSTRUMETOR_CP;span_exporter=$SPAN_EXPORTER;log_dir=$LOG_DIR;log_level=$LOG_LEVEL;instrumentor_server_jar=$SERVER_JAR_PATH;instrumentor_main_class=$INSTRUMENTOR_MAIN_CLASS;connection_str=$CONNECTION_STR"
 
     echo
     echo "Using following agent arguments:"
@@ -64,6 +64,6 @@ finalize_configuration(){
     echo "Log dir                 : $LOG_DIR"
     echo "Log level               : $LOG_LEVEL"
     echo "Extra server classpath  : $INSTRUMETOR_CP"
-    echo "Saver type              : $SAVER"
+    echo "Span exporter           : $SPAN_EXPORTER"
     echo
 }

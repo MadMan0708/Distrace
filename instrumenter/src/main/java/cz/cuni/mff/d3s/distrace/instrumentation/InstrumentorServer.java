@@ -1,12 +1,12 @@
 package cz.cuni.mff.d3s.distrace.instrumentation;
 
 
+import cz.cuni.mff.d3s.distrace.storage.JSONDiskExporter;
+import cz.cuni.mff.d3s.distrace.storage.SpanExporter;
 import cz.cuni.mff.d3s.distrace.tracing.Span;
 import cz.cuni.mff.d3s.distrace.tracing.TraceContext;
 import cz.cuni.mff.d3s.distrace.json.*;
-import cz.cuni.mff.d3s.distrace.storage.DirectZipkinSaver;
-import cz.cuni.mff.d3s.distrace.storage.JSONDiskSaver;
-import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
+import cz.cuni.mff.d3s.distrace.storage.DirectZipkinExporter;
 import cz.cuni.mff.d3s.distrace.tracing.TraceContextManager;
 import cz.cuni.mff.d3s.distrace.utils.*;
 import nanomsg.exceptions.IOException;
@@ -98,11 +98,11 @@ public class InstrumentorServer {
             Span.class,
             TraceContextManager.class,
             TraceContext.SpanEvent.class,
-            SpanSaver.class,
-            DirectZipkinSaver.class,
-            JSONDiskSaver.class,
-            DirectZipkinSaver.DirectZipkinSaverTask.class,
-            JSONDiskSaver.JSONDiskSaverTask.class,
+            SpanExporter.class,
+            DirectZipkinExporter.class,
+            JSONDiskExporter.class,
+            DirectZipkinExporter.DirectZipkinExporterTask.class,
+            JSONDiskExporter.JSONDiskExporterTask.class,
             NativeAgentUtils.class
     };
 
@@ -118,7 +118,7 @@ public class InstrumentorServer {
             JSONPrettyStringBuilder.class
     };
 
-    private static ArrayList<Class<?>> customSaverClasses = Utils.getCustomSpanSaverClasses();
+    private static ArrayList<Class<?>> customSpanExporterClasses = Utils.getCustomSpanExporterClasses();
 
     /**
      * Register byte code received from the native agent in the instrumentation class loader
@@ -184,11 +184,11 @@ public class InstrumentorServer {
      */
     private void handleSentPrepClasses() {
         try {
-            sock.send(helperClasses.length + customSaverClasses.size() + jsonClasses.length);
+            sock.send(helperClasses.length + customSpanExporterClasses.size() + jsonClasses.length);
             for (Class clazz : helperClasses) {
                 sendClazz(clazz);
             }
-            for (Class clazz : customSaverClasses) {
+            for (Class clazz : customSpanExporterClasses) {
                 sendClazz(clazz);
             }
             for (Class clazz : jsonClasses) {

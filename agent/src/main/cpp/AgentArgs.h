@@ -22,7 +22,7 @@ namespace Distrace {
         static const std::string ARG_CONNECTION_STR;
         static const std::string ARG_LOG_LEVEL;
         static const std::string ARG_LOG_DIR;
-        static const std::string ARG_SAVER_TYPE;
+        static const std::string ARG_SPAN_EXPORTER_TYPE;
         static const std::string ARG_CONFIG_FILE;
         static const std::string ARG_CLASS_OUTPUT_DIR;
 
@@ -96,9 +96,9 @@ namespace Distrace {
         int validateLogLevel(std::string &errorMsg);
 
         /**
-         * Validates saver argument in case it is set
+         * Validates span exporter argument in case it is set
          */
-        int validateSaverType(std::string &errorMsg);
+        int validateSpanExporterType(std::string &errorMsg);
         /**
          * Check for single mandatory argument
          */

@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.distrace.utils;
 import com.rits.cloning.Cloner;
 import com.rits.cloning.ObjenesisInstantiationStrategy;
 import cz.cuni.mff.d3s.distrace.instrumentation.Interceptor;
-import cz.cuni.mff.d3s.distrace.storage.SpanSaver;
+import cz.cuni.mff.d3s.distrace.storage.SpanExporter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,9 +31,9 @@ public class Utils {
         return getByteCodesFor(ClassServiceLoader.load(Interceptor.class));
     }
 
-    public static ArrayList<Class<?>> getCustomSpanSaverClasses(){
+    public static ArrayList<Class<?>> getCustomSpanExporterClasses(){
         ArrayList<Class<?>> nestedClasses = new ArrayList<>();
-        ArrayList<Class<?>> load = ClassServiceLoader.load(SpanSaver.class);
+        ArrayList<Class<?>> load = ClassServiceLoader.load(SpanExporter.class);
         for(Class<?> clazz : load){
             nestedClasses.addAll(Arrays.asList(clazz.getDeclaredClasses()));
         }
