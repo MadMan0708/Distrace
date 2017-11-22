@@ -1,0 +1,36 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+description = "Instrumentation agent for Simple MR task in H2O"
+
+
+//
+// Configure project properties
+//
+ext {
+    h2oVersion = "3.10.4.5"
+}
+
+dependencies {
+    // use functionality provided by core-instrumentor
+    compile project(path: ':distrace-instrumenter', configuration: 'shadow')
+    compile "ai.h2o:h2o-core:${h2oVersion}"
+    compile project(":distrace-examples-H2OSumMRTask-app")
+    compile group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc2'
+    // https://mvnrepository.com/artifact/ai.h2o/sparkling-water-core_2.10
+    compile group: 'ai.h2o', name: 'sparkling-water-core_2.11', version: '2.1.9'
+
+
+}
+
+artifacts {
+    archives shadowJar
+}
+
+shadowJar{
+    dependencies {
+        include(project(path: ':distrace-instrumenter', configuration: 'shadow'))
+        // exclude application classes from the final jar
+        exclude(dependency("ai.h2o:h2o-core:${h2oVersion}"))
+        exclude(project(":distrace-examples-H2OSumMRTask-app"))
+    }
+}

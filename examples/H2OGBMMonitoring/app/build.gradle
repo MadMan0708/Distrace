@@ -1,6 +1,6 @@
 apply plugin: 'com.github.johnrengelman.shadow'
 
-description = "Simple application demostrating instrumentation of distrubuted MR task in H2O"
+description = "Simple application demostrating instrumentation of GBM modeling task in H2O"
 
 // example application does not need to have any dependency on the instrumentation platform at all
 
