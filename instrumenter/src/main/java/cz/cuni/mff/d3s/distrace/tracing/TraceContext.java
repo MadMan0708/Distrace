@@ -125,6 +125,9 @@ public class TraceContext implements Serializable {
         return contextManager.getTraceContext(Thread.currentThread());
     }
 
+    public static TraceContext getFromCurrentThreadOrNull(){
+        return contextManager.getTraceContextOrNull(Thread.currentThread());
+    }
     /**
      * Attach trace context on the specified holder object.
      * A holder object is used to transfer the trace information between different application nodes.

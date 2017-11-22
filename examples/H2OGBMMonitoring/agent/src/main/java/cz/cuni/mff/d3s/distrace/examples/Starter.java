@@ -7,6 +7,8 @@ import cz.cuni.mff.d3s.distrace.instrumentation.BaseTransformer;
 import cz.cuni.mff.d3s.distrace.instrumentation.MainAgentBuilder;
 import cz.cuni.mff.d3s.distrace.instrumentation.TransformerUtils;
 import cz.cuni.mff.d3s.distrace.utils.ReflectionUtils;
+import hex.ModelBuilder;
+import hex.ModelBuilderAdvices;
 import javassist.ClassPool;
 import javassist.ClassPoolInterceptor;
 import jsr166y.CountedCompleter;
@@ -31,7 +33,27 @@ public class Starter {
             public AgentBuilder createAgent(BaseAgentBuilder builder, String pathToHelperClasses) {
                 return builder
                         .type(is(ClassPool.class))
-                        .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(pathToHelperClasses), true));
+                        .transform(TransformerUtils.forInterceptorMethods(new ClassPoolInterceptor(pathToHelperClasses), true))
+                        .type(isSubTypeOf(ModelBuilder.class))
+                        .transform(new BaseTransformer() {
+                            @Override
+                            public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
+                                // define the trace context field and the instrumentation points
+                                return TransformerUtils.defineTraceContextField(builder).
+                                        visit(Advice.to(ModelBuilderAdvices.trainModel.class).on(named("trainModel")));
+                            }
+                        })
+                        .type(isSubTypeOf(Job.class))
+                        .transform(new BaseTransformer() {
+                          @Override
+                          public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
+                            // define the trace context field and the instrumentation points
+                            return TransformerUtils.defineTraceContextField(builder).
+                                    visit(Advice.to(JobAdvices.get.class).on(named("get")));
+                          }
+                        });
+
+
 
             }
         });

@@ -37,6 +37,14 @@ public class TraceContextManager {
         }
     }
 
+    synchronized TraceContext getTraceContextOrNull(Thread thread) {
+        if (hasTraceContext(thread)) {
+            return contexts.get(thread.getId());
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();

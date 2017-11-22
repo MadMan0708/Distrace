@@ -17,7 +17,7 @@ public class H2OSpanExporter extends DirectZipkinExporter {
 
     @Override
     public void export(Span span) {
-        span.setServiceName("MRTask");
+        span.setServiceName("GBM");
         submitSpanTask(new DirectZipkinExporterTask(span));
     }
 }

@@ -22,7 +22,7 @@ public class MainWithTask {
         // Start h2o node
         H2OApp.main(args);
         // Wait for rest of the cloud, for 10 seconds max
-        H2O.waitForCloudSize(3, 20000);
+        H2O.waitForCloudSize(1, 20000);
         System.out.println("Loading test data prostate.csv");
         File prostate = new File("data/prostate.csv").getAbsoluteFile();
 
