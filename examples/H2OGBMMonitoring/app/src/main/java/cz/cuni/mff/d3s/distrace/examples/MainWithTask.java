@@ -1,30 +1,39 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
+import hex.tree.gbm.GBM;
+import hex.tree.gbm.GBMModel;
 import water.H2O;
 import water.H2OApp;
 import water.H2ONode;
+import water.Key;
 import water.fvec.*;
+import water.parser.ParseSetup;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
-import java.util.concurrent.ExecutionException;
 
 /**
  * This application starts h2o instance which connects to the rest of the cluster
  * and submits an MR task which sums the number
  */
 public class MainWithTask {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Start h2o node
         H2OApp.main(args);
         // Wait for rest of the cloud, for 10 seconds max
-        H2O.waitForCloudSize(3, 10000);
-        // Create frame with numbers we want to count
-        Frame frame = FrameTestCreator.createFrame("test", new long[]{0, 10});
-        // Vec numVec = Vec.makeSeq(3, 100);
-        //Frame frame = new Frame(numVec);
-        printFrameInfo(frame);
+        H2O.waitForCloudSize(3, 20000);
+        System.out.println("Loading test data prostate.csv");
+        File prostate = new File("data/prostate.csv").getAbsoluteFile();
 
+        System.out.println("Creating frame based on the " + prostate);
+        String name = prostate.toURI().toString();
+        String baseName = name.substring(name.lastIndexOf('/') + 1);
+        Frame frame = water.util.FrameUtils.parseFrame(Key.make(ParseSetup.createHexName(baseName)), prostate.toURI());
+        System.out.println("Frame created!");
+        printFrameInfo(frame);
         // Start Sum MR task n times
+
         startTask(frame, 1);
 
         System.out.println("Finished, check http://localhost:9411 for span visualizations!");
@@ -35,8 +44,12 @@ public class MainWithTask {
 
     private static void startTask(Frame frame, int howManyTimes) {
         for (int i = 0; i < howManyTimes; i++) {
-            SumMRTask mrTask = new SumMRTask().doAll(frame);
-            System.out.println("Computed sum is " + mrTask.getSum());
+            GBMModel.GBMParameters gbmParams = new GBMModel.GBMParameters();
+            gbmParams._train = frame._key;
+            gbmParams._response_column = "CAPSULE";
+            gbmParams._ntrees = 10;
+            GBMModel gbmModel = new GBM(gbmParams).trainModel().get();
+            System.out.println("Train Model " + gbmModel);
         }
     }
 
