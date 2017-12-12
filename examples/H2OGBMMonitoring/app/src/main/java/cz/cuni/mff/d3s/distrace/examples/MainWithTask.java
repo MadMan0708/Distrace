@@ -22,7 +22,7 @@ public class MainWithTask {
         // Start h2o node
         H2OApp.main(args);
         // Wait for rest of the cloud, for 10 seconds max
-        H2O.waitForCloudSize(1, 20000);
+        H2O.waitForCloudSize(2, 20000);
         System.out.println("Loading test data prostate.csv");
         File prostate = new File("data/prostate.csv").getAbsoluteFile();
 
@@ -32,8 +32,8 @@ public class MainWithTask {
         Frame frame = water.util.FrameUtils.parseFrame(Key.make(ParseSetup.createHexName(baseName)), prostate.toURI());
         System.out.println("Frame created!");
         printFrameInfo(frame);
-        // Start Sum MR task n times
 
+        // Start task n times
         startTask(frame, 1);
 
         System.out.println("Finished, check http://localhost:9411 for span visualizations!");

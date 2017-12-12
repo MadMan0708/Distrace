@@ -11,6 +11,7 @@ public class JobAdvices {
       TraceContext tc = TraceContext.getFromCurrentThreadOrNull();
       if( tc != null && tc.getCurrentSpan().hasFlag("gbm")) {
         TraceContext.getFromCurrentThread().closeCurrentSpan();
+        System.out.println("Job finished!!!!");
       }
     }
   }

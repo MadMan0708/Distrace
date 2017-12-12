@@ -6,19 +6,23 @@ import cz.cuni.mff.d3s.distrace.instrumentation.BaseAgentBuilder;
 import cz.cuni.mff.d3s.distrace.instrumentation.BaseTransformer;
 import cz.cuni.mff.d3s.distrace.instrumentation.MainAgentBuilder;
 import cz.cuni.mff.d3s.distrace.instrumentation.TransformerUtils;
-import cz.cuni.mff.d3s.distrace.utils.ReflectionUtils;
 import hex.ModelBuilder;
 import hex.ModelBuilderAdvices;
+import hex.tree.SharedTree;
+import hex.tree.gbm.GBM;
+import hex.tree.gbm.GBMAdvices;
+import hex.tree.gbm.GBMDriverAdvices;
+import hex.tree.gbm.SharedTreeDriverAdvices;
 import javassist.ClassPool;
 import javassist.ClassPoolInterceptor;
-import jsr166y.CountedCompleter;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import water.*;
-import water.fvec.Frame;
-
-import java.lang.reflect.Method;
+import net.bytebuddy.matcher.ElementMatchers;
+import water.H2O;
+import water.Job;
+import water.JobAdvices;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -51,9 +55,36 @@ public class Starter {
                             return TransformerUtils.defineTraceContextField(builder).
                                     visit(Advice.to(JobAdvices.get.class).on(named("get")));
                           }
+                        })
+                        .type(ElementMatchers.<TypeDescription>named("hex.tree.gbm.GBM$GBMDriver"))
+                        .transform(new BaseTransformer() {
+                            @Override
+                            public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
+                                // define the trace context field and the instrumentation points
+                                return TransformerUtils.defineTraceContextField(builder).
+                                        visit(Advice.to(GBMDriverAdvices.buildNextKTrees.class).on(named("buildNextKTrees")))
+                                        .visit(Advice.to(GBMDriverAdvices.initializeModelSpecifics.class).on(named("initializeModelSpecifics")));
+                            }
+                        })
+                        .type(ElementMatchers.<TypeDescription>named("hex.tree.SharedTree$Driver"))
+                        .transform(new BaseTransformer() {
+                            @Override
+                            public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
+                                // define the trace context field and the instrumentation points
+                                return TransformerUtils.defineTraceContextField(builder).
+                                        visit(Advice.to(SharedTreeDriverAdvices.scoreAndBuildTrees.class).on(named("scoreAndBuildTrees")))
+                                        .visit(Advice.to(SharedTreeDriverAdvices.computeImpl.class).on(named("computeImpl")));
+                            }
+                        })
+                        .type(is(GBM.class))
+                        .transform(new BaseTransformer() {
+                            @Override
+                            public DynamicType.Builder<?> defineTransformation(DynamicType.Builder<?> builder) {
+                                // define the trace context field and the instrumentation points
+                                return TransformerUtils.defineTraceContextField(builder).
+                                        visit(Advice.to(GBMAdvices.trainModelImpl.class).on(named("trainModelImpl")));
+                            }
                         });
-
-
 
             }
         });
