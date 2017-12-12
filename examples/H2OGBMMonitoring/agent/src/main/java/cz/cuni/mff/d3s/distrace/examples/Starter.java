@@ -73,7 +73,8 @@ public class Starter {
                                 // define the trace context field and the instrumentation points
                                 return TransformerUtils.defineTraceContextField(builder).
                                         visit(Advice.to(SharedTreeDriverAdvices.scoreAndBuildTrees.class).on(named("scoreAndBuildTrees")))
-                                        .visit(Advice.to(SharedTreeDriverAdvices.computeImpl.class).on(named("computeImpl")));
+                                        .visit(Advice.to(SharedTreeDriverAdvices.computeImpl.class).on(named("computeImpl")))
+                                        .visit(Advice.to(SharedTreeDriverAdvices.buildLayer.class).on(named("buildLayer")));
                             }
                         })
                         .type(is(GBM.class))

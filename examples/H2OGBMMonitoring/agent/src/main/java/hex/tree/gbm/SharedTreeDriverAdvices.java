@@ -41,9 +41,24 @@ public class SharedTreeDriverAdvices {
 
             System.out.println("scoreAndBuildTrees finished.");
         }
+    }
 
+    public static class buildLayer {
+        @Advice.OnMethodEnter
+        public static void enter(@Advice.This Object o) {
+            TraceContext.getFromObject(o)
+                    .openNestedSpan("Building a single layer")
+                    .setIpPort(H2O.getIpPortString());
 
+            System.out.println("building a single layer started.");
+        }
 
+        @Advice.OnMethodExit
+        public static void exit(@Advice.This Object o) {
+            TraceContext.getFromObject(o).closeCurrentSpan();
+
+            System.out.println("building a single layer finished.");
+        }
     }
 
 

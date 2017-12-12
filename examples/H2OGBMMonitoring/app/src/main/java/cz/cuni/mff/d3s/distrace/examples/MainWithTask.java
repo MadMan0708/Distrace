@@ -1,13 +1,12 @@
 package cz.cuni.mff.d3s.distrace.examples;
 
+import hex.ModelBuilder;
 import hex.tree.gbm.GBM;
 import hex.tree.gbm.GBMModel;
-import water.H2O;
-import water.H2OApp;
-import water.H2ONode;
-import water.Key;
+import water.*;
 import water.fvec.*;
 import water.parser.ParseSetup;
+import water.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +29,7 @@ public class MainWithTask {
         String name = prostate.toURI().toString();
         String baseName = name.substring(name.lastIndexOf('/') + 1);
         Frame frame = water.util.FrameUtils.parseFrame(Key.make(ParseSetup.createHexName(baseName)), prostate.toURI());
+        frame = rebalance(frame, false, "rebalanced_prostate.hex");
         System.out.println("Frame created!");
         printFrameInfo(frame);
 
@@ -40,6 +40,20 @@ public class MainWithTask {
         // Shutdown the cluster once we have the result
         H2O.orderlyShutdown(1000);
         H2O.exit(0);
+    }
+
+
+    protected static Frame rebalance(final Frame original_fr, boolean local, final String name) {
+        if (original_fr == null) return null;
+        int chunks = 2;
+
+        Log.info("Rebalancing " + name.substring(name.length()-5)  + " dataset into " + chunks + " chunks.");
+        Key newKey = Key.makeUserHidden(name + ".chunks" + chunks);
+        RebalanceDataSet rb = new RebalanceDataSet(original_fr, newKey, chunks);
+        H2O.submitTask(rb).join();
+        Frame rebalanced_fr = DKV.get(newKey).get();
+        Scope.track(rebalanced_fr);
+        return rebalanced_fr;
     }
 
     private static void startTask(Frame frame, int howManyTimes) {
