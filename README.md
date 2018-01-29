@@ -124,3 +124,16 @@ In order to develop custom instrumentation library based on Distrace you need to
 java -agentpath:$AGENT_ARGS -jar app.jar
 
 
+## Examples with H2O
+In examples with H2O, the version can be configured by passing -Ph2oVersion to gradle build command, such as:
+
+First, start Zipkin in a docker service:
+```
+./docker/start-zipkin.sh
+```
+Once we have Zipking running, start Distrace in docker:
+./docker/bin/run-shell.sh # This command downloads the docker file with all the dependencies
+./gradlew build -x check -Ph2oVersion=3.16.0.4 # Build distrace and the examples for desired H2O
+./bin/run-test.sh # start demo of your choice. The h2o demos will use the desired version
+
+```

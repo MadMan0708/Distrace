@@ -8,7 +8,7 @@ description = "Simple application demostrating instrumentation of distrubuted MR
 // Configure project properties
 //
 ext {
-    h2oVersion = "3.10.4.5"
+    h2oVersion = rootProject.h2oVersion
 }
 
 

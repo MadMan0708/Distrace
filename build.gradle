@@ -46,7 +46,6 @@ configure(subprojects) { project ->
     // All project inherits the same versioning number
     ext.version = rootProject.version
     ext.distrace_tag = rootProject.docker_tag
-
     repositories {
         mavenCentral()
         maven { url "https://clojars.org/repo" }

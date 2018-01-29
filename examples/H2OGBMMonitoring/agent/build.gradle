@@ -7,7 +7,7 @@ description = "Instrumentation agent for GBM in H2O"
 // Configure project properties
 //
 ext {
-    h2oVersion = "3.10.4.5"
+    h2oVersion = rootProject.h2oVersion
 }
 
 dependencies {

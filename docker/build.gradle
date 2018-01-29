@@ -79,7 +79,7 @@ task createDockerfile(type: Dockerfile) {
                 git checkout tags/${docker_tag} && \\
                 ./gradlew build -x check && \\
                 rm -rf /opt/nanomsg /opt/nanomsgxx  \$HOME/.gradle/caches/ && \\
-                apt-get -q -y remove --purge python git make cmake gcc g++ && \\
+                apt-get -q -y remove --purge python git && \\
                 apt-get -q -y autoremove""".stripMargin()
 
     workingDir "/opt/distrace"
