@@ -20,7 +20,6 @@ public class SharedTreeDriverAdvices {
         @Advice.OnMethodExit
         public static void exit(@Advice.This Object o) {
             TraceContext.getFromObject(o).closeCurrentSpan();
-
             System.out.println("computeImpl finished");
         }
     }
