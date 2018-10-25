@@ -29,7 +29,6 @@ public class MainWithTask {
 
         System.out.println("Finished, check http://localhost:9411 for span visualizations!");
         // Shutdown the cluster once we have the result
-        H2O.orderlyShutdown(1000);
         H2O.exit(0);
     }
 
