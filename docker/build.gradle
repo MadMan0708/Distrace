@@ -82,7 +82,7 @@ task createDockerfile(type: Dockerfile) {
                 apt-get -q -y remove --purge python git && \\
                 apt-get -q -y autoremove""".stripMargin()
     
-    runCommand """
+    runCommand """\\
                 # Download Zipkin
                 mkdir -p /opt/zipkin && \\
                 cd /opt/zipkin && \\
