@@ -1,5 +1,5 @@
 #!/bin/bash
 
-java -jar /opt/zipkin/zipkin-server-2.11.7-exec.jar &
+java -jar /opt/distrace/zipkin/zipkin.jar > zipkin.stdout 2>zipkin.stderr &
 
 /bin/bash
