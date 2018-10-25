@@ -15,15 +15,17 @@ if [ "$#" -le 0 ]; then
     exit
 fi
 
-# second argument is optional and overrides default ( localhost ) ip
-# address on which Zipkin service is running
+export NRUNS=1
+
+# second argument is optional specifies number of application runs. Default to 1
 if [ -n "$2" ]; then
-    export ZIPKIN_IP=$2
+    export NRUNS=$2
 fi
 
 EXAMPLE_DIR=$TOPDIR/examples/$1
 if [ -d $EXAMPLE_DIR ]; then
-    cd $EXAMPLE_DIR && ./test.sh
+
+    cd $EXAMPLE_DIR && (for i in $(seq 1 $NRUNS); do ./test.sh; done)
 else
     echo "Example $1 doesn't exist"
     printExamples

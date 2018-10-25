@@ -90,7 +90,7 @@ task createDockerfile(type: Dockerfile) {
     
     workingDir "/opt/distrace"
     
-    entryPoint "/opt/distrace/docker/bin.entry.sh"
+    entryPoint "/opt/distrace/docker/bin/entry.sh"
 }
 
 task cleanDockerfile(type: Delete) {
