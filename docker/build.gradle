@@ -81,8 +81,16 @@ task createDockerfile(type: Dockerfile) {
                 rm -rf /opt/nanomsg /opt/nanomsgxx  \$HOME/.gradle/caches/ && \\
                 apt-get -q -y remove --purge python git && \\
                 apt-get -q -y autoremove""".stripMargin()
-
+    
+    runCommand """
+                # Download Zipkin
+                mkdir -p /opt/zipkin && \\
+                cd /opt/zipkin && \\
+                wget http://central.maven.org/maven2/io/zipkin/java/zipkin-server/2.11.7/zipkin-server-2.11.7-exec.jar
+               """
     workingDir "/opt/distrace"
+    
+    entryPoint "java -jar /opt/zipkin/zipkin.jar & && ./bin/bash"
 }
 
 task cleanDockerfile(type: Delete) {
