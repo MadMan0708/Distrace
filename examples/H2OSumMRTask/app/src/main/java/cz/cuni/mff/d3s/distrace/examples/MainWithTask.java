@@ -29,7 +29,7 @@ public class MainWithTask {
 
         System.out.println("Finished, check http://localhost:9411 for span visualizations!");
         // Shutdown the cluster once we have the result
-        H2O.shutdown(-1);
+        H2O.shutdown(0);
     }
 
     private static void startTask(Frame frame, int howManyTimes) {
