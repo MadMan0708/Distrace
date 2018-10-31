@@ -26,9 +26,9 @@ EXAMPLE_DIR=$TOPDIR/examples/$1
 if [ -d $EXAMPLE_DIR ]; then
 
     cd $EXAMPLE_DIR && (for i in $(seq 1 $NRUNS); do ./test.sh; done)
+    rm -rf /opt/distrace/traces/
     mkdir -p /opt/distrace/traces/
-    name=$(date +%s%3N)
-    wget -O /opt/distrace/traces/${name}.json http://localhost:9411/api/v1/traces/
+    wget -O /opt/distrace/traces/trace.json http://localhost:9411/api/v1/traces/
 else
     echo "Example $1 doesn't exist"
     printExamples
