@@ -26,6 +26,7 @@ EXAMPLE_DIR=$TOPDIR/examples/$1
 if [ -d $EXAMPLE_DIR ]; then
 
     cd $EXAMPLE_DIR && (for i in $(seq 1 $NRUNS); do ./test.sh; done)
+    wget -O traces.json http://localhost:9411/api/v1/traces/
 else
     echo "Example $1 doesn't exist"
     printExamples
