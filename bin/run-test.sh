@@ -30,7 +30,7 @@ if [ -d $EXAMPLE_DIR ]; then
     mkdir -p /opt/distrace/traces/
     wget -O /opt/distrace/traces/trace.json http://localhost:9411/api/v1/traces/
     cd /opt/distrace/traces
-    /opt/distrace/examples/H2OSumMRTask/parse.sh
+    python parse.py
 else
     echo "Example $1 doesn't exist"
     printExamples
